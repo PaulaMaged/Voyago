@@ -6,6 +6,7 @@ import advertiserRoutes from './routes/AdvertiserRoutes.js';
 import publicRoutes from './routes/PublicRoutes.js';
 import tourGuideRoutes from './routes/TourGuideRoutes.js';
 import tourismGovernorRoutes from './routes/TourismGovernorRoutes.js';
+import touristRoute from './routes/TouristRoute.js';
 import sellerRoutes from './routes/SellerRoutes.js';
 import Register from './controllers/UserController.js';
 const app = express();
@@ -21,6 +22,7 @@ app.use('/api/public', publicRoutes);
 app.use('/api/tourguide', tourGuideRoutes);
 app.use('/api/tourismgovernor', tourismGovernorRoutes);
 app.use('/api/seller', sellerRoutes);
+app.use('/api/tourist', touristRoute);
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
