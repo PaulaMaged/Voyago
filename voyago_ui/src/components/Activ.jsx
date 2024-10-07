@@ -12,8 +12,8 @@ function ActivityComponent() {
       description: formData.get("description"),
       advertiser: formData.get("advertiser"),
       activity_date: formData.get("activity_date"),
-      activity_time: formData.get("activity_time"),
-      activity_end: formData.get("activity_end"),
+      activity_time: formData.get("activity_time" ) + " AM",
+      activity_end: formData.get("activity_end" ) + " PM",
       price: parseFloat(formData.get("price")),
       category: formData.get("category"),
       discount: parseFloat(formData.get("discount") || 0),
@@ -21,8 +21,10 @@ function ActivityComponent() {
       booking_open: formData.get("booking_open") === "on",
     };
 
+    console.log(data)
+
     try {
-      const response = await axios.post("http://localhost:5000/api/activities", data);
+      const response = await axios.post("http://localhost:5000/api/advertiser/activities", data);
       setResult(JSON.stringify(response.data));
     } catch (error) {
       console.log(error);
@@ -35,7 +37,7 @@ function ActivityComponent() {
     const id = event.target.id.value;
 
     try {
-      const response = await axios.get(`http://localhost:5000/api/activities/${id}`);
+      const response = await axios.get(`http://localhost:5000/api/advertiser/activities/${id}`);
       setResult(JSON.stringify(response.data));
     } catch (error) {
       console.log(error);
@@ -48,7 +50,7 @@ function ActivityComponent() {
     const id = event.target.id.value;
 
     try {
-      const response = await axios.delete(`http://localhost:5000/api/activities/${id}`);
+      const response = await axios.delete(`http://localhost:5000/api/advertiser/activities/${id}`);
       setResult(JSON.stringify(response.data));
     } catch (error) {
       console.log(error);

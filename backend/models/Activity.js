@@ -16,7 +16,7 @@ const activitySchema = new mongoose.Schema({
     ref: "Advertiser",
     required: true,
   },
-  activity_date: { type: Date, required: true },
+  activity_date: { type: String, required: true },
   activity_time: { type: String, required: true },
   activity_end: { type: String },
   price: { type: Number, required: true },

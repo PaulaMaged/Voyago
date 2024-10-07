@@ -31,7 +31,7 @@ function UserComponent() {
     const id = event.target.id.value;
 
     try {
-      const response = await axios.get(`/api/users/${id}`);
+      const response = await axios.get(`http://localhost:5000/api/users/${id}`);
       setResult(JSON.stringify(response.data));
     } catch (error) {
       setResult(JSON.stringify(error.response?.data || error.message, null, 2));
@@ -44,7 +44,7 @@ function UserComponent() {
     const id = event.target.id.value;
 
     try {
-      const response = await axios.delete(`/api/users/${id}`);
+      const response = await axios.delete(`http://localhost:5000/api/users/${id}`);
       setResult(JSON.stringify(response.data));
     } catch (error) {
       setResult(JSON.stringify(error.response?.data || error.message, null, 2));
