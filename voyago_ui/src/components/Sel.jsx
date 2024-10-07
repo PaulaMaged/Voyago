@@ -14,8 +14,8 @@ function SellerComponent() {
     };
 
     try {
-      const response = await axios.post("/api/sellers", data);
-      setResult(JSON.stringify(response.data, null, 2));
+      const response = await axios.post("http://localhost:5000/api/sellers", data);
+      setResult(JSON.stringify(response.data));
     } catch (error) {
       setResult(JSON.stringify(error.response?.data || error.message, null, 2));
     }
@@ -26,8 +26,8 @@ function SellerComponent() {
     const id = event.target.id.value;
 
     try {
-      const response = await axios.get(`/api/sellers/${id}`);
-      setResult(JSON.stringify(response.data, null, 2));
+      const response = await axios.get(`http://localhost:5000/api/sellers/${id}`);
+      setResult(JSON.stringify(response.data));
     } catch (error) {
       setResult(JSON.stringify(error.response?.data || error.message, null, 2));
     }
@@ -38,8 +38,8 @@ function SellerComponent() {
     const id = event.target.id.value;
 
     try {
-      const response = await axios.delete(`/api/sellers/${id}`);
-      setResult(JSON.stringify(response.data, null, 2));
+      const response = await axios.delete(`http://localhost:5000/api/sellers/${id}`);
+      setResult(JSON.stringify(response.data));
     } catch (error) {
       setResult(JSON.stringify(error.response?.data || error.message, null, 2));
     }

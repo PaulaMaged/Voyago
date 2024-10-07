@@ -16,8 +16,8 @@ function Adv () {
     };
 
     try {
-      const response = await axios.post("/api/advertiser/advertisers", data);
-      setResult(JSON.stringify(response.data, null, 2)); // Displaying response
+      const response = await axios.post("http://localhost:5000/api/advertiser/advertisers", data);
+      setResult(JSON.stringify(response.data)); // Displaying response
     } catch (error) {
       setResult(JSON.stringify(error.response?.data || error.message, null, 2));
     }
@@ -30,8 +30,8 @@ function Adv () {
     const id = formData.get("id");
 
     try {
-      const response = await axios.get(`/api/advertiser/advertisers/${id}`);
-      setResult(JSON.stringify(response.data, null, 2)); // Displaying response
+      const response = await axios.get(`http://localhost:5000/api/advertiser/advertisers/${id}`);
+      setResult(JSON.stringify(response.data)); // Displaying response
     } catch (error) {
       setResult(JSON.stringify(error.response?.data || error.message, null, 2));
     }
@@ -44,8 +44,8 @@ function Adv () {
     const id = formData.get("id");
 
     try {
-      const response = await axios.delete(`/api/advertiser/advertisers/${id}`);
-      setResult(JSON.stringify(response.data, null, 2)); // Displaying response
+      const response = await axios.delete(`http://localhost:5000/api/advertiser/advertisers/${id}`);
+      setResult(JSON.stringify(response.data)); // Displaying response
     } catch (error) {
       setResult(JSON.stringify(error.response?.data || error.message, null, 2));
     }

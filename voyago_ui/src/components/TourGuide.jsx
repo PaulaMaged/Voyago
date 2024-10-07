@@ -17,8 +17,8 @@ function TestComp() {
     };
 
     try {
-      const response = await axios.post("/api/tourguide/tourguides", data);
-      setResult(JSON.stringify(response.data, null, 2)); // Displaying response
+      const response = await axios.post("http://localhost:5000/api/tourguide/tourguides", data);
+      setResult(JSON.stringify(response.data)); // Displaying response
     } catch (error) {
       setResult(JSON.stringify(error.response?.data || error.message, null, 2));
     }
@@ -31,8 +31,8 @@ function TestComp() {
     const id = formData.get("id");
 
     try {
-      const response = await axios.get(`/api/tourguide/tourguides/${id}`);
-      setResult(JSON.stringify(response.data, null, 2)); // Displaying response
+      const response = await axios.get(`http://localhost:5000/api/tourguide/tourguides/${id}`);
+      setResult(JSON.stringify(response.data)); // Displaying response
     } catch (error) {
       setResult(JSON.stringify(error.response?.data || error.message, null, 2));
     }
@@ -45,8 +45,8 @@ function TestComp() {
     const id = formData.get("id");
 
     try {
-      const response = await axios.delete(`/api/tourguide/tourguides/${id}`);
-      setResult(JSON.stringify(response.data, null, 2)); // Displaying response
+      const response = await axios.delete(`http://localhost:5000/api/tourguide/tourguides/${id}`);
+      setResult(JSON.stringify(response.data)); // Displaying response
     } catch (error) {
       setResult(JSON.stringify(error.response?.data || error.message, null, 2));
     }
