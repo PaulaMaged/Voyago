@@ -6,6 +6,7 @@ import ReviewComponent from "./components/Rev.jsx"
 import SellerComponent from "./components/Sel.jsx"
 import TouristComponent from "./components/tour.jsx"
 import UserComponent from "./components/User.jsx"
+import LandmarkComponent from "./components/lm.jsx"
 function App() {
   return (
     <>
@@ -18,6 +19,7 @@ function App() {
       <SellerComponent />
       <TouristComponent />
       <UserComponent />
+      <LandmarkComponent />
       
     </>
   )
