@@ -14,6 +14,17 @@ router.put("/landmarks/:id", TourismGovernorController.updateLandmark);
 // Delete a Landmark
 router.delete("/landmarks/:id", TourismGovernorController.deleteLandmark);
 
+//create a Tag
+router.post("/tags",TourismGovernorController.createTag);
+
+// Delete a Tag
+router.delete("/tags/:id", TourismGovernorController.deleteTag);
+
+// GET all Tags
+router.get("/tags", TourismGovernorController.getAllTags);
+
+
+
 // View All Tourism Governor's Landmarks
 router.get(
   "/governor/:id/landmarks",
