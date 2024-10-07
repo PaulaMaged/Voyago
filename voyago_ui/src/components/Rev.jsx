@@ -16,7 +16,7 @@ function ReviewComponent() {
 
     try {
       const response = await axios.post("http://localhost:5000/api/reviews", data);
-      setResult(JSON.stringify(response.data, null, 2));
+      setResult(JSON.stringify(response.data));
     } catch (error) {
       setResult(JSON.stringify(error.response?.data || error.message, null, 2));
     }
@@ -28,7 +28,7 @@ function ReviewComponent() {
 
     try {
       const response = await axios.get(`/http://localhost:5000/api/reviews/${id}`);
-      setResult(JSON.stringify(response.data, null, 2));
+      setResult(JSON.stringify(response.data));
     } catch (error) {
       setResult(JSON.stringify(error.response?.data || error.message, null, 2));
     }
@@ -40,7 +40,7 @@ function ReviewComponent() {
 
     try {
       const response = await axios.delete(`http://localhost:5000/api/reviews/${id}`);
-      setResult(JSON.stringify(response.data, null, 2));
+      setResult(JSON.stringify(response.data));
     } catch (error) {
       setResult(JSON.stringify(error.response?.data || error.message, null, 2));
     }
