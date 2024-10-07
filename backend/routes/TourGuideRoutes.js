@@ -15,6 +15,18 @@ router.put("/itineraries/:id", TourGuideController.updateItinerary);
 // Delete an Itinerary (Prevent if bookings exist)
 router.delete("/itineraries/:id", TourGuideController.deleteItinerary);
 
+//create Tour Guide 
+router.post("/tourguides", TourGuideController.createTourGuide);
+
+//get Tour Guide 
+router.get("/tourguides/:id", TourGuideController.getTourGuideById);
+
+//update Tour Guide
+router.put("/tourguides/:id", TourGuideController.updateTourGuideById);
+
+//delete Tour Guide
+router.delete("/tourguides/:id", TourGuideController.deleteTourGuideById);
+
 // View All Tour Guide's Itineraries
 router.get(
   "/tourguide/:id/itineraries",
