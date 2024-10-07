@@ -4,7 +4,8 @@ import ActivityComponent from "./components/Activ.jsx"
 import ItineraryComponent from "./components/Itin.jsx"
 import ReviewComponent from "./components/Rev.jsx"
 import SellerComponent from "./components/Sel.jsx"
-import Tourist from "../../backend/models/Tourist.js"
+import TouristComponent from "./components/tour.jsx"
+import UserComponent from "./components/User.jsx"
 function App() {
   return (
     <>
@@ -16,7 +17,8 @@ function App() {
       <ReviewComponent />
       <SellerComponent />
       <TouristComponent />
-
+      <UserComponent />
+      
     </>
   )
 }
