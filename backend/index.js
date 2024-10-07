@@ -6,12 +6,13 @@ import advertiserRoutes from './routes/AdvertiserRoutes.js';
 import publicRoutes from './routes/PublicRoutes.js';
 import tourGuideRoutes from './routes/TourGuideRoutes.js';
 import tourismGovernorRoutes from './routes/TourismGovernorRoutes.js';
-import touristRoute from './routes/TouristRoute.js';
+import touristRoute from './routes/TouristRoutes.js';
 import sellerRoutes from './routes/SellerRoutes.js';
 import Register from './controllers/UserController.js';
+import cors from "cors"
 const app = express();
 const port = 8000;
-
+app.use(cors());
 app.use(express.json());
 
 mongo_conn().catch(err => console.log("Error Connecting to data-base ", err));

@@ -1,4 +1,4 @@
-import Tourist from "../models/Tourist";
+import Tourist from "../models/Tourist.js";
 
 //create Tourist 
 const createTourist = async (req, res) => {
@@ -21,3 +21,5 @@ const getTouristById = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export default {createTourist, getTouristById};
