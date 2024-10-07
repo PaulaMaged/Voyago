@@ -28,7 +28,7 @@ function ItineraryComponent() {
     };
 
     try {
-      const response = await axios.post("http://localhost:5000/api/itineraries", data);
+      const response = await axios.post("http://localhost:5000/api/seller/itineraries", data);
       setResult(JSON.stringify(response.data));
     } catch (error) {
       console.log(error);
@@ -41,7 +41,7 @@ function ItineraryComponent() {
     const id = event.target.id.value;
 
     try {
-      const response = await axios.get(`http://localhost:5000/api/itineraries/${id}`);
+      const response = await axios.get(`http://localhost:5000/api/seller/itineraries/${id}`);
       setResult(JSON.stringify(response.data));
     } catch (error) {
       console.log(error);
@@ -54,7 +54,7 @@ function ItineraryComponent() {
     const id = event.target.id.value;
 
     try {
-      const response = await axios.delete(`http://localhost:5000/api/itineraries/${id}`);
+      const response = await axios.delete(`http://localhost:5000/api/seller/itineraries/${id}`);
       setResult(JSON.stringify(response.data));
     } catch (error) {
       console.log(error);

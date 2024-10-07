@@ -15,7 +15,7 @@ function TouristComponent() {
     };
 
     try {
-      const response = await axios.post("http://localhost:5000/api/tourists", data);
+      const response = await axios.post("http://localhost:5000/api/tourist/tourists", data);
       setResult(JSON.stringify(response.data));
     } catch (error) {
       setResult(JSON.stringify(error.response?.data || error.message, null, 2));
@@ -27,7 +27,7 @@ function TouristComponent() {
     const id = event.target.id.value;
 
     try {
-      const response = await axios.get(`http://localhost:5000/api/tourists/${id}`);
+      const response = await axios.get(`http://localhost:5000/api/tourist/tourists/${id}`);
       setResult(JSON.stringify(response.data));
     } catch (error) {
       setResult(JSON.stringify(error.response?.data || error.message, null, 2));
@@ -39,7 +39,7 @@ function TouristComponent() {
     const id = event.target.id.value;
 
     try {
-      const response = await axios.delete(`http://localhost:5000/api/tourists/${id}`);
+      const response = await axios.delete(`http://localhost:5000/api/tourist/tourists/${id}`);
       setResult(JSON.stringify(response.data));
     } catch (error) {
       setResult(JSON.stringify(error.response?.data || error.message, null, 2));
