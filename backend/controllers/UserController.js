@@ -1,8 +1,8 @@
 import User from "../models/User.js"
 const Register = async (req, res) => {
     try {
-        const { username, password, description, DOB } = req.body
-        const newUser = new User({ username, password, description, DOB })
+        const payload = req.body
+        const newUser = new User(payload)
         await newUser.save()
         res.status(201).json(newUser)
     } catch (error) {

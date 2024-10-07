@@ -15,9 +15,11 @@ function UserComponent() {
       DOB: formData.get("DOB"),
     };
 
+    console.log(data);
+
     try {
-      const response = await axios.post("/api/users", data);
-      setResult(JSON.stringify(response.data, null, 2));
+      const response = await axios.post("http://localhost:5000/signUp", data);
+      setResult(JSON.stringify(response.data));
     } catch (error) {
       setResult(JSON.stringify(error.response?.data || error.message, null, 2));
     }
@@ -30,7 +32,7 @@ function UserComponent() {
 
     try {
       const response = await axios.get(`/api/users/${id}`);
-      setResult(JSON.stringify(response.data, null, 2));
+      setResult(JSON.stringify(response.data));
     } catch (error) {
       setResult(JSON.stringify(error.response?.data || error.message, null, 2));
     }
@@ -43,7 +45,7 @@ function UserComponent() {
 
     try {
       const response = await axios.delete(`/api/users/${id}`);
-      setResult(JSON.stringify(response.data, null, 2));
+      setResult(JSON.stringify(response.data));
     } catch (error) {
       setResult(JSON.stringify(error.response?.data || error.message, null, 2));
     }
@@ -70,7 +72,7 @@ function UserComponent() {
         <br />
         <label>
           Date of Birth:
-          <input type="date" name="DOB" />
+          <input type="string" name="DOB" />
         </label>
         <br />
         <button type="submit">Create User</button>
