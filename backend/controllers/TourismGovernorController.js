@@ -1,4 +1,50 @@
 import Landmark from "../models/Landmark.js";
+import Tag from "../models/Tag.js";
+
+//create a Tag 
+const createTag = async (req, res) => {
+  try {
+    const newTag = new Tag(req.body);
+    const savedTag = await newTag.save();
+    res.status(201).json(savedTag);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Delete a Tag
+const deleteTag = async (req, res) => {
+  try {
+    const tag = await Tag.findByIdAndDelete(req.params.id);
+    if (!tag)
+      return res.status(404).json({ message: "Tag not found" });
+    res.status(204).json();
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+//GET all Tags
+const getAllTags = async (req, res) => {
+  try {
+    const tags = await Tag.find();
+    res.status(200).json(tags);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// View All Landmarks with a specific Tag
+const getLandmarksByTag = async (req, res) => {
+  try {
+    const landmarks = await Landmark.find({ tags: req.params.tagId });
+    res.status(200).json(landmarks);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
 
 // Create a Landmark (Museum/Historical Place)
 const createLandmark = async (req, res) => {
@@ -67,4 +113,8 @@ export default {
   updateLandmark,
   deleteLandmark,
   getGovernorLandmarks,
+  createTag,
+  deleteTag,
+  getLandmarksByTag,
+  getAllTags,
 };
