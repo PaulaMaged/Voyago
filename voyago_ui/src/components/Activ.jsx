@@ -7,28 +7,43 @@ function ActivityComponent() {
   const createActivity = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
+    const rawTags = formData.get("tags");
+
+    // Process tags: split, trim, and filter out empty strings
+    const tags = rawTags
+      ? rawTags
+          .split(",")
+          .map((id) => id.trim())
+          .filter((id) => id) // Removes empty strings
+      : [];
+
     const data = {
       title: formData.get("title"),
       description: formData.get("description"),
       advertiser: formData.get("advertiser"),
       activity_date: formData.get("activity_date"),
-      activity_time: formData.get("activity_time" ) + " AM",
-      activity_end: formData.get("activity_end" ) + " PM",
+      activity_time: formData.get("activity_time"), // Removed " AM"
+      activity_end: formData.get("activity_end"),   // Removed " PM"
       price: parseFloat(formData.get("price")),
       category: formData.get("category"),
       discount: parseFloat(formData.get("discount") || 0),
-      tags: formData.get("tags").split(",").map((id) => id.trim()),
+      tags: tags, // Use the cleaned tags array
       booking_open: formData.get("booking_open") === "on",
     };
 
-    console.log(data)
+    console.log("Sending data:", data);
 
     try {
-      const response = await axios.post("http://localhost:5000/api/advertiser/activities", data);
-      setResult(JSON.stringify(response.data));
+      const response = await axios.post(
+        "http://localhost:5000/api/advertiser/activities",
+        data
+      );
+      setResult(JSON.stringify(response.data, null, 2));
     } catch (error) {
-      console.log(error);
-      setResult(JSON.stringify(error.response?.data || error.message, null, 2));
+      console.error("Error creating activity:", error);
+      setResult(
+        JSON.stringify(error.response?.data || error.message, null, 2)
+      );
     }
   };
 
@@ -37,11 +52,15 @@ function ActivityComponent() {
     const id = event.target.id.value;
 
     try {
-      const response = await axios.get(`http://localhost:5000/api/advertiser/activities/${id}`);
-      setResult(JSON.stringify(response.data));
+      const response = await axios.get(
+        `http://localhost:5000/api/advertiser/activities/${id}`
+      );
+      setResult(JSON.stringify(response.data, null, 2));
     } catch (error) {
-      console.log(error);
-      setResult(JSON.stringify(error.response?.data || error.message, null, 2));
+      console.error("Error fetching activity:", error);
+      setResult(
+        JSON.stringify(error.response?.data || error.message, null, 2)
+      );
     }
   };
 
@@ -50,11 +69,15 @@ function ActivityComponent() {
     const id = event.target.id.value;
 
     try {
-      const response = await axios.delete(`http://localhost:5000/api/advertiser/activities/${id}`);
-      setResult(JSON.stringify(response.data));
+      const response = await axios.delete(
+        `http://localhost:5000/api/advertiser/activities/${id}`
+      );
+      setResult(JSON.stringify(response.data, null, 2));
     } catch (error) {
-      console.log(error);
-      setResult(JSON.stringify(error.response?.data || error.message, null, 2));
+      console.error("Error deleting activity:", error);
+      setResult(
+        JSON.stringify(error.response?.data || error.message, null, 2)
+      );
     }
   };
 
