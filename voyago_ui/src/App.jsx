@@ -9,6 +9,7 @@ import UserComponent from "./components/User.jsx"
 import LandmarkComponent from "./components/lm.jsx"
 import TourGovernorComponent from "./components/tourgoverner.jsx"
 import LocationComponent from "./components/location.jsx"
+import ProductComponent from "./components/products.jsx"
 function App() {
   return (
     <>
@@ -19,11 +20,13 @@ function App() {
       <ItineraryComponent />
       <ReviewComponent />
       <SellerComponent />
+      <ProductComponent />
       <TouristComponent />
       <UserComponent />
       <LandmarkComponent />
       <TourGovernorComponent />
       <LocationComponent />
+      
       
     </>
   )
