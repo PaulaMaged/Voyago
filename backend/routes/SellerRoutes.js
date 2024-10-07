@@ -9,7 +9,7 @@ router.post("/sellers", SellerController.createSeller);
 router.get("/sellers/user/:userId", SellerController.getSellersByUserId);
 
 // Get Products by Seller ID
-router.get("/sellers/:Id", SellerController.getProductsBelongingToSeller);
+router.get("/sellers/:sellerId/products", SellerController.getProductsBelongingToSeller);
 
 // Update Seller by ID
 router.put("/sellers/:id", SellerController.updateSellerById);
