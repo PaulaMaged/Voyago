@@ -22,7 +22,7 @@ function TourGovernorComponent() {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/tourismgovernor/tourgovernors",
+        "http://localhost:5000/api/tourismgovernor/tourgovernor",
         data
       );
       setResult(JSON.stringify(response.data, null, 2));

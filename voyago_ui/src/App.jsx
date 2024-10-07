@@ -8,6 +8,7 @@ import TouristComponent from "./components/tour.jsx"
 import UserComponent from "./components/User.jsx"
 import LandmarkComponent from "./components/lm.jsx"
 import TourGovernorComponent from "./components/tourgoverner.jsx"
+import LocationComponent from "./components/location.jsx"
 function App() {
   return (
     <>
@@ -22,6 +23,7 @@ function App() {
       <UserComponent />
       <LandmarkComponent />
       <TourGovernorComponent />
+      <LocationComponent />
       
     </>
   )

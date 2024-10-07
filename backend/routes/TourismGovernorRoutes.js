@@ -23,7 +23,25 @@ router.delete("/tags/:id", TourismGovernorController.deleteTag);
 // GET all Tags
 router.get("/tags", TourismGovernorController.getAllTags);
 
+//create a TourismGov
+router.post("/tourgovernor",TourismGovernorController.createTourGovernor);
 
+//GET TourGoverner
+router.get("/tourGovernors/:id", TourismGovernorController.getTourGovernor);
+
+//Update TourGovernor
+router.put("/tourGovernors/:id", TourismGovernorController.updateTourGovernor);
+
+// Delete TourGovernor
+router.delete("/tourGovernors/:id", TourismGovernorController.deleteTourGovernor);
+
+//Create Location 
+router.post("/locations", TourismGovernorController.createLocation);
+//Get Location 
+router.get("/locations/:id", TourismGovernorController.getLocation);
+
+//delete Location
+router.delete("/locations/:id", TourismGovernorController.deleteLocation);
 
 // View All Tourism Governor's Landmarks
 router.get(

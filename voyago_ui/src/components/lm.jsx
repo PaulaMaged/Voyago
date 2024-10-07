@@ -91,7 +91,7 @@ function LandmarkComponent() {
         <br />
         <label>
           Description:
-          <textarea name="description"></textarea>
+          <input type="text" name="description"></input>
         </label>
         <br />
         <label>

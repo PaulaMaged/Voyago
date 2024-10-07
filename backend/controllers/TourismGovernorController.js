@@ -1,5 +1,58 @@
 import Landmark from "../models/Landmark.js";
 import Tag from "../models/Tag.js";
+import TourGovernor from "../models/TourGovernor.js";
+import Location from "../models/Location.js";
+//Create a new TourGov 
+const createTourGovernor = async (req, res) => {
+  try {
+    const newTourGovernor = new TourGovernor(req.body);
+    const savedTourGovernor = await newTourGovernor.save();
+    res.status(201).json(savedTourGovernor);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Delete a TourGov
+const deleteTourGovernor = async (req, res) => {
+  try {
+    const tourGovernor = await TourGovernor.findByIdAndDelete(req.params.id);
+    if (!tourGovernor)
+      return res.status(404).json({ message: "Tour Governor not found" });
+    res.status(204).json();
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+//update
+const updateTourGovernor = async (req, res) => {
+  try {
+    const tourGovernor = await TourGovernor.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+    if (!tourGovernor)
+      return res.status(404).json({ message: "Tour Governor not found" });
+    res.status(200).json(tourGovernor);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+//get tourGovernor
+const getTourGovernor = async (req, res) => {
+  try {
+    const tourGovernor = await TourGovernor.findById(req.params.id);
+    if (!tourGovernor)
+      return res.status(404).json({ message: "Tour Governor not found" });
+    res.status(200).json(tourGovernor);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 
 //create a Tag 
 const createTag = async (req, res) => {
@@ -107,6 +160,44 @@ const getGovernorLandmarks = async (req, res) => {
   }
 };
 
+//create Location
+const createLocation = async (req, res) => {
+  try {
+    const newLocation = new Location(req.body);
+    const savedLocation = await newLocation.save();
+    res.status(201).json(savedLocation);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+//delete Location
+const deleteLocation = async (req, res) => {
+  try {
+    const location = await Location.findByIdAndDelete(req.params.id);
+    if (!location)
+      return res.status(404).json({ message: "Location not found" });
+    res.status(204).json();
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+//get Location
+const getLocation = async (req, res) => {
+  try {
+    const location = await Location.findById(req.params.id);
+    if (!location)
+      return res.status(404).json({ message: "Location not found" });
+    res.status(200).json(location);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+
+
 export default {
   createLandmark,
   getLandmark,
@@ -117,4 +208,12 @@ export default {
   deleteTag,
   getLandmarksByTag,
   getAllTags,
+  createTourGovernor,
+  deleteTourGovernor,
+  updateTourGovernor,
+  getTourGovernor,
+  createLocation,
+  deleteLocation,
+  getLocation,
+
 };
