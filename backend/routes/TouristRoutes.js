@@ -5,6 +5,9 @@ import TouristController from "../controllers/TouristController.js";
 //create Tourist 
 router.post("/tourists", TouristController.createTourist);
 
+//Tourist pay
+router.post("/tourists/:id/pay", TouristController.createTourist);
+
 // read tourist by id
 router.get("/tourists/:id", TouristController.getTouristById);
 
