@@ -23,57 +23,78 @@ const getTouristById = async (req, res) => {
   }
 };
 
+// Helper function to get Tourist by id
+const getTouristByIdHelper = async (id) => {
+  try {
+    const tourist = await Tourist.findById(id);
+    if (!tourist) {
+      throw new Error("Tourist not found");
+    }
+    return tourist;
+  } catch (error) {
+    throw error;
+  }
+};
+
 // Tourist: pay for an activity or itinerary.
 const touristPay = async (req, res) => {
   try {
-    // Check if the tourist exists
-    const tourist = await Tourist.findById(req.params.id);
-    if (!tourist) return res.status(404).json({ message: "Tourist not found" });
+    const tourist = await getTouristByIdHelper(req.params.id);
+
+    if (!req.body.itineraryIds) {
+      return res.status(400).json({ message: "Invalid itinerary IDs provided" });
+    }
 
     const itineraryIds = req.body.itineraryIds;
-
-    // Check if itineraryIds are provided and valid
-    if (!Array.isArray(itineraryIds) || itineraryIds.length === 0) {
-      return res
-        .status(400)
-        .json({ message: "Invalid itinerary IDs provided" });
-    }
-
-    // Check if all itineraries exist and are active
-    const plans = await Itinerary.find({ _id: { $in: itineraryIds } });
+    const plans = await getPlans(itineraryIds);
 
     if (plans.length !== itineraryIds.length) {
-      return res
-        .status(404)
-        .json({ message: "One or more itineraries not found" });
+      return res.status(404).json({ message: "One or more itineraries not found" });
     }
 
-    // Calculate total price and update points
-    let totalPrice = 0;
-    plans.forEach((plan) => {
-      tourist.plans.push(plan); // Or push plan._id
-      totalPrice += plan.price;
-    });
+    const totalPrice = calculateTotalPrice(plans);
+    const updatedTourist = await updateTouristData(tourist, plans, totalPrice);
 
+    res.json(updatedTourist);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getPlans = async (itineraryIds) => {
+  try {
+    const plans = await Itinerary.find({ _id: { $in: itineraryIds } });
+    return plans;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const calculateTotalPrice = (plans) => {
+  return plans.reduce((total, plan) => total + plan.price, 0);
+};
+
+const updateTouristData = async (tourist, plans, totalPrice) => {
+  try {
     const levelMultipliers = {
       1: 0.5,
       2: 1,
       3: 1.5,
     };
 
-    // Update level and points
     tourist.points += totalPrice * levelMultipliers[tourist.level] || 0;
 
-    try {
-      await tourist.save();
-    } catch (saveError) {
-      return res.status(500).json({ error: "Failed to save tourist data" });
-    }
+    plans.forEach((plan) => {
+      tourist.plans.push(plan);
+    });
 
-    res.json(tourist);
+    await tourist.save();
+    return tourist;
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    throw error;
   }
 };
+
+
 
 export default { createTourist, getTouristById, touristPay };
