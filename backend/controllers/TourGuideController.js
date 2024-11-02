@@ -16,7 +16,7 @@ const createTourGuide = async (req, res) => {
 //get Tour Guide by id 
 const getTourGuideById = async (req, res) => {
   try {
-    const tourGuide = await TourGuide.findById(req.params.id);
+    const tourGuide = await TourGuide.findById(req.params.id).populate('user');
     if (!tourGuide) return res.status(404).json({ message: "Tour Guide not found" });
     res.status(200).json(tourGuide);
   } catch (error) {

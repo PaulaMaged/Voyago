@@ -13,10 +13,12 @@ const createAdvertiser = async (req, res) => {
   }
 };
 
-//GET Advertiser by id 
+//GET Advertiser by id
 const getAdvertiserById = async (req, res) => {
   try {
-    const advertiser = await Advertiser.findById(req.params.id);
+    const advertiser = await Advertiser.findById(req.params.id).populate(
+      "user"
+    );
     if (!advertiser)
       return res.status(404).json({ message: "Advertiser not found" });
     res.status(200).json(advertiser);

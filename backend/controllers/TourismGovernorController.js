@@ -44,7 +44,7 @@ const updateTourGovernor = async (req, res) => {
 //get tourGovernor
 const getTourGovernor = async (req, res) => {
   try {
-    const tourGovernor = await TourGovernor.findById(req.params.id);
+    const tourGovernor = await TourGovernor.findById(req.params.id).populate('user');
     if (!tourGovernor)
       return res.status(404).json({ message: "Tour Governor not found" });
     res.status(200).json(tourGovernor);

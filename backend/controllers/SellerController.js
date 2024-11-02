@@ -34,7 +34,7 @@ const createSeller = async (req, res, ) => {
  */
 const getSellersByUserId = async (req, res) => {
     try {
-        const sellers = await Seller.find({ user: req.params.userId });
+        const sellers = await Seller.find({ user: req.params.userId }).populate('user');
         res.json(sellers);
     } catch (error) {
         res.status(500).json({ error: error.message });

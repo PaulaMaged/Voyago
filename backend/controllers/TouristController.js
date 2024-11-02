@@ -14,7 +14,7 @@ const createTourist = async (req, res) => {
 //get Tourist by id
 const getTouristById = async (req, res) => {
   try {
-    const tourist = await Tourist.findById(req.params.id);
+    const tourist = await Tourist.findById(req.params.id).populate('user');
     if (!tourist) return res.status(404).json({ message: "Tourist not found" });
     res.status(200).json(tourist);
   } catch (error) {
