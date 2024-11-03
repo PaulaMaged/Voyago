@@ -1,11 +1,17 @@
-import mongoose  from "mongoose";
-import Seller  from "./Seller.js";
-import Location  from "./Location.js";
+import mongoose from "mongoose";
+import Seller from "./Seller.js";
+import Location from "./Location.js";
+import Product from "./Product.js";
 
 const orderSchema = new mongoose.Schema({
   seller: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Seller",
+    required: true,
+  },
+  Product: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Product",
     required: true,
   },
   description: { type: String },

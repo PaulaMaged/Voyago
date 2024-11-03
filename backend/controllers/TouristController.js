@@ -42,17 +42,43 @@ const touristPay = async (req, res) => {
     const tourist = await getTouristByIdHelper(req.params.id);
 
     if (!req.body.itineraryIds) {
-      return res.status(400).json({ message: "Invalid itinerary IDs provided" });
+      return res
+        .status(400)
+        .json({ message: "Invalid itinerary IDs provided" });
     }
 
     const itineraryIds = req.body.itineraryIds;
     const plans = await getPlans(itineraryIds);
 
     if (plans.length !== itineraryIds.length) {
-      return res.status(404).json({ message: "One or more itineraries not found" });
+      return res
+        .status(404)
+        .json({ message: "One or more itineraries not found" });
     }
 
     const totalPrice = calculateTotalPrice(plans);
+
+    if (tourist.wallet < totalPrice) {
+      return res.status(402).json({ message: "Insufficient balance" });
+    }
+
+    tourist.wallet -= totalPrice;
+
+    // Assign badges based on tourist's level
+    const badges = {
+      1: "Copper",
+      2: "Gold",
+      3: "Platinum",
+    };
+
+    // Check if the tourist's current level corresponds to a badge and if they haven't already been awarded that badge
+    if (
+      badges[tourist.level] &&
+      !tourist.badges.includes(badges[tourist.level])
+    ) {
+      tourist.badges.push(badges[tourist.level]);
+    }
+
     const updatedTourist = await updateTouristData(tourist, plans, totalPrice);
 
     res.json(updatedTourist);
@@ -84,6 +110,20 @@ const updateTouristData = async (tourist, plans, totalPrice) => {
 
     tourist.points += totalPrice * levelMultipliers[tourist.level] || 0;
 
+    // Define level requirements
+    const levels = [
+      { points: 0, level: 1 },
+      { points: 100000, level: 2 },
+      { points: 500000, level: 3 },
+    ];
+
+    // Find the level based on the tourist's points
+    const newLevel =
+      levels.find((level) => tourist.points >= level.points)?.level || 1;
+
+    // Update the tourist's level
+    tourist.level = newLevel;
+
     plans.forEach((plan) => {
       tourist.plans.push(plan);
     });
@@ -95,6 +135,26 @@ const updateTouristData = async (tourist, plans, totalPrice) => {
   }
 };
 
+const redeemPoints = async (req, res) => {
+  try {
+    const tourist = await getTouristByIdHelper(req.params.id);
+    if (!tourist) return res.status(404).json({ message: "Tourist not found" });
 
+    const pointsToRedeem = tourist.points;
+    if (pointsToRedeem < 10) {
+      return res.status(400).json({ message: "Invalid points provided" });
+    }
+
+    const cashAmount = Math.floor(pointsToRedeem / 10000) * 100;
+
+    tourist.wallet += cashAmount;
+    tourist.points = 0; // reset points to 0
+
+    await tourist.save();
+    res.json(tourist);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 export default { createTourist, getTouristById, touristPay };
