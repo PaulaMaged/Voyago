@@ -135,6 +135,50 @@ const updateTouristData = async (tourist, plans, totalPrice) => {
   }
 };
 
+const rateProduct = async (req, res) => {
+  try {
+    const tourist = await getTouristByIdHelper(req.params.id);
+    if (!tourist) return res.status(404).json({ message: "Tourist not found" });
+
+    const productId = req.body.productId;
+    const rating = req.body.rating;
+    const comment = req.body.comment;
+
+    if (!productId) {
+      return res.status(400).json({ message: "Invalid product ID provided" });
+    }
+
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ message: "Invalid rating provided" });
+    }
+
+    const product = await Product.findById(productId);
+    if (!product) return res.status(404).json({ message: "Product not found" });
+
+    const review = await Review.findOne({
+      product: productId,
+      reviewer: tourist._id,
+    });
+    if (review)
+      return res
+        .status(400)
+        .json({ message: "You have already reviewed this product" });
+
+    const newReview = new Review({
+      reviewer: tourist._id,
+      product: productId,
+      rating: rating,
+      comment: comment,
+      review_date: new Date(),
+    });
+
+    const savedReview = await newReview.save();
+    res.json(savedReview);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const redeemPoints = async (req, res) => {
   try {
     const tourist = await getTouristByIdHelper(req.params.id);
@@ -157,4 +201,10 @@ const redeemPoints = async (req, res) => {
   }
 };
 
-export default { createTourist, getTouristById, touristPay };
+export default {
+  createTourist,
+  rateProduct,
+  touristPay,
+  redeemPoints,
+  getTouristById,
+};
