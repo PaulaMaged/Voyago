@@ -1,7 +1,8 @@
 // Import the required models for the Itinerary and Tourist entities
 import Itinerary from "../models/Itinerary.js";
 import Tourist from "../models/Tourist.js";
-
+import Complaint from "../models/Complaint.js";
+import Booking from "../models/Booking.js";
 /**
  * Create a new tourist.
  * @param {Object} req - Express request object.
@@ -301,6 +302,108 @@ const redeemPoints = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+/**
+ * File a complaint.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const fileComplaint = async (req, res) => {
+  try {
+    // Retrieve the tourist by their ID
+    const tourist = await getTouristByIdHelper(req.params.id);
+    // Check if the tourist is not found
+    if (!tourist) return res.status(404).json({ message: "Tourist not found" });
+
+    // Retrieve the complaint details from the request body
+    const { title, body } = req.body;
+
+    // Check if the title or body is missing
+    if (!title || !body) {
+      return res.status(400).json({ message: "Title and body are required" });
+    }
+
+    // Create a new complaint
+    const newComplaint = new Complaint({
+      tourist: tourist._id,
+      title: title,
+      body: body,
+      date: new Date(),
+    });
+
+    // Save the new complaint
+    const savedComplaint = await newComplaint.save();
+
+    // Return the saved complaint
+    res.status(201).json(savedComplaint);
+  } catch (error) {
+    // Return an error response with a 500 Internal Server Error status code
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const cancelBooking = async (bookingId) => {
+  try {
+    // Find the booking by ID
+    const booking = await Booking.findById(bookingId);
+
+    if (!booking) {
+      throw new Error("Booking not found");
+    }
+
+    // Calculate the time 48 hours before the start of the event/activity/itinerary
+    let startTime;
+    if (booking.plan_id) {
+      const itinerary = await Itinerary.findById(booking.plan_id);
+      startTime = itinerary.start_date; // Assuming Itinerary has a start_date field
+    } else {
+      const activity = await Activity.findById(booking.activity);
+      startTime = activity.start_time; // Assuming Activity has a start_time field
+    }
+
+    const cancellationDeadline = new Date(startTime);
+    cancellationDeadline.setDate(cancellationDeadline.getDate() - 2); // Subtract 2 days (48 hours)
+
+    // Check if the current time is before the cancellation deadline
+    if (new Date() < cancellationDeadline) {
+      // Cancel the booking (e.g., update the booking status)
+      booking.status = "cancelled"; // Assuming you have a status field in the Booking schema
+      await booking.save();
+      return "Booking cancelled successfully";
+    } else {
+      throw new Error("Cancellation deadline has passed");
+    }
+  } catch (error) {
+    console.error("Error cancelling booking:", error);
+    throw error; // Re-throw the error to be handled by the caller
+  }
+};
+
+/**
+ * View my list of issued complaints and its status (pending/resolved)
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+const viewComplaints = async (req, res) => {
+  try {
+    // Retrieve the tourist by their ID
+    const tourist = await getTouristByIdHelper(req.params.id);
+    // Check if the tourist is not found
+    if (!tourist) return res.status(404).json({ message: "Tourist not found" });
+
+    // Find all complaints by the tourist
+    const complaints = await Complaint.find({ tourist: tourist._id })
+      .populate("tourist")
+      .exec();
+
+    // Return the complaints
+    res.json(complaints);
+  } catch (error) {
+    // Return an error response with a 500 Internal Server Error status code
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
 
 // Export the controllers
 export default {
@@ -309,4 +412,7 @@ export default {
   touristPay,
   redeemPoints,
   getTouristById,
+  fileComplaint,
+  cancelBooking,
+  viewComplaints
 };
