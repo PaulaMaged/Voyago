@@ -227,6 +227,197 @@ const updateTouristData = async (tourist, plans, totalPrice) => {
 };
 
 /**
+ * Rate an itinerary.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const rateItinerary = async (req, res) => {
+  try {
+    // Retrieve the tourist by their ID
+    const tourist = await getTouristByIdHelper(req.params.id);
+    // Check if the tourist is not found
+    if (!tourist) return res.status(404).json({ message: "Tourist not found" });
+
+    // Retrieve the itinerary ID, rating, and comment from the request body
+    const itineraryId = req.body.itineraryId;
+    const rating = req.body.rating;
+    const comment = req.body.comment;
+
+    // Check if the itinerary ID is not provided
+    if (!itineraryId) {
+      return res.status(400).json({ message: "Invalid itinerary ID provided" });
+    }
+
+    // Check if the rating is not valid
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ message: "Invalid rating provided" });
+    }
+
+    // Find the itinerary by its ID
+    const itinerary = await Itinerary.findById(itineraryId);
+    // Check if the itinerary is not found
+    if (!itinerary)
+      return res.status(404).json({ message: "Itinerary not found" });
+
+    // Find the review by the tourist and itinerary
+    const review = await ItineraryReview.findOne({
+      itinerary: itineraryId,
+      reviewer: tourist._id,
+    });
+    // Check if the review already exists
+    if (review)
+      return res
+        .status(400)
+        .json({ message: "You have already reviewed this itinerary" });
+
+    // Create a new review
+    const newReview = new ItineraryReview({
+      reviewer: tourist._id,
+      itinerary: itineraryId,
+      rating: rating,
+      comment: comment,
+      review_date: new Date(),
+    });
+
+    // Save the new review
+    const savedReview = await newReview.save();
+    // Return the saved review
+    res.json(savedReview);
+  } catch (error) {
+    // Return an error response with a 500 Internal Server Error status code
+    res.status(500).json({ error: error.message });
+  }
+};
+
+/**
+ * Rate a tour guide.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const rateTourGuide = async (req, res) => {
+  try {
+    // Retrieve the tourist by their ID
+    const tourist = await getTouristByIdHelper(req.params.id);
+    // Check if the tourist is not found
+    if (!tourist) return res.status(404).json({ message: "Tourist not found" });
+
+    // Retrieve the tour guide ID, rating, and comment from the request body
+    const tourGuideId = req.body.tourGuideId;
+    const rating = req.body.rating;
+    const comment = req.body.comment;
+
+    // Check if the tour guide ID is not provided
+    if (!tourGuideId) {
+      return res
+        .status(400)
+        .json({ message: "Invalid tour guide ID provided" });
+    }
+
+    // Check if the rating is not valid
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ message: "Invalid rating provided" });
+    }
+
+    // Find the tour guide by its ID
+    const tourGuide = await TourGuide.findById(tourGuideId);
+    // Check if the tour guide is not found
+    if (!tourGuide)
+      return res.status(404).json({ message: "Tour guide not found" });
+
+    // Find the review by the tourist and tour guide
+    const review = await TourGuideReview.findOne({
+      tourGuide: tourGuideId,
+      reviewer: tourist._id,
+    });
+    // Check if the review already exists
+    if (review)
+      return res
+        .status(400)
+        .json({ message: "You have already reviewed this tour guide" });
+
+    // Create a new review
+    const newReview = new TourGuideReview({
+      reviewer: tourist._id,
+      tourGuide: tourGuideId,
+      rating: rating,
+      comment: comment,
+      review_date: new Date(),
+    });
+
+    // Save the new review
+    const savedReview = await newReview.save();
+    // Return the saved review
+    res.json(savedReview);
+  } catch (error) {
+    // Return an error response with a 500 Internal Server Error status code
+    res.status(500).json({ error: error.message });
+  }
+};
+
+/**
+ * Rate an activity.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const rateActivity = async (req, res) => {
+  try {
+    // Retrieve the tourist by their ID
+    const tourist = await getTouristByIdHelper(req.params.id);
+    // Check if the tourist is not found
+    if (!tourist) return res.status(404).json({ message: "Tourist not found" });
+
+    // Retrieve the activity ID, rating, and comment from the request body
+    const activityId = req.body.activityId;
+    const rating = req.body.rating;
+    const comment = req.body.comment;
+
+    // Check if the activity ID is not provided
+    if (!activityId) {
+      return res.status(400).json({ message: "Invalid activity ID provided" });
+    }
+
+    // Check if the rating is not valid
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ message: "Invalid rating provided" });
+    }
+
+    // Find the activity by its ID
+    const activity = await Activity.findById(activityId);
+    // Check if the activity is not found
+    if (!activity)
+      return res.status(404).json({ message: "Activity not found" });
+
+    // Find the review by the tourist and activity
+    const review = await ActivityReview.findOne({
+      activity: activityId,
+      reviewer: tourist._id,
+    });
+    // Check if the review already exists
+    if (review)
+      return res
+        .status(400)
+        .json({ message: "You have already reviewed this activity" });
+
+    // Create a new review
+    const newReview = new ActivityReview({
+      reviewer: tourist._id,
+      activity: activityId,
+      rating: rating,
+      comment: comment,
+      review_date: new Date(),
+    });
+
+    // Save the new review
+    const savedReview = await newReview.save();
+    // Return the saved review
+    res.json(savedReview);
+  } catch (error) {
+    // Return an error response with a 500 Internal Server Error status code
+    res.status(500).json({ error: error.message });
+  }
+};
+
+/**
  * Rate a product.
  * @param {Object} req - Express request object.
  * @param {Object} res - Express response object.
@@ -455,4 +646,7 @@ export default {
   fileComplaint,
   cancelBooking,
   viewComplaints,
+  rateActivity,
+  rateItinerary,
+  rateTourGuide,
 };
