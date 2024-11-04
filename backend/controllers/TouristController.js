@@ -383,12 +383,33 @@ const cancelBooking = async (bookingId) => {
     const cancellationDeadline = new Date(startTime);
     cancellationDeadline.setDate(cancellationDeadline.getDate() - 2); // Subtract 2 days (48 hours)
 
+    // Get the tourist's ID from the booking
+    const touristId = booking.tourist;
+
     // Check if the current time is before the cancellation deadline
     if (new Date() < cancellationDeadline) {
       // Cancel the booking (e.g., update the booking status)
       booking.status = "cancelled"; // Assuming you have a status field in the Booking schema
       await booking.save();
-      return "Booking cancelled successfully";
+
+      // Find the tourist by ID
+      const tourist = await Tourist.findById(touristId);
+
+      // Calculate the amount to refund
+      let refundAmount;
+      if (booking.plan_id) {
+        const itinerary = await Itinerary.findById(booking.plan_id);
+        refundAmount = itinerary.price; // Assuming Itinerary has a price field
+      } else {
+        const activity = await Activity.findById(booking.activity);
+        refundAmount = activity.price; // Assuming Activity has a price field
+      }
+
+      // Refund the amount to the tourist's wallet
+      tourist.wallet += refundAmount;
+      await tourist.save();
+
+      return "Booking cancelled successfully and amount refunded.";
     } else {
       throw new Error("Cancellation deadline has passed");
     }
