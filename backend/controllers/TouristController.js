@@ -125,9 +125,8 @@ const touristPay = async (req, res) => {
     const bookings = plans.map((plan) => {
       return {
         tourist: tourist._id,
-        itinerary: plan._id,
-        totalPrice: plan.price,
-        bookingDate: new Date(),
+        plan_id: plan._id,
+        booking_date: new Date(),
       };
     });
 

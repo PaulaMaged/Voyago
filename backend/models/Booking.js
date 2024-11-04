@@ -20,12 +20,13 @@ const bookingSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    active: {
+      type: Boolean,
+      default: true,
+    },
     booking_date: {
       type: Date,
       default: Date.now,
-    },
-    booking_time: {
-      type: String,
     },
   },
   {
