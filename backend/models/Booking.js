@@ -6,13 +6,9 @@ import Location from "./Location.js";
 
 const bookingSchema = new mongoose.Schema(
   {
-    plan_type: {
-      type: String,
-      enum: ["Activity", "Itinerary"],
-      required: true,
-    },
     plan_id: {
       type: mongoose.Schema.Types.ObjectId,
+      ref: "Itinerary",
       required: true,
     },
     tourist: {

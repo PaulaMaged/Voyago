@@ -5,11 +5,7 @@ import Activity from "./Activity.js";
 const complaintSchema = new Schema({
   subject_of_complaint: {
     type: Schema.Types.ObjectId,
-    required: true,
-  },
-  subject_type: {
-    type: String,
-    enum: ["Itinerary", "Activity"],
+    ref: "Itinerary",
     required: true,
   },
   reviewer: { type: Schema.Types.ObjectId, ref: "User", required: true },
