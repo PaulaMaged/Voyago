@@ -12,6 +12,7 @@ const bookingSchema = new mongoose.Schema({
     required: true,
   },
   itinerary: { type: mongoose.Schema.Types.ObjectId, ref: "Itinerary" },
+  attended: { type: Boolean },
   booking_date: { type: Date, default: Date.now },
   booking_time: { type: String },
   location: { type: mongoose.Schema.Types.ObjectId, ref: "Location" },
