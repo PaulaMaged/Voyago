@@ -11,3 +11,4 @@
 - [ ] add price to LAndMArk
 - [ ] How to create tags while creating the activity like youtube
 - [ ] Ask the prof for an example of an itinerary --> Omer
+- [ ] Booking Ask about The referencing of Activity or Itinerary
