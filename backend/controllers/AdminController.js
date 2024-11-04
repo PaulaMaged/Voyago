@@ -178,6 +178,69 @@ const getComplaintsByStatus = async (req, res) => {
   }
 };
 
+/**
+ * Retrieves and returns all complaints with their statuses.
+ *
+ * A GET request to view all complaints and their statuses
+ *
+ * @param {Object} req - The incoming HTTP request.
+ * @param {Object} res - The outgoing HTTP response.
+ */
+const getAllComplaints = async (req, res) => {
+  try {
+    // Retrieve all complaints from the database
+    const complaints = await Complaint.find({}, 'status');
+
+    // Return a 200 success response with the complaints and their statuses
+    res.status(200).json({ complaints });
+  } catch (error) {
+    // Log any errors that occur during the execution of this function
+    console.error("Error retrieving all complaints:", error);
+
+    // Return a 500 error response to indicate an internal server error
+    res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+/**
+ * Retrieves and returns the details of a specific complaint.
+ *
+ * A GET request to view the details of a selected complaint
+ *
+ * @param {Object} req - The incoming HTTP request.
+ * @param {Object} res - The outgoing HTTP response.
+ */
+const getComplaintDetails = async (req, res) => {
+  try {
+    // Extract the complaint ID from the request parameters
+    const { complaintId } = req.params;
+
+    // Validate the presence of the complaint ID
+    if (!complaintId) {
+      return res.status(400).json({ message: "Complaint ID is required" });
+    }
+
+    // Retrieve the complaint from the database by its ID
+    const complaint = await Complaint.findById(complaintId);
+
+    // Check if the complaint exists
+    if (!complaint) {
+      return res.status(404).json({ message: "Complaint not found" });
+    }
+
+    // Return a 200 success response with the complaint details
+    res.status(200).json({ complaint });
+  } catch (error) {
+    // Log any errors that occur during the execution of this function
+    console.error("Error retrieving complaint details:", error);
+
+    // Return a 500 error response to indicate an internal server error
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+
 export default {
   markComplaint,
   replyToComplaint,
