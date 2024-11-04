@@ -11,6 +11,23 @@ const Register = async (req, res) => {
   }
 };
 
+const createUser = async (req, res) => {
+  try {
+    const payload = req.body;
+    const existingUser = await User.findOne({ email: payload.email });
+    if (existingUser) {
+      return res.status(400).json({ message: "Email already in use" });
+    }
+    const userRole = payload.role || "user";
+    const newUser = new User({ ...payload, role: userRole });
+    await newUser.save();
+    res.status(201).json(newUser);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+
 // Function to handle changing a user's password
 const changePassword = async (req, res) => {
   try {
