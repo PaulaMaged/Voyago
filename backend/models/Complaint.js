@@ -3,7 +3,7 @@ import Itinerary from "./Itinerary.js";
 import Activity from "./Activity.js";
 
 const complaintSchema = new Schema({
-  subject_of_complaint: {
+  itinerary: {
     type: Schema.Types.ObjectId,
     ref: "Itinerary",
     required: true,

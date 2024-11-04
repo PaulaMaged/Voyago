@@ -3,6 +3,8 @@ import Itinerary from "../models/Itinerary.js";
 import Tourist from "../models/Tourist.js";
 import Complaint from "../models/Complaint.js";
 import Booking from "../models/Booking.js";
+import ProductReview from "../models/ProductReview.js";
+
 /**
  * Create a new tourist.
  * @param {Object} req - Express request object.
@@ -257,7 +259,7 @@ const rateProduct = async (req, res) => {
     if (!product) return res.status(404).json({ message: "Product not found" });
 
     // Find the review by the tourist and product
-    const review = await Review.findOne({
+    const review = await ProductReview.findOne({
       product: productId,
       reviewer: tourist._id,
     });
@@ -268,7 +270,7 @@ const rateProduct = async (req, res) => {
         .json({ message: "You have already reviewed this product" });
 
     // Create a new review
-    const newReview = new Review({
+    const newReview = new ProductReview({
       reviewer: tourist._id,
       product: productId,
       rating: rating,

@@ -1,6 +1,6 @@
 import Complaint from "../models/Complaint.js";
-
 import ReplyComplaint from "./ReplyComplaint.js";
+
 /**
  * Marks a complaint as either pending or resolved.
  *
@@ -189,7 +189,7 @@ const getComplaintsByStatus = async (req, res) => {
 const getAllComplaints = async (req, res) => {
   try {
     // Retrieve all complaints from the database
-    const complaints = await Complaint.find({}, 'status');
+    const complaints = await Complaint.find({}, "status");
 
     // Return a 200 success response with the complaints and their statuses
     res.status(200).json({ complaints });
@@ -239,11 +239,11 @@ const getComplaintDetails = async (req, res) => {
   }
 };
 
-
-
 export default {
   markComplaint,
+  getComplaintDetails,
   replyToComplaint,
   getComplaintsByDate,
   getComplaintsByStatus,
+  getAllComplaints,
 };

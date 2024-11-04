@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import User from "./User.js";
 import Product from "./Product.js";
 
-const reviewSchema = new mongoose.Schema({
+const tourGuideReviewSchema = new mongoose.Schema({
   reviewer: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
@@ -10,7 +10,7 @@ const reviewSchema = new mongoose.Schema({
   },
   product: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Product",
+    ref: "TourGuide",
     required: true,
   },
   rating: { type: Number, required: true },
@@ -18,5 +18,8 @@ const reviewSchema = new mongoose.Schema({
   review_date: { type: Date, default: Date.now },
 });
 
-const Review = mongoose.model("Review", reviewSchema);
-export default Review;
+const TourGuideReview = mongoose.model(
+  "TourGuideReview",
+  tourGuideReviewSchema
+);
+export default TourGuideReview;

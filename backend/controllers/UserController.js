@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+
 const Register = async (req, res) => {
   try {
     const payload = req.body;
@@ -12,7 +13,7 @@ const Register = async (req, res) => {
 
 // Function to handle changing a user's password
 const changePassword = async (req, res) => {
-try {
+  try {
     // Extract user ID, current password, and new password from the request body
     const { userId, currentPassword, newPassword } = req.body;
 
@@ -46,5 +47,32 @@ try {
   }
 };
 
+const createDeletionRequest = async (req, res) => {
+  try {
+    const { userId } = req.param;
 
-export default {Register, changePassword};
+    // Retrieve the user with the provided ID from the database
+    const user = await User.findById(userId);
+
+    // If the user does not exist, return a 404 error response
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Create a deletion request for this user
+    const deletionRequest = new User.DeletionRequest({
+      userId: user._id,
+      status: "pending",
+    });
+
+    await deletionRequest.save();
+
+    // Return a 201 success response with the created deletion request
+    res.status(201).json(deletionRequest);
+  } catch (error) {
+    // Catch any errors that occur during the process and return a 400 error response with the error message
+    res.status(400).json({ message: error.message });
+  }
+};
+
+export default { Register, changePassword, createDeletionRequest };
