@@ -1,4 +1,3 @@
-
 // Import the Product model to interact with the product collection in the database
 import Product from "../models/Product";
 
@@ -11,7 +10,7 @@ import Product from "../models/Product";
  * @param {Object} res - Express response object.
  */
 const getAllProductsSalesAndQuantity = async (req, res) => {
-try {
+  try {
     // Retrieve all products from the database
     const products = await Product.find().exec();
 
@@ -273,5 +272,5 @@ export default {
   getSingleProductSalesAndQuantity,
   archiveProduct,
   unarchiveProduct,
-  uploadProductImage
+  uploadProductImage,
 };

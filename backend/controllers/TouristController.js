@@ -64,10 +64,11 @@ const getTouristByIdHelper = async (id) => {
 };
 
 /**
- * Handle tourist payment for an activity or itinerary.
+ * Handle tourist payment for an activity or itinerary and create bookings for the itineraries.
  * @param {Object} req - Express request object.
  * @param {Object} res - Express response object.
  */
+
 const touristPay = async (req, res) => {
   try {
     // Retrieve the tourist by their ID
@@ -82,6 +83,7 @@ const touristPay = async (req, res) => {
 
     // Retrieve the itinerary IDs
     const itineraryIds = req.body.itineraryIds;
+
     // Retrieve the plans for the itinerary IDs
     const plans = await getPlans(itineraryIds);
 
@@ -118,6 +120,24 @@ const touristPay = async (req, res) => {
       // Add the badge to the tourist's badges
       tourist.badges.push(badges[tourist.level]);
     }
+
+    // Create bookings for the itineraries
+    const bookings = plans.map((plan) => {
+      return {
+        tourist: tourist._id,
+        itinerary: plan._id,
+        totalPrice: plan.price,
+        bookingDate: new Date(),
+      };
+    });
+
+    // Save the bookings to the database
+    await Promise.all(
+      bookings.map(async (booking) => {
+        const newBooking = new Booking(booking);
+        await newBooking.save();
+      })
+    );
 
     // Update the tourist's data with the plans and total price
     const updatedTourist = await updateTouristData(tourist, plans, totalPrice);
@@ -403,8 +423,6 @@ const viewComplaints = async (req, res) => {
   }
 };
 
-
-
 // Export the controllers
 export default {
   createTourist,
@@ -414,5 +432,5 @@ export default {
   getTouristById,
   fileComplaint,
   cancelBooking,
-  viewComplaints
+  viewComplaints,
 };
