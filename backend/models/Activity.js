@@ -30,6 +30,10 @@ const activitySchema = new mongoose.Schema({
   price: { type: Number, required: true, min: 0 },
   category: { type: String },
   discount: { type: Number, default: 0 },
+  location: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Location",
+  },
   tags: [{ type: mongoose.Schema.Types.ObjectId, ref: "Tag" }],
   booking_open: { type: Boolean, default: true },
 });
