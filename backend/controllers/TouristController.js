@@ -1,9 +1,14 @@
 // Import the required models for the Itinerary and Tourist entities
 import Itinerary from "../models/Itinerary.js";
+import Activity from "../models/Activity.js";
 import Tourist from "../models/Tourist.js";
 import Complaint from "../models/Complaint.js";
-import Booking from "../models/Booking.js";
+import ItineraryBooking from "../models/ItineraryBooking.js";
+import ActivityBooking from "../models/ActivityBooking.js";
 import ProductReview from "../models/ProductReview.js";
+import ItineraryReview from "../models/ItineraryReview.js";
+import TourGuideReview from "../models/TourGuideReview.js";
+import ActivityReview from "../models/ActivityReview.js";
 
 /**
  * Create a new tourist.
@@ -127,7 +132,7 @@ const touristPay = async (req, res) => {
     const bookings = plans.map((plan) => {
       return {
         tourist: tourist._id,
-        plan_id: plan._id,
+        itinerary: plan._id,
         booking_date: new Date(),
       };
     });
@@ -135,7 +140,7 @@ const touristPay = async (req, res) => {
     // Save the bookings to the database
     await Promise.all(
       bookings.map(async (booking) => {
-        const newBooking = new Booking(booking);
+        const newBooking = new ItineraryBooking(booking);
         await newBooking.save();
       })
     );
@@ -235,6 +240,7 @@ const rateItinerary = async (req, res) => {
   try {
     // Retrieve the tourist by their ID
     const tourist = await getTouristByIdHelper(req.params.id);
+
     // Check if the tourist is not found
     if (!tourist) return res.status(404).json({ message: "Tourist not found" });
 
@@ -255,6 +261,7 @@ const rateItinerary = async (req, res) => {
 
     // Find the itinerary by its ID
     const itinerary = await Itinerary.findById(itineraryId);
+
     // Check if the itinerary is not found
     if (!itinerary)
       return res.status(404).json({ message: "Itinerary not found" });
@@ -264,6 +271,7 @@ const rateItinerary = async (req, res) => {
       itinerary: itineraryId,
       reviewer: tourist._id,
     });
+
     // Check if the review already exists
     if (review)
       return res
@@ -294,10 +302,12 @@ const rateItinerary = async (req, res) => {
  * @param {Object} req - Express request object.
  * @param {Object} res - Express response object.
  */
+
 const rateTourGuide = async (req, res) => {
   try {
     // Retrieve the tourist by their ID
     const tourist = await getTouristByIdHelper(req.params.id);
+
     // Check if the tourist is not found
     if (!tourist) return res.status(404).json({ message: "Tourist not found" });
 
@@ -320,6 +330,7 @@ const rateTourGuide = async (req, res) => {
 
     // Find the tour guide by its ID
     const tourGuide = await TourGuide.findById(tourGuideId);
+
     // Check if the tour guide is not found
     if (!tourGuide)
       return res.status(404).json({ message: "Tour guide not found" });
@@ -346,6 +357,7 @@ const rateTourGuide = async (req, res) => {
 
     // Save the new review
     const savedReview = await newReview.save();
+
     // Return the saved review
     res.json(savedReview);
   } catch (error) {
@@ -618,63 +630,110 @@ const fileComplaint = async (req, res) => {
   }
 };
 
-const cancelBooking = async (bookingId) => {
-  try {
-    // Find the booking by ID
-    const booking = await Booking.findById(bookingId);
+/**
+ * Cancel an Itinerary Booking.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const cancelItineraryBooking = async (req, res) => {
+try {
+    const bookingId = req.params.bookingId;
 
+    // Find the Itinerary Booking by its ID
+    const booking = await ItineraryBooking.findById(bookingId);
     if (!booking) {
-      throw new Error("Booking not found");
+      return res.status(404).json({ message: "Itinerary booking not found" });
     }
 
-    // Calculate the time 48 hours before the start of the event/activity/itinerary
-    let startTime;
-    if (booking.plan_id) {
-      const itinerary = await Itinerary.findById(booking.plan_id);
-      startTime = itinerary.start_date; // Assuming Itinerary has a start_date field
-    } else {
-      const activity = await Activity.findById(booking.activity);
-      startTime = activity.start_time; // Assuming Activity has a start_time field
+    // Find the Itinerary by its ID
+    const itinerary = await Itinerary.findById(booking.itinerary);
+    if (!itinerary) {
+      return res.status(404).json({ message: "Itinerary not found" });
     }
 
-    const cancellationDeadline = new Date(startTime);
+    // Calculate the cancellation deadline
+    const cancellationDeadline = new Date(itinerary.start_date);
     cancellationDeadline.setDate(cancellationDeadline.getDate() - 2); // Subtract 2 days (48 hours)
 
-    // Get the tourist's ID from the booking
+    // Calculate the refund amount
+    const refundAmount = itinerary.price;
+
+    // Find the Tourist by its ID
     const touristId = booking.tourist;
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
 
-    // Check if the current time is before the cancellation deadline
+    // Check if the cancellation deadline has passed
     if (new Date() < cancellationDeadline) {
-      // Cancel the booking (e.g., update the booking status)
-      booking.status = "cancelled"; // Assuming you have a status field in the Booking schema
-      await booking.save();
-
-      // Find the tourist by ID
-      const tourist = await Tourist.findById(touristId);
-
-      // Calculate the amount to refund
-      let refundAmount;
-      if (booking.plan_id) {
-        const itinerary = await Itinerary.findById(booking.plan_id);
-        refundAmount = itinerary.price; // Assuming Itinerary has a price field
-      } else {
-        const activity = await Activity.findById(booking.activity);
-        refundAmount = activity.price; // Assuming Activity has a price field
-      }
-
-      // Refund the amount to the tourist's wallet
+    // Delete the booking
+      await booking.delete();
+    
+      // Refund the tourist
       tourist.wallet += refundAmount;
       await tourist.save();
-
-      return "Booking cancelled successfully and amount refunded.";
+    
+      // Return a success message
+      return res.json({ message: "Itinerary booking cancelled successfully and amount refunded." });
     } else {
-      throw new Error("Cancellation deadline has passed");
+      // Return an error message if the cancellation deadline has passed
+      return res.status(400).json({ message: "Cancellation deadline has passed" });
     }
   } catch (error) {
-    console.error("Error cancelling booking:", error);
-    throw error; // Re-throw the error to be handled by the caller
+    // Log the error and return a server error response
+    console.error("Error cancelling itinerary booking:", error);
+    return res.status(500).json({ error: error.message });
   }
 };
+
+/**
+ * Cancel an Activity Booking.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const cancelActivityBooking = async (req, res) => {
+  try {
+    const bookingId = req.params.bookingId;
+
+    // Find the Activity Booking by its ID
+    const booking = await ActivityBooking.findById(bookingId);
+    if (!booking) {
+      return res.status(404).json({ message: "Activity booking not found" });
+    }
+
+    // Find the Activity by its ID
+    const activity = await Activity.findById(booking.activity);
+    if (!activity) {
+      return res.status(404).json({ message: "Activity not found" });
+    }
+
+    // Find the Tourist by its ID
+    const touristId = booking.tourist;
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    // Calculate the refund amount
+    const refundAmount = activity.price;
+
+    // Delete the booking
+    await booking.delete();
+  
+    // Refund the tourist
+    tourist.wallet += refundAmount;
+    await tourist.save();
+
+    // Return a success message
+    return res.json({ message: "Activity booking cancelled successfully and amount refunded." });
+  } catch (error) {
+    // Log the error and return a server error response
+    console.error("Error cancelling activity booking:", error);
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 
 /**
  * View my list of issued complaints and its status (pending/resolved)
@@ -709,7 +768,8 @@ export default {
   redeemPoints,
   getTouristById,
   fileComplaint,
-  cancelBooking,
+  cancelActivityBooking,
+  cancelItineraryBooking,
   viewComplaints,
   rateActivity,
   rateItinerary,
