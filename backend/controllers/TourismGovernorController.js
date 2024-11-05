@@ -2,7 +2,8 @@ import Landmark from "../models/Landmark.js";
 import Tag from "../models/Tag.js";
 import TourGovernor from "../models/TourGovernor.js";
 import Location from "../models/Location.js";
-//Create a new TourGov 
+
+//Create a new TourGov
 const createTourGovernor = async (req, res) => {
   try {
     const newTourGovernor = new TourGovernor(req.body);
@@ -44,7 +45,9 @@ const updateTourGovernor = async (req, res) => {
 //get tourGovernor
 const getTourGovernor = async (req, res) => {
   try {
-    const tourGovernor = await TourGovernor.findById(req.params.id).populate('user');
+    const tourGovernor = await TourGovernor.findById(req.params.id).populate(
+      "user"
+    );
     if (!tourGovernor)
       return res.status(404).json({ message: "Tour Governor not found" });
     res.status(200).json(tourGovernor);
@@ -53,8 +56,7 @@ const getTourGovernor = async (req, res) => {
   }
 };
 
-
-//create a Tag 
+//create a Tag
 const createTag = async (req, res) => {
   try {
     const newTag = new Tag(req.body);
@@ -69,8 +71,7 @@ const createTag = async (req, res) => {
 const deleteTag = async (req, res) => {
   try {
     const tag = await Tag.findByIdAndDelete(req.params.id);
-    if (!tag)
-      return res.status(404).json({ message: "Tag not found" });
+    if (!tag) return res.status(404).json({ message: "Tag not found" });
     res.status(204).json();
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -96,8 +97,6 @@ const getLandmarksByTag = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
-
 
 // Create a Landmark (Museum/Historical Place)
 const createLandmark = async (req, res) => {
@@ -195,9 +194,6 @@ const getLocation = async (req, res) => {
   }
 };
 
-
-
-
 export default {
   createLandmark,
   getLandmark,
@@ -215,5 +211,4 @@ export default {
   createLocation,
   deleteLocation,
   getLocation,
-
 };
