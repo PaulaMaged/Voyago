@@ -3,58 +3,58 @@ const router = express.Router();
 import TourismGovernorController from "../controllers/TourismGovernorController.js";
 
 // Create a Landmark (Museum/Historical Place)
-router.post("/landmarks", TourismGovernorController.createLandmark);
+router.post("/create-landmark", TourismGovernorController.createLandmark);
 
 // Read Landmark (By ID)
-router.get("/landmarks/:id", TourismGovernorController.getLandmark);
+router.get("/get-landmarks/:landmarkId", TourismGovernorController.getLandmark);
 
 // View All Landmarks with a specific Tag
 router.get(
-  "/tags/:tagId/landmarks",
+  "/get-all-landmarks-by-tag/:tagId",
   TourismGovernorController.getLandmarksByTag
 );
 
 // Update a Landmark
-router.put("/landmarks/:id", TourismGovernorController.updateLandmark);
+router.put("/update-landmark/:landmarkId", TourismGovernorController.updateLandmark);
 
 // Delete a Landmark
-router.delete("/landmarks/:id", TourismGovernorController.deleteLandmark);
+router.delete("/delete/:landmarkId", TourismGovernorController.deleteLandmark);
 
 //create a Tag
-router.post("/tags", TourismGovernorController.createTag);
+router.post("/create-tag", TourismGovernorController.createTag);
 
 // Delete a Tag
-router.delete("/tags/:id", TourismGovernorController.deleteTag);
+router.delete("/delete-tag/:TagId", TourismGovernorController.deleteTag);
 
 // GET all Tags
-router.get("/tags", TourismGovernorController.getAllTags);
+router.get("/get-all-tags", TourismGovernorController.getAllTags);
 
 //create a TourismGov
-router.post("/tourgovernor", TourismGovernorController.createTourGovernor);
+router.post("/create-tourgovernor", TourismGovernorController.createTourGovernor);
 
 //GET TourGoverner
-router.get("/tourGovernors/:id", TourismGovernorController.getTourGovernor);
+router.get("/get-tourgovernor/:tourgovernorId", TourismGovernorController.getTourGovernor);
 
 //Update TourGovernor
-router.put("/tourGovernors/:id", TourismGovernorController.updateTourGovernor);
+router.put("/update-tourgovernor/:tourgovernorId", TourismGovernorController.updateTourGovernor);
 
 // Delete TourGovernor
 router.delete(
-  "/tourGovernors/:id",
+  "/delete-tourgovernor/:tourgovernorId",
   TourismGovernorController.deleteTourGovernor
 );
 
 //Create Location
-router.post("/locations", TourismGovernorController.createLocation);
+router.post("/create-location", TourismGovernorController.createLocation);
 //Get Location
-router.get("/locations/:id", TourismGovernorController.getLocation);
+router.get("/get-location/:locationId", TourismGovernorController.getLocation);
 
 //delete Location
-router.delete("/locations/:id", TourismGovernorController.deleteLocation);
+router.delete("/delete-location/:locationId", TourismGovernorController.deleteLocation);
 
 // View All Tourism Governor's Landmarks
 router.get(
-  "/governor/:id/landmarks",
+  "/get-tourgovernor-landmarks/:tourgovernorId",
   TourismGovernorController.getGovernorLandmarks
 );
 

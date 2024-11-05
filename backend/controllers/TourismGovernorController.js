@@ -17,7 +17,7 @@ const createTourGovernor = async (req, res) => {
 // Delete a TourGov
 const deleteTourGovernor = async (req, res) => {
   try {
-    const tourGovernor = await TourGovernor.findByIdAndDelete(req.params.id);
+    const tourGovernor = await TourGovernor.findByIdAndDelete(req.params.tourgovernorId);
     if (!tourGovernor)
       return res.status(404).json({ message: "Tour Governor not found" });
     res.status(204).json();
@@ -30,7 +30,7 @@ const deleteTourGovernor = async (req, res) => {
 const updateTourGovernor = async (req, res) => {
   try {
     const tourGovernor = await TourGovernor.findByIdAndUpdate(
-      req.params.id,
+      req.params.tourgovernorId,
       req.body,
       { new: true }
     );
@@ -45,7 +45,7 @@ const updateTourGovernor = async (req, res) => {
 //get tourGovernor
 const getTourGovernor = async (req, res) => {
   try {
-    const tourGovernor = await TourGovernor.findById(req.params.id).populate(
+    const tourGovernor = await TourGovernor.findById(req.params.tourgovernorId).populate(
       "user"
     );
     if (!tourGovernor)
@@ -70,7 +70,7 @@ const createTag = async (req, res) => {
 // Delete a Tag
 const deleteTag = async (req, res) => {
   try {
-    const tag = await Tag.findByIdAndDelete(req.params.id);
+    const tag = await Tag.findByIdAndDelete(req.params.TagId);
     if (!tag) return res.status(404).json({ message: "Tag not found" });
     res.status(204).json();
   } catch (error) {
@@ -125,7 +125,7 @@ const getLandmark = async (req, res) => {
 const updateLandmark = async (req, res) => {
   try {
     const updatedLandmark = await Landmark.findByIdAndUpdate(
-      req.params.id,
+      req.params.landmarkId,
       { $set: req.body },
       { new: true }
     );
@@ -140,7 +140,7 @@ const updateLandmark = async (req, res) => {
 // Delete a Landmark
 const deleteLandmark = async (req, res) => {
   try {
-    const deletedLandmark = await Landmark.findByIdAndDelete(req.params.id);
+    const deletedLandmark = await Landmark.findByIdAndDelete(req.params.landmarkId);
     if (!deletedLandmark)
       return res.status(404).json({ message: "Landmark not found" });
     res.status(200).json({ message: "Landmark deleted successfully" });
@@ -152,7 +152,7 @@ const deleteLandmark = async (req, res) => {
 // View All Tourism Governor's Landmarks
 const getGovernorLandmarks = async (req, res) => {
   try {
-    const landmarks = await Landmark.find({ tour_governor: req.params.id });
+    const landmarks = await Landmark.find({ tour_governor: req.params.tourgovernorId });
     res.status(200).json(landmarks);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -173,7 +173,7 @@ const createLocation = async (req, res) => {
 //delete Location
 const deleteLocation = async (req, res) => {
   try {
-    const location = await Location.findByIdAndDelete(req.params.id);
+    const location = await Location.findByIdAndDelete(req.params.locationId);
     if (!location)
       return res.status(404).json({ message: "Location not found" });
     res.status(204).json();
@@ -185,7 +185,7 @@ const deleteLocation = async (req, res) => {
 //get Location
 const getLocation = async (req, res) => {
   try {
-    const location = await Location.findById(req.params.id);
+    const location = await Location.findById(req.params.locationId);
     if (!location)
       return res.status(404).json({ message: "Location not found" });
     res.status(200).json(location);
