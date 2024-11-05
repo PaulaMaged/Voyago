@@ -16,10 +16,20 @@ const activitySchema = new mongoose.Schema({
     ref: "Advertiser",
     required: true,
   },
-  activity_date: { type: String, required: true },
-  activity_time: { type: String, required: true },
-  activity_end: { type: String },
-  price: { type: Number, required: true },
+  
+  start_time: {
+    type: Date,
+    required: true,
+  },
+
+  duration: {
+    type: Number,
+    required: true,
+    default: 30, // 30 minutes
+    min: 0,
+  },
+
+  price: { type: Number, required: true, min: 0 },
   category: { type: String },
   discount: { type: Number, default: 0 },
   tags: [{ type: mongoose.Schema.Types.ObjectId, ref: "Tag" }],
