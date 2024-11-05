@@ -90,11 +90,6 @@ const deleteSellerById = async (req, res) => {
 
 
 export default {
-  createProduct,
-  getAllProducts,
-  getProductById,
-  deleteProductById,
-  updateProductById,
   getSellersByUserId,
   createSeller,
   updateSellerById,
