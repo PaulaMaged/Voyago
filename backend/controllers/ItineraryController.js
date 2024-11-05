@@ -1,5 +1,5 @@
 import Itinerary from "../models/Itinerary";
-import Booking from "../models/Booking";
+import ItineraryBooking from "../models/ItineraryBooking";
 
 const deactivateItinerary = async (req, res) => {
   const { id } = req.params;
@@ -10,7 +10,7 @@ const deactivateItinerary = async (req, res) => {
 
   try {
     // Check if the itinerary has any bookings
-    const bookings = await Booking.find({ plan_id: id });
+    const bookings = await ItineraryBooking.find({ Itinerary: id });
 
     if (bookings.length > 0) {
       // If it has bookings, check if it is already deactivated
@@ -54,7 +54,7 @@ const activateItinerary = async (req, res) => {
 
   try {
     // Check if the itinerary has any bookings
-    const bookings = await Booking.find({ plan_id: id });
+    const bookings = await ItineraryBooking.find({ Itinerary: id });
 
     if (bookings.length > 0) {
       // If it has bookings, don't allow it to be activated
