@@ -1,4 +1,6 @@
 import Complaint from "../models/Complaint.js";
+import User from "../models/User.js";
+import Admin from "../models/Admin.js";
 import ReplyComplaint from "../models/ReplyComplaint.js";
 
 /**
@@ -180,6 +182,45 @@ const getComplaintsByStatus = async (req, res) => {
 };
 
 /**
+ * Creates a new admin.
+ *
+ * A POST request to create a new admin.
+ *
+ * @param {Object} req - The incoming HTTP request.
+ * @param {Object} res - The outgoing HTTP response.
+ */
+const createAdmin = async (req, res) => {
+try {
+    // Validate the presence of required fields in the request body
+    if (!req.body) {
+      // Return a 400 error if the request body is empty
+      return res.status(400).json({ message: "Request body is required" });
+    }
+
+    const adminUser = await User.findById(req.body.user);
+
+    if (adminUser.role != 'ADMIN') {
+      return res.status(400).json({ message: "User not assigned as admin" });
+    }
+
+    // Create a new admin document with the provided data
+    const newAdmin = new Admin(req.body);
+
+    // Save the new admin to the database
+    await newAdmin.save();
+
+    // Return a 201 success response with the created admin
+    res.status(201).json({ message: "Admin created successfully", admin: newAdmin });
+  } catch (error) {
+    // Log any errors that occur during the execution of this function
+    console.error("Error creating admin:", error);
+
+    // Return a 500 error response to indicate an internal server error
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+/**
  * Retrieves and returns all complaints with their statuses.
  *
  * A GET request to view all complaints and their statuses
@@ -200,6 +241,44 @@ const getAllComplaints = async (req, res) => {
 
     // Return a 500 error response to indicate an internal server error
     res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+/**
+ * Retrieves and returns the details of an admin associated with a specific user ID.
+ *
+ * A GET request to retrieve an admin by their user ID
+ *
+ * @param {Object} req - The incoming HTTP request.
+ * @param {Object} res - The outgoing HTTP response.
+ */
+const getAdminByUserId = async (req, res) => {
+  try {
+    // Extract the user ID from the request parameters
+    const { userId } = req.params;
+
+    // Validate the presence of the user ID
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
+    // Retrieve the admin from the database by the user ID
+    // NOTE: This requires a model for admins, which is not provided in the original code.
+    const admin = await Admin.findOne({ user: userId }).populate("user");
+
+    // Check if the admin exists
+    if (!admin) {
+      return res.status(404).json({ message: "Admin not found" });
+    }
+
+    // Return a 200 success response with the admin details
+    res.status(200).json({ admin });
+  } catch (error) {
+    // Log any errors that occur during the execution of this function
+    console.error("Error retrieving admin by user ID:", error);
+
+    // Return a 500 error response to indicate an internal server error
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -243,9 +322,11 @@ const getComplaintDetails = async (req, res) => {
 
 export default {
   markComplaint,
+  getAdminByUserId,
   getComplaintDetails,
   replyToComplaint,
   getComplaintsByDate,
   getComplaintsByStatus,
   getAllComplaints,
+  createAdmin,
 };

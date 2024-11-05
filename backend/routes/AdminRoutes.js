@@ -14,6 +14,14 @@ const router = express.Router();
 router.post("/mark-complaint", AdminController.markComplaint);
 
 /**
+ * Creates a new admin.
+ *
+ * A POST request to register a new admin.
+ */
+router.post("/create-admin", AdminController.createAdmin);
+
+
+/**
  * Add a reply to a complaint.
  *
  * A POST request to add a reply to a specific complaint
@@ -33,6 +41,14 @@ router.get("/get-complaints-by-date", AdminController.getComplaintsByDate);
  * A POST request to filter complaints by status
  */
 router.post("/get-complaints-by-status", AdminController.getComplaintsByStatus);
+
+/**
+ * Retrieves and returns the admin by user ID.
+ *
+ * A GET request
+ */
+router.get("/get-admin-by-userId/:userId", AdminController.getAdminByUserId);
+
 
 /**
  * Retrieves and returns all complaints with their statuses.
