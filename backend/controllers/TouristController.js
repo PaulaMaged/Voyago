@@ -355,6 +355,47 @@ const rateTourGuide = async (req, res) => {
 };
 
 /**
+ * Update the tourist's profile.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const updateTouristProfile = async (req, res) => {
+  try {
+    // Retrieve the tourist by their ID
+    const tourist = await getTouristByIdHelper(req.params.id);
+    // Check if the tourist is not found
+    if (!tourist) return res.status(404).json({ message: "Tourist not found" });
+
+    // Retrieve the profile details from the request body
+    const { name, phone } = req.body;
+
+    // Check if any of the profile details is missing
+    if (!name || !phone) {
+      return res.status(400).json({ message: "Name and phone are required" });
+    }
+
+    // Retrieve the user document from the database
+    const user = await User.findById(tourist.user);
+
+    // Check if the user is not found
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Update the user's profile
+    user.name = name;
+    user.phone = phone;
+
+    // Save the updated user
+    await user.save();
+
+    // Return the updated user
+    res.json(user);
+  } catch (error) {
+    // Return an error response with a 500 Internal Server Error status code
+    res.status(500).json({ error: error.message });
+  }
+};
+
+/**
  * Rate an activity.
  * @param {Object} req - Express request object.
  * @param {Object} res - Express response object.
@@ -411,6 +452,30 @@ const rateActivity = async (req, res) => {
     const savedReview = await newReview.save();
     // Return the saved review
     res.json(savedReview);
+  } catch (error) {
+    // Return an error response with a 500 Internal Server Error status code
+    res.status(500).json({ error: error.message });
+  }
+};
+
+/**
+ * Get the balance of a tourist.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+
+const getTouristBalance = async (req, res) => {
+  try {
+    // Retrieve the tourist by their ID
+    const touristId = req.params.id;
+    const tourist = await Tourist.findById(touristId);
+
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    // Return the balance of the tourist
+    res.json({ balance: tourist.wallet });
   } catch (error) {
     // Return an error response with a 500 Internal Server Error status code
     res.status(500).json({ error: error.message });
@@ -553,8 +618,6 @@ const fileComplaint = async (req, res) => {
   }
 };
 
-
-
 const cancelBooking = async (bookingId) => {
   try {
     // Find the booking by ID
@@ -650,5 +713,7 @@ export default {
   viewComplaints,
   rateActivity,
   rateItinerary,
+  getTouristBalance,
+  updateTouristProfile,
   rateTourGuide,
 };
