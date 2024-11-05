@@ -4,38 +4,56 @@ const router = express.Router();
 import TourGuideController from "../controllers/TourGuideController.js";
 
 // Create an Itinerary
-router.post("/itineraries", TourGuideController.createItinerary);
+router.post("/create-itinerary", TourGuideController.createItinerary);
 
 // Read Itinerary (By ID)
-router.get("/itineraries/:id", TourGuideController.getItinerary);
+router.get("/get-itinerary/:itineraryId", TourGuideController.getItinerary);
 
 // Update an Itinerary
-router.put("/itineraries/:id", TourGuideController.updateItinerary);
+router.put(
+  "/update-itinerary/:itineraryId",
+  TourGuideController.updateItinerary
+);
 
 // Delete an Itinerary (Prevent if bookings exist)
-router.delete("/itineraries/:id", TourGuideController.deleteItinerary);
+router.delete(
+  "/delete-itinerary/:itineraryId",
+  TourGuideController.deleteItinerary
+);
 
 //create Tour Guide
-router.post("/tourguides", TourGuideController.createTourGuide);
+router.post("/create-tourguide", TourGuideController.createTourGuide);
 
 //get Tour Guide Profile
 router.get(
-  "/tourguides/profile/:id",
+  "/get-tourguide/:tourGuideId",
   TourGuideController.getTourGuideProfileInfo
 );
 
 //get Tour Guide
-router.get("/tourguides/:id", TourGuideController.getTourGuideById);
+router.get("/get-tourguide/:tourGuideId", TourGuideController.getTourGuide);
+
+//get Tour Guide by User ID
+router.get(
+  "/get-tourguide-by-userId/:userId",
+  TourGuideController.getTourGuideByUserId
+);
 
 //update Tour Guide
-router.put("/tourguides/:id", TourGuideController.updateTourGuideById);
+router.put(
+  "/update-tourguide/:tourGuideId",
+  TourGuideController.updateTourGuide
+);
 
 //delete Tour Guide
-router.delete("/tourguides/:id", TourGuideController.deleteTourGuideById);
+router.delete(
+  "/delete-tourguide/:tourGuideId",
+  TourGuideController.deleteTourGuide
+);
 
 // View All Tour Guide's Itineraries
 router.get(
-  "/tourguides/:id/itineraries",
+  "/get-tourguide-itineraries/:tourGuideId",
   TourGuideController.getTourGuideItineraries
 );
 

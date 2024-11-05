@@ -16,7 +16,7 @@ const createTourGuide = async (req, res) => {
 // Get Tour Guide Profile Info
 const getTourGuideProfileInfo = async (req, res) => {
   try {
-    const tourGuideId = req.params.id;
+    const tourGuideId = req.params.tourGuideId;
     const tourGuide = await TourGuide.findById(tourGuideId).populate("user");
     if (!tourGuide)
       return res.status(404).json({ error: "Tour Guide not found" });
@@ -26,10 +26,26 @@ const getTourGuideProfileInfo = async (req, res) => {
   }
 };
 
-//get Tour Guide by id
-const getTourGuideById = async (req, res) => {
+//get Tour Guide
+const getTourGuide = async (req, res) => {
   try {
-    const tourGuide = await TourGuide.findById(req.params.id).populate("user");
+    const tourGuide = await TourGuide.findById(req.params.tourGuideId).populate(
+      "user"
+    );
+    if (!tourGuide)
+      return res.status(404).json({ message: "Tour Guide not found" });
+    res.status(200).json(tourGuide);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+//get Tour Guide by User ID
+const getTourGuideByUserId = async (req, res) => {
+  try {
+    const tourGuide = await TourGuide.findOne({
+      user: req.params.userId,
+    }).populate("user");
     if (!tourGuide)
       return res.status(404).json({ message: "Tour Guide not found" });
     res.status(200).json(tourGuide);
@@ -39,7 +55,7 @@ const getTourGuideById = async (req, res) => {
 };
 
 //update Tour Guide by id
-const updateTourGuideById = async (req, res) => {
+const updateTourGuide = async (req, res) => {
   try {
     const updatedTourGuide = await TourGuide.findByIdAndUpdate(
       req.params.id,
@@ -55,7 +71,7 @@ const updateTourGuideById = async (req, res) => {
 };
 
 //delete Tour Guide by id
-const deleteTourGuideById = async (req, res) => {
+const deleteTourGuide = async (req, res) => {
   try {
     const deletedTourGuide = await TourGuide.findByIdAndDelete(req.params.id);
     if (!deletedTourGuide)
@@ -80,7 +96,7 @@ const createItinerary = async (req, res) => {
 // Read Itinerary (By ID)
 const getItinerary = async (req, res) => {
   try {
-    const itinerary = await Itinerary.findById(req.params.id).populate(
+    const itinerary = await Itinerary.findById(req.params.itineraryId).populate(
       "activities"
     );
     if (!itinerary)
@@ -95,7 +111,7 @@ const getItinerary = async (req, res) => {
 const updateItinerary = async (req, res) => {
   try {
     const updatedItinerary = await Itinerary.findByIdAndUpdate(
-      req.params.id,
+      req.params.itineraryId,
       { $set: req.body },
       { new: true }
     );
@@ -110,14 +126,18 @@ const updateItinerary = async (req, res) => {
 // Delete an Itinerary (Prevent if bookings exist)
 const deleteItinerary = async (req, res) => {
   try {
-    const bookings = await ItineraryBooking.find({ itinerary: req.params.id });
+    const bookings = await ItineraryBooking.find({
+      itinerary: req.params.itineraryId,
+    });
     if (bookings.length > 0) {
       return res
         .status(400)
         .json({ message: "Cannot delete itinerary with existing bookings" });
     }
 
-    const deletedItinerary = await Itinerary.findByIdAndDelete(req.params.id);
+    const deletedItinerary = await Itinerary.findByIdAndDelete(
+      req.params.itineraryId
+    );
     if (!deletedItinerary)
       return res.status(404).json({ message: "Itinerary not found" });
     res.status(200).json({ message: "Itinerary deleted successfully" });
@@ -129,7 +149,9 @@ const deleteItinerary = async (req, res) => {
 // View All Tour Guide's Itineraries
 const getTourGuideItineraries = async (req, res) => {
   try {
-    const itineraries = await Itinerary.find({ tour_guide: req.params.id });
+    const itineraries = await Itinerary.find({
+      tour_guide: req.params.tourGuideId,
+    });
     res.status(200).json(itineraries);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -140,11 +162,12 @@ export default {
   createItinerary,
   getItinerary,
   updateItinerary,
+  getTourGuideByUserId,
   deleteItinerary,
   getTourGuideItineraries,
   createTourGuide,
-  getTourGuideById,
-  updateTourGuideById,
-  deleteTourGuideById,
+  getTourGuide,
+  updateTourGuide,
+  deleteTourGuide,
   getTourGuideProfileInfo,
 };

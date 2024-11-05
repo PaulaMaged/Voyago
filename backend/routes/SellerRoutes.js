@@ -5,8 +5,11 @@ import SellerController from "../controllers/SellerController.js";
 // Create a Seller
 router.post("/create-seller", SellerController.createSeller);
 
-// Get Sellers by User ID
-router.get("/get-seller/:sellerId", SellerController.getSellersByUserId);
+// Get Seller
+router.get("/get-seller/:sellerId", SellerController.getSeller);
+
+// Get Seller by userId
+router.get("/get-seller-by-userId/:userId", SellerController.getSellerByUserId);
 
 // Get Products by Seller ID
 router.get(
@@ -15,10 +18,10 @@ router.get(
 );
 
 // Update Seller by ID
-router.put("/update-seller/:sellerId", SellerController.updateSellerById);
+router.put("/update-seller/:sellerId", SellerController.updateSeller);
 
 // Delete Seller by ID
-router.delete("/delete-seller/:sellerId", SellerController.deleteSellerById);
+router.delete("/delete-seller/:sellerId", SellerController.deleteSeller);
 
 // Create a Product
 router.post("/create-product", SellerController.createProduct);
@@ -27,12 +30,12 @@ router.post("/create-product", SellerController.createProduct);
 router.get("/get-all-products", SellerController.getAllProducts);
 
 // Get Product by ID
-router.get("/get-product/:productId", SellerController.getProductById);
+router.get("/get-product/:productId", SellerController.getProduct);
 
 // Update Product by ID
-router.put("/update-product/:productId", SellerController.updateProductById);
+router.put("/update-product/:productId", SellerController.updateProduct);
 
 // Delete Product by ID
-router.delete("/delete-product/:productId", SellerController.deleteProductById);
+router.delete("/delete-product/:productId", SellerController.deleteProduct);
 
 export default router;

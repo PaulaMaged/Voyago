@@ -23,7 +23,7 @@ const createSeller = async (req, res) => {
 };
 
 /**
- * Retrieves all sellers associated with a specific user ID.
+ * Retrieves all sellers
  *
  * @param {Object} req - The request object.
  * @param {Object} req.params - The parameters from the request URL.
@@ -32,9 +32,18 @@ const createSeller = async (req, res) => {
  * @returns {Object} - A JSON response containing an array of sellers or an error message.
  */
 
-const getSellersByUserId = async (req, res) => {
+const getSeller = async (req, res) => {
   try {
-    const sellers = await Seller.find({ user: req.params.sellerId }).populate(
+    const sellers = await Seller.findById(req.params.sellerId).populate("user");
+    res.json(sellers);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getSellerByUserId = async (req, res) => {
+  try {
+    const sellers = await Seller.findOne({ user: req.params.userId }).populate(
       "user"
     );
     res.json(sellers);
@@ -62,7 +71,7 @@ const getProductsBelongingToSeller = async (req, res) => {
   }
 };
 
-const updateSellerById = async (req, res) => {
+const updateSeller = async (req, res) => {
   try {
     const updatedSeller = await Seller.findByIdAndUpdate(
       req.params.sellerId,
@@ -77,7 +86,7 @@ const updateSellerById = async (req, res) => {
   }
 };
 
-const deleteSellerById = async (req, res) => {
+const deleteSeller = async (req, res) => {
   try {
     const deletedSeller = await Seller.findByIdAndDelete(req.params.sellerId);
     if (!deletedSeller)
@@ -99,7 +108,7 @@ const createProduct = async (req, res) => {
   }
 };
 
-const getProductById = async (req, res) => {
+const getProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.productId);
     if (!product) return res.status(404).json({ message: "Product not found" });
@@ -118,7 +127,7 @@ const getAllProducts = async (req, res) => {
   }
 };
 
-const updateProductById = async (req, res) => {
+const updateProduct = async (req, res) => {
   try {
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.productId,
@@ -133,9 +142,11 @@ const updateProductById = async (req, res) => {
   }
 };
 
-const deleteProductById = async (req, res) => {
+const deleteProduct = async (req, res) => {
   try {
-    const deletedProduct = await Product.findByIdAndDelete(req.params.productId);
+    const deletedProduct = await Product.findByIdAndDelete(
+      req.params.productId
+    );
     if (!deletedProduct)
       return res.status(404).json({ message: "Product not found" });
     res.json({ message: "Product deleted successfully" });
@@ -147,12 +158,13 @@ const deleteProductById = async (req, res) => {
 export default {
   createProduct,
   getAllProducts,
-  getProductById,
-  deleteProductById,
-  updateProductById,
-  getSellersByUserId,
+  getProduct,
+  deleteProduct,
+  updateProduct,
+  getSeller,
   createSeller,
-  updateSellerById,
-  deleteSellerById,
+  updateSeller,
+  deleteSeller,
+  getSellerByUserId,
   getProductsBelongingToSeller,
 };
