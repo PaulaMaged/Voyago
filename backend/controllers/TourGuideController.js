@@ -107,6 +107,19 @@ const getItinerary = async (req, res) => {
   }
 };
 
+// Read all Itineraries
+const getAllItineraries = async (req, res) => {
+  try {
+    const itineraries = await Itinerary.find().populate("activities");
+    if (!itineraries)
+      return res.status(404).json({ message: "No itineraries found" });
+    res.status(200).json(itineraries);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
 // Update an Itinerary
 const updateItinerary = async (req, res) => {
   try {
@@ -170,4 +183,5 @@ export default {
   updateTourGuide,
   deleteTourGuide,
   getTourGuideProfileInfo,
+  getAllItineraries 
 };

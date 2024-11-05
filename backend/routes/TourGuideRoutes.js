@@ -30,6 +30,10 @@ router.get(
   TourGuideController.getTourGuideProfileInfo
 );
 
+//get all itineraries
+router.get("/get-all-itineraries", TourGuideController.getAllItineraries);
+
+
 //get Tour Guide
 router.get("/get-tourguide/:tourGuideId", TourGuideController.getTourGuide);
 
