@@ -20,6 +20,19 @@ router.post("/mark-complaint", AdminController.markComplaint);
  */
 router.post("/create-admin", AdminController.createAdmin);
 
+/**
+ * Deletes an admin account.
+ *
+ * A DELETE request to delete an admin's account
+ */
+router.delete("/delete-admin/:adminId", AdminController.deleteAdmin);
+
+/**
+ * Updates an admin's account details.
+ *
+ * A PATCH request to update an admin's account details
+ */
+router.put("/update-admin/:adminId", AdminController.updateAdmin);
 
 /**
  * Add a reply to a complaint.
@@ -48,7 +61,6 @@ router.post("/get-complaints-by-status", AdminController.getComplaintsByStatus);
  * A GET request
  */
 router.get("/get-admin-by-userId/:userId", AdminController.getAdminByUserId);
-
 
 /**
  * Retrieves and returns all complaints with their statuses.

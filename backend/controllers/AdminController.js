@@ -221,6 +221,90 @@ try {
 };
 
 /**
+ * Removes an admin from the system.
+ *
+ * A DELETE request to delete an admin
+ *
+ * @param {Object} req - The incoming HTTP request.
+ * @param {Object} res - The outgoing HTTP response.
+ */
+const deleteAdmin = async (req, res) => {
+  try {
+    // Extract the admin ID from the request parameters
+    const { adminId } = req.params;
+
+    // Validate the presence of the admin ID
+    if (!adminId) {
+      return res.status(400).json({ message: "Admin ID is required" });
+    }
+
+    // Retrieve the admin from the database by its ID
+    const admin = await Admin.findById(adminId);
+
+    // Check if the admin exists
+    if (!admin) {
+      return res.status(404).json({ message: "Admin not found" });
+    }
+
+    // Remove the admin from the database
+    await admin.remove();
+
+    // Return a 200 success response
+    res.status(200).json({ message: "Admin deleted successfully" });
+  } catch (error) {
+    // Log any errors that occur during the execution of this function
+    console.error("Error deleting admin:", error);
+
+    // Return a 500 error response to indicate an internal server error
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+/**
+ * Updates an existing admin.
+ *
+ * A PATCH request to update an existing admin
+ *
+ * @param {Object} req - The incoming HTTP request.
+ * @param {Object} res - The outgoing HTTP response.
+ */
+const updateAdmin = async (req, res) => {
+  try {
+    // Extract the admin ID from the request parameters
+    const { adminId } = req.params;
+
+    // Validate the presence of the admin ID
+    if (!adminId) {
+      return res.status(400).json({ message: "Admin ID is required" });
+    }
+
+    // Retrieve the admin from the database by its ID
+    const admin = await Admin.findById(adminId);
+
+    // Check if the admin exists
+    if (!admin) {
+      return res.status(404).json({ message: "Admin not found" });
+    }
+
+    // Update the admin's details
+    const updatedAdmin = await Admin.findByIdAndUpdate(adminId, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    // Return a 200 success response with the updated admin
+    res.status(200).json({ message: "Admin updated successfully", admin: updatedAdmin });
+  } catch (error) {
+    // Log any errors that occur during the execution of this function
+    console.error("Error updating admin:", error);
+
+    // Return a 500 error response to indicate an internal server error
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+/**
  * Retrieves and returns all complaints with their statuses.
  *
  * A GET request to view all complaints and their statuses
@@ -329,4 +413,6 @@ export default {
   getComplaintsByStatus,
   getAllComplaints,
   createAdmin,
+  updateAdmin,
+  deleteAdmin,
 };
