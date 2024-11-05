@@ -137,6 +137,7 @@ const getComplaintsByDate = async (req, res) => {
     res.status(500).json({ message: "Internal server error." });
   }
 };
+
 /**
  * Retrieves and returns complaints filtered by status.
  *
@@ -210,6 +211,7 @@ const getAllComplaints = async (req, res) => {
  * @param {Object} req - The incoming HTTP request.
  * @param {Object} res - The outgoing HTTP response.
  */
+
 const getComplaintDetails = async (req, res) => {
   try {
     // Extract the complaint ID from the request parameters
