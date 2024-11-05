@@ -1,6 +1,4 @@
 import mongoose from "mongoose";
-import Advertiser from "./Advertiser.js";
-import Tag from "./Tag.js";
 
 const activitySchema = new mongoose.Schema({
   title: {
@@ -16,7 +14,7 @@ const activitySchema = new mongoose.Schema({
     ref: "Advertiser",
     required: true,
   },
-  
+
   start_time: {
     type: Date,
     required: true,

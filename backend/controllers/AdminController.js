@@ -1,5 +1,5 @@
 import Complaint from "../models/Complaint.js";
-import ReplyComplaint from "./ReplyComplaint.js";
+import ReplyComplaint from "../models/ReplyComplaint.js";
 
 /**
  * Marks a complaint as either pending or resolved.

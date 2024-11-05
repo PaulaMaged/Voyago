@@ -1,7 +1,4 @@
 import mongoose from "mongoose";
-import TourGovernor from "./TourGovernor.js";
-import Location from "./Location.js";
-import Tag from "./Tag.js";
 
 const landmarkSchema = new mongoose.Schema({
   tour_governor: {

@@ -1,6 +1,5 @@
+// models/Complaint.js
 import mongoose, { Schema } from "mongoose";
-import Itinerary from "./Itinerary.js";
-import Activity from "./Activity.js";
 
 const complaintSchema = new Schema({
   itinerary: {

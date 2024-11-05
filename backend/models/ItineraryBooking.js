@@ -1,7 +1,4 @@
-
 import mongoose from "mongoose";
-import Itinerary from "./Itinerary.js";
-import Tourist from "./Tourist.js";
 
 const ItineraryBookingSchema = new mongoose.Schema(
 {

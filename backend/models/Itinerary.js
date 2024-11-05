@@ -1,7 +1,4 @@
 import mongoose from "mongoose";
-import TourGuide from "./TourGuide.js";
-import Activity from "./Activity.js";
-import Location from "./Location.js";
 
 const itinerarySchema = new mongoose.Schema({
   tour_guide: {

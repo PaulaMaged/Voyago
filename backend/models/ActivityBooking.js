@@ -1,9 +1,4 @@
-
 import mongoose from "mongoose";
-import Activity from "./Activity.js";
-import Tourist from "./Tourist.js";
-import Itinerary from "./Itinerary.js";
-import Location from "./Location.js";
 
 const ActivityBookingSchema = new mongoose.Schema(
 {

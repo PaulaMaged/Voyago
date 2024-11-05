@@ -8,6 +8,7 @@ import tourGuideRoutes from "./routes/TourGuideRoutes.js";
 import tourismGovernorRoutes from "./routes/TourismGovernorRoutes.js";
 import touristRoute from "./routes/TouristRoutes.js";
 import sellerRoutes from "./routes/SellerRoutes.js";
+import adminRoutes from "./routes/AdminRoutes.js";
 import cors from "cors";
 
 const app = express();
@@ -24,6 +25,7 @@ mongo_conn().catch((err) => console.log("Error Connecting to database ", err));
 app.use("/api/advertiser", advertiserRoutes);
 app.use("/api/public", publicRoutes);
 app.use("/api/tourguide", tourGuideRoutes);
+app.use("/api/admin", adminRoutes);
 app.use("/api/tourismgovernor", tourismGovernorRoutes);
 app.use("/api/seller", sellerRoutes);
 app.use("/api/tourist", touristRoute);

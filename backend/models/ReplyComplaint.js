@@ -1,6 +1,5 @@
 // Import the mongoose library
 import mongoose from "mongoose";
-import Complaint from "./Complaint";
 
 // Define the replyComplaintSchema
 const replyComplaintSchema = new mongoose.Schema({

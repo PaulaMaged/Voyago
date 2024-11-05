@@ -1,7 +1,4 @@
 import mongoose from "mongoose";
-import Seller from "./Seller.js";
-import Location from "./Location.js";
-import Product from "./Product.js";
 
 const orderSchema = new mongoose.Schema({
   seller: {
