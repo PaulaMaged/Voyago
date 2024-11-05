@@ -6,7 +6,7 @@ import Landmark from "../models/Landmark.js";
 const getUpcomingActivities = async (req, res) => {
   try {
     const activities = await Activity.find({
-      activity_date: { $gte: new Date() },
+      start_time: { $gte: new Date() },
     });
     res.status(200).json(activities);
   } catch (error) {
