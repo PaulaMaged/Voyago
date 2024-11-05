@@ -13,6 +13,16 @@ const createAdvertiser = async (req, res) => {
   }
 };
 
+//GET All Advertiser
+const getAllAdvertisers = async (req, res) => {
+  try {
+    const advertisers = await Advertiser.find().populate("user");
+    res.status(200).json(advertisers);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 //GET Advertiser by id
 const getAdvertiserById = async (req, res) => {
   try {
@@ -130,6 +140,7 @@ export default {
   createActivity,
   getActivity,
   updateActivity,
+  getAllAdvertisers,
   deleteActivity,
   getAdvertiserActivities,
   createAdvertiser,

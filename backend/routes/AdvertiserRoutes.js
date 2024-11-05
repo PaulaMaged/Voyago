@@ -8,6 +8,8 @@ router.post("/advertisers", AdvertiserController.createAdvertiser);
 // Get Advertiser by ID
 router.get("/advertisers/:id", AdvertiserController.getAdvertiserById);
 
+// Get All Advertisers
+router.get("/advertisers", AdvertiserController.getAllAdvertisers);
 
 // Update Advertiser by ID
 router.put("/advertisers/:id", AdvertiserController.updateAdvertiser);
