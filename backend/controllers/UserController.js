@@ -21,7 +21,8 @@ const createUser = async (req, res) => {
 const changePassword = async (req, res) => {
   try {
     // Extract user ID, current password, and new password from the request body
-    const { userId, currentPassword, newPassword } = req.body;
+    const { userId } = req.params;
+    const { currentPassword, newPassword } = req.body;
 
     // Retrieve the user with the provided ID from the database
     const user = await User.findById(userId);
@@ -89,4 +90,39 @@ const createDeletionRequest = async (req, res) => {
   }
 };
 
-export default { Register, changePassword, createDeletionRequest, createUser };
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find();
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+const deleteUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Retrieve the user with the provided ID from the database
+    const user = await User.findById(userId);
+
+    // If the user does not exist, return a 404 error response
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Delete the user from the database
+    await User.findByIdAndDelete(user._id);
+
+    // Return a 200 success response with a message confirming the deletion
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    // Catch any errors that occur during the process and return a 400 error response with the error message
+    res.status(400).json({ message: error.message });
+  }
+};
+
+
+
+
+export default { changePassword, createDeletionRequest, createUser, getAllUsers, deleteUser };
