@@ -2,7 +2,7 @@ import Itinerary from "../models/Itinerary.js";
 import Booking from "../models/Booking.js";
 import TourGuide from "../models/TourGuide.js";
 
-//create Tour Guide 
+//create Tour Guide
 const createTourGuide = async (req, res) => {
   try {
     const newTourGuide = new TourGuide(req.body);
@@ -13,11 +13,25 @@ const createTourGuide = async (req, res) => {
   }
 };
 
-//get Tour Guide by id 
+// Get Tour Guide Profile Info
+const getTourGuideProfileInfo = async (req, res) => {
+  try {
+    const tourGuideId = req.params.id;
+    const tourGuide = await TourGuide.findById(tourGuideId).populate("user");
+    if (!tourGuide)
+      return res.status(404).json({ error: "Tour Guide not found" });
+    res.status(200).json(tourGuide);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+//get Tour Guide by id
 const getTourGuideById = async (req, res) => {
   try {
-    const tourGuide = await TourGuide.findById(req.params.id).populate('user');
-    if (!tourGuide) return res.status(404).json({ message: "Tour Guide not found" });
+    const tourGuide = await TourGuide.findById(req.params.id).populate("user");
+    if (!tourGuide)
+      return res.status(404).json({ message: "Tour Guide not found" });
     res.status(200).json(tourGuide);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -51,7 +65,6 @@ const deleteTourGuideById = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
 
 // Create an Itinerary
 const createItinerary = async (req, res) => {
@@ -133,4 +146,5 @@ export default {
   getTourGuideById,
   updateTourGuideById,
   deleteTourGuideById,
+  getTourGuideProfileInfo,
 };
