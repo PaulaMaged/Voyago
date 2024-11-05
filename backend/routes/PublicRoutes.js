@@ -1,4 +1,5 @@
-import express from 'express';
+// backend/routes/PublicRoutes.js
+import express from "express";
 const router = express.Router();
 import PublicController from "../controllers/PublicController.js";
 
