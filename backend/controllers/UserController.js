@@ -27,7 +27,6 @@ const createUser = async (req, res) => {
   }
 };
 
-
 // Function to handle changing a user's password
 const changePassword = async (req, res) => {
   try {
@@ -92,4 +91,4 @@ const createDeletionRequest = async (req, res) => {
   }
 };
 
-export default { Register, changePassword, createDeletionRequest };
+export default { Register, changePassword, createDeletionRequest, createUser };
