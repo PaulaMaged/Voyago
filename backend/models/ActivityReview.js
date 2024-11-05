@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
 
-const productReviewSchema = new mongoose.Schema({
+const activityReviewSchema = new mongoose.Schema({
   reviewer: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
   },
-  product: {
+  activity: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Activity",
     required: true,
@@ -16,5 +16,5 @@ const productReviewSchema = new mongoose.Schema({
   review_date: { type: Date, default: Date.now },
 });
 
-const ProductReview = mongoose.model("ProductReview", productReviewSchema);
-export default ProductReview;
+const ActivityReview = mongoose.model("ActivityReview", activityReviewSchema);
+export default ActivityReview;
