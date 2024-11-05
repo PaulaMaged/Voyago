@@ -10,6 +10,7 @@ import Seller from "../models/Seller.js";
  * @returns {Object} - The created seller object or an error message.
  * @throws Will throw an error if the seller data is invalid or if there's a database error.
  */
+
 const createSeller = async (req, res) => {
   const seller = req.body;
   try {
@@ -22,7 +23,6 @@ const createSeller = async (req, res) => {
 };
 
 /**
-
  * Retrieves all sellers associated with a specific user ID.
  *
  * @param {Object} req - The request object.
@@ -31,6 +31,7 @@ const createSeller = async (req, res) => {
  * @param {Object} res - The response object used to send back the result.
  * @returns {Object} - A JSON response containing an array of sellers or an error message.
  */
+
 const getSellersByUserId = async (req, res) => {
   try {
     const sellers = await Seller.find({ user: req.params.userId }).populate(
@@ -51,6 +52,7 @@ const getSellersByUserId = async (req, res) => {
  * @param {Object} res - The response object used to send back the result.
  * @returns {Object} - A JSON response containing an array of products or an error message.
  */
+
 const getProductsBelongingToSeller = async (req, res) => {
   try {
     const products = await Product.find({ seller: req.params.sellerId });
