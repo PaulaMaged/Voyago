@@ -1,5 +1,6 @@
 import Activity from "../models/Activity.js";
 import Advertiser from "../models/Advertiser.js";
+import User from "../models/User.js";
 
 //create Advertiser
 const createAdvertiser = async (req, res) => {
@@ -26,9 +27,9 @@ const getAllAdvertisers = async (req, res) => {
 //GET Advertiser by id
 const getAdvertiserById = async (req, res) => {
   try {
-    const advertiser = await Advertiser.findById(req.params.id).populate(
-      "user"
-    );
+    const advertiser = await Advertiser.findById(
+      req.params.advertiserId
+    ).populate("user");
     if (!advertiser)
       return res.status(404).json({ message: "Advertiser not found" });
     res.status(200).json(advertiser);
@@ -41,7 +42,7 @@ const getAdvertiserById = async (req, res) => {
 const updateAdvertiser = async (req, res) => {
   try {
     const updatedAdvertiser = await Advertiser.findByIdAndUpdate(
-      req.params.id,
+      req.params.advertiserId,
       { $set: req.body },
       { new: true }
     );
@@ -56,7 +57,9 @@ const updateAdvertiser = async (req, res) => {
 //delete advertiser
 const deleteAdvertiser = async (req, res) => {
   try {
-    const deletedAdvertiser = await Advertiser.findByIdAndDelete(req.params.id);
+    const deletedAdvertiser = await Advertiser.findByIdAndDelete(
+      req.params.advertiserId
+    );
     if (!deletedAdvertiser)
       return res.status(404).json({ message: "Advertiser not found" });
     res.status(200).json({ message: "Advertiser deleted successfully" });
@@ -80,7 +83,7 @@ const createActivity = async (req, res) => {
 // Read Activity (By ID)
 const getActivity = async (req, res) => {
   try {
-    const activity = await Activity.findById(req.params.id);
+    const activity = await Activity.findById(req.params.activityId);
     if (!activity)
       return res.status(404).json({ message: "Activity not found" });
     res.status(200).json(activity);
@@ -93,7 +96,7 @@ const getActivity = async (req, res) => {
 const updateActivity = async (req, res) => {
   try {
     const updatedActivity = await Activity.findByIdAndUpdate(
-      req.params.id,
+      req.params.activityId,
       { $set: req.body },
       { new: true }
     );
@@ -108,7 +111,9 @@ const updateActivity = async (req, res) => {
 // Delete an Activity
 const deleteActivity = async (req, res) => {
   try {
-    const deletedActivity = await Activity.findByIdAndDelete(req.params.id);
+    const deletedActivity = await Activity.findByIdAndDelete(
+      req.params.activityId
+    );
     if (!deletedActivity)
       return res.status(404).json({ message: "Activity not found" });
     res.status(200).json({ message: "Activity deleted successfully" });
@@ -117,10 +122,30 @@ const deleteActivity = async (req, res) => {
   }
 };
 
+// AdvertiserController.js
+const getAdvertiserByUserId = async (req, res) => {
+  try {
+    const advertiser = await Advertiser.findOne({
+      user: req.params.userId,
+    }).populate("user");
+
+    if (!advertiser) {
+      return res
+        .status(404)
+        .json({ message: "Advertiser not found for this user" });
+    }
+    res.status(200).json(advertiser);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 // View All Advertiser's Activities
 const getAdvertiserActivities = async (req, res) => {
   try {
-    const activities = await Activity.find({ advertiser: req.params.id });
+    const activities = await Activity.find({
+      advertiser: req.params.advertiserId,
+    });
     res.status(200).json(activities);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -143,6 +168,7 @@ export default {
   getAllAdvertisers,
   deleteActivity,
   getAdvertiserActivities,
+  getAdvertiserByUserId,
   createAdvertiser,
   getAdvertiserById,
   updateAdvertiser,

@@ -122,7 +122,68 @@ const deleteUser = async (req, res) => {
   }
 };
 
+const getUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
 
+    // Retrieve the user with the provided ID from the database
+    const user = await User.findById(userId);
 
+    // If the user does not exist, return a 404 error response
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
-export default { changePassword, createDeletionRequest, createUser, getAllUsers, deleteUser };
+    // Return a 200 success response with the user object
+    res.status(200).json(user);
+  } catch (error) {
+    // Catch any errors that occur during the process and return a 400 error response with the error message
+    res.status(400).json({ message: error.message });
+  }
+};
+
+const updateUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const payload = req.body;
+
+    // Retrieve the user with the provided ID from the database
+    const user = await User.findById(userId);
+
+    // If the user does not exist, return a 404 error response
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Do not allow email changes
+    if (payload.email) {
+      return res.status(400).json({ message: "Email cannot be changed" });
+    }
+
+    user.set({ ...payload });
+
+    // If userRole is not defined, return an error
+    if (!user.role && payload.role) {
+      user.role = payload.role;
+    }
+
+    // Save the changes to the user object in the database
+    await user.save();
+
+    // Return a 200 success response with a message confirming the update
+    res.status(200).json({ message: "User updated successfully" });
+  } catch (error) {
+    // Catch any errors that occur during the process and return a 400 error response with the error message
+    res.status(400).json({ message: error.message });
+  }
+};
+
+export default {
+  changePassword,
+  createDeletionRequest,
+  createUser,
+  getAllUsers,
+  deleteUser,
+  updateUser,
+  getUser,
+};

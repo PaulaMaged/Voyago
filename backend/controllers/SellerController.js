@@ -34,7 +34,7 @@ const createSeller = async (req, res) => {
 
 const getSellersByUserId = async (req, res) => {
   try {
-    const sellers = await Seller.find({ user: req.params.userId }).populate(
+    const sellers = await Seller.find({ user: req.params.sellerId }).populate(
       "user"
     );
     res.json(sellers);
@@ -65,7 +65,7 @@ const getProductsBelongingToSeller = async (req, res) => {
 const updateSellerById = async (req, res) => {
   try {
     const updatedSeller = await Seller.findByIdAndUpdate(
-      req.params.id,
+      req.params.sellerId,
       req.body,
       { new: true }
     );
@@ -79,7 +79,7 @@ const updateSellerById = async (req, res) => {
 
 const deleteSellerById = async (req, res) => {
   try {
-    const deletedSeller = await Seller.findByIdAndDelete(req.params.id);
+    const deletedSeller = await Seller.findByIdAndDelete(req.params.sellerId);
     if (!deletedSeller)
       return res.status(404).json({ message: "Seller not found" });
     res.json({ message: "Seller deleted successfully" });
@@ -88,8 +88,68 @@ const deleteSellerById = async (req, res) => {
   }
 };
 
+const createProduct = async (req, res) => {
+  const product = req.body;
+  try {
+    const newProduct = new Product(product);
+    const savedProduct = await newProduct.save();
+    res.status(201).json(savedProduct);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getProductById = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.productId);
+    if (!product) return res.status(404).json({ message: "Product not found" });
+    res.json(product);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getAllProducts = async (req, res) => {
+  try {
+    const products = await Product.find();
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const updateProductById = async (req, res) => {
+  try {
+    const updatedProduct = await Product.findByIdAndUpdate(
+      req.params.productId,
+      req.body,
+      { new: true }
+    );
+    if (!updatedProduct)
+      return res.status(404).json({ message: "Product not found" });
+    res.json(updatedProduct);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const deleteProductById = async (req, res) => {
+  try {
+    const deletedProduct = await Product.findByIdAndDelete(req.params.productId);
+    if (!deletedProduct)
+      return res.status(404).json({ message: "Product not found" });
+    res.json({ message: "Product deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 export default {
+  createProduct,
+  getAllProducts,
+  getProductById,
+  deleteProductById,
+  updateProductById,
   getSellersByUserId,
   createSeller,
   updateSellerById,
