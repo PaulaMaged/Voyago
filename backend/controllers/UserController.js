@@ -1,15 +1,5 @@
 import User from "../models/User.js";
-
-const Register = async (req, res) => {
-  try {
-    const payload = req.body;
-    const newUser = new User(payload);
-    await newUser.save();
-    res.status(201).json(newUser);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
+import DeletionRequest from "../models/DeletionRequest.js";
 
 const createUser = async (req, res) => {
   try {
@@ -41,8 +31,15 @@ const changePassword = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Compare the provided current password with the user's actual password
-    const isMatch = await user.comparePassword(currentPassword);
+    // Check the format of the new password for security
+    if (newPassword.length < 8) {
+      return res
+        .status(400)
+        .json({ message: "New password must be at least 8 characters long" });
+    }
+
+    // Compare the provided current password with the user's actual password using bcrypt's compare method
+    const isMatch = currentPassword === user.password;
 
     // If the passwords do not match, return a 400 error response
     if (!isMatch) {
@@ -65,7 +62,8 @@ const changePassword = async (req, res) => {
 
 const createDeletionRequest = async (req, res) => {
   try {
-    const { userId } = req.param;
+    const { userId } = req.params;
+    const reason = req.body.reason;
 
     // Retrieve the user with the provided ID from the database
     const user = await User.findById(userId);
@@ -76,9 +74,9 @@ const createDeletionRequest = async (req, res) => {
     }
 
     // Create a deletion request for this user
-    const deletionRequest = new User.DeletionRequest({
+    const deletionRequest = new DeletionRequest({
       userId: user._id,
-      status: "pending",
+      reason,
     });
 
     await deletionRequest.save();
