@@ -4,9 +4,11 @@ import upload from '../middlewares/uploadMiddleware';
 
 const router = Router();
 
-// Archive/unarchive a product
-router.put('/products/:productId/archive', ProductController.archiveProduct);
-router.put('/products/:productId/unarchive', ProductController.unarchiveProduct);
+// Archive a product
+router.patch('/products/:productId/archive', ProductController.archiveProduct);
+
+// Unarchive a product
+router.patch('/products/:productId/unarchive', ProductController.unarchiveProduct);
 
 // Retrieve all products sales and quantity
 router.get('/products/sales-and-quantity', ProductController.getAllProductsSalesAndQuantity);
