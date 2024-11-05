@@ -1,5 +1,5 @@
 import Itinerary from "../models/Itinerary.js";
-import Booking from "../models/Booking.js";
+import ItineraryBooking from "../models/ItineraryBooking.js";
 import TourGuide from "../models/TourGuide.js";
 
 //create Tour Guide
@@ -110,7 +110,7 @@ const updateItinerary = async (req, res) => {
 // Delete an Itinerary (Prevent if bookings exist)
 const deleteItinerary = async (req, res) => {
   try {
-    const bookings = await Booking.find({ itinerary: req.params.id });
+    const bookings = await ItineraryBooking.find({ itinerary: req.params.id });
     if (bookings.length > 0) {
       return res
         .status(400)
