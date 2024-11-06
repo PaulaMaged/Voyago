@@ -14,6 +14,10 @@ router.get(
   TourismGovernorController.getLandmarksByTag
 );
 
+// Get All Landmarks
+router.get("/get-all-landmarks", TourismGovernorController.getAllLandmarks);
+
+
 // Update a Landmark
 router.put(
   "/update-landmark/:landmarkId",

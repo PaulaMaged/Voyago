@@ -14,6 +14,17 @@ const createTourGovernor = async (req, res) => {
   }
 };
 
+// GET all Landmarks
+const getAllLandmarks = async (req, res) => {
+  try {
+    const landmarks = await Landmark.find().populate("tour_governor").populate("tags").populate("location");
+    res.status(200).json(landmarks);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
 // Delete a TourGov
 const deleteTourGovernor = async (req, res) => {
   try {
