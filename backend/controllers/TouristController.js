@@ -9,12 +9,15 @@ import ProductReview from "../models/ProductReview.js";
 import ItineraryReview from "../models/ItineraryReview.js";
 import TourGuideReview from "../models/TourGuideReview.js";
 import ActivityReview from "../models/ActivityReview.js";
+import TourGuide from "../models/TourGuide.js"; // Added
+import Product from "../models/Product.js"; // Added
 
 /**
  * Create a new tourist.
  * @param {Object} req - Express request object.
  * @param {Object} res - Express response object.
  */
+
 const createTourist = async (req, res) => {
   try {
     // Create a new tourist instance using the request body
@@ -34,10 +37,12 @@ const createTourist = async (req, res) => {
  * @param {Object} req - Express request object.
  * @param {Object} res - Express response object.
  */
-const getTouristById = async (req, res) => {
+const getTourist = async (req, res) => {
   try {
     // Find the tourist by their ID and populate the user field
-    const tourist = await Tourist.findById(req.params.id).populate("user");
+    const tourist = await Tourist.findById(req.params.touristId).populate(
+      "user"
+    );
     // Check if the tourist is not found
     if (!tourist) return res.status(404).json({ message: "Tourist not found" });
     // Return the tourist with a 200 OK status code
@@ -49,60 +54,132 @@ const getTouristById = async (req, res) => {
 };
 
 /**
- * Helper function to retrieve a tourist by their ID.
- * @param {String} id - Tourist ID.
- * @returns {Object} Tourist object.
+ * Retrieve a tourist by their ID.
+ * @param {String} touristId - The ID of the tourist.
+ * @returns {Object} Tourist Mongoose document.
  */
-const getTouristByIdHelper = async (id) => {
+const getTouristByIdHelper = async (touristId) => {
   try {
-    // Find the tourist by their ID
-    const tourist = await Tourist.findById(id);
-    // Check if the tourist is not found
+    const tourist = await Tourist.findById(touristId)
+      .populate("user") // Populate other necessary fields if needed
+      .exec();
     if (!tourist) {
-      // Throw a new error with a message
       throw new Error("Tourist not found");
     }
-    // Return the tourist
     return tourist;
   } catch (error) {
-    // Rethrow the error
     throw error;
   }
 };
 
+const getAllTouristsItineraryBooking = async (req, res) => {
+  try {
+    const touristId = req.params.touristId;
+    const tourist = await getTouristByIdHelper(touristId);
+    const itineraryBookings = await ItineraryBooking.find({
+      tourist: tourist._id,
+    });
+    res.status(200).json(itineraryBookings);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getAllTouristActivityBooking = async (req, res) => {
+  try {
+    const touristId = req.params.touristId;
+    const tourist = await getTouristByIdHelper(touristId);
+    const activityBookings = await ActivityBooking.find({
+      tourist: tourist._id,
+    });
+    res.status(200).json(activityBookings);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 /**
- * Handle tourist payment for an activity or itinerary and create bookings for the itineraries.
+ * Retrieve all tourists.
  * @param {Object} req - Express request object.
  * @param {Object} res - Express response object.
  */
+const getAllTourists = async (req, res) => {
+  try {
+    // Find all tourists and populate the user field
+    const tourists = await Tourist.find().populate("user");
+    // Return the tourists with a 200 OK status code
+    res.status(200).json(tourists);
+  } catch (error) {
+    // Return an error response with a 500 Internal Server Error status code
+    res.status(500).json({ error: error.message });
+  }
+};
 
 const touristPay = async (req, res) => {
   try {
-    // Retrieve the tourist by their ID
-    const tourist = await getTouristByIdHelper(req.params.id);
+    const touristId = req.params.touristId;
+    const tourist = await getTouristByIdHelper(touristId); // Ensure this helper does not populate 'plans'
+    const plans = req.body.plans;
 
-    // Check if the itinerary IDs are provided
-    if (!req.body.itineraryIds) {
+    // Validate the 'plans' array
+    if (!plans || !Array.isArray(plans) || plans.length === 0) {
       return res
         .status(400)
-        .json({ message: "Invalid itinerary IDs provided" });
+        .json({ message: "Invalid list of plans provided" });
     }
 
-    // Retrieve the itinerary IDs
-    const itineraryIds = req.body.itineraryIds;
+    let totalPrice = 0;
 
-    // Retrieve the plans for the itinerary IDs
-    const plans = await getPlans(itineraryIds);
+    // Process each plan: validate and create bookings
+    for (const plan of plans) {
+      try {
+        let existingPlan;
+        if (plan.type === "Activity") {
+          existingPlan = await Activity.findById(plan.activityId);
+        } else if (plan.type === "Itinerary") {
+          existingPlan = await Itinerary.findById(plan.itineraryId);
+        } else {
+          return res
+            .status(400)
+            .json({ message: `Invalid plan type: ${plan.type}` });
+        }
 
-    // Check if the plans are not found
-    if (plans.length !== itineraryIds.length) {
-      return res
-        .status(404)
-        .json({ message: "One or more itineraries not found" });
+        if (!existingPlan) {
+          return res.status(404).json({
+            message: `Plan ID not found: ${
+              plan.type === "Activity" ? plan.activityId : plan.itineraryId
+            }`,
+          });
+        }
+
+        // Accumulate the total price
+        totalPrice += existingPlan.price;
+
+        // Create the appropriate booking
+        if (plan.type === "Activity") {
+          await ActivityBooking.create({
+            activity: existingPlan._id,
+            tourist: tourist._id,
+            attended: false,
+            active: true,
+            booking_date: new Date(),
+          });
+        } else if (plan.type === "Itinerary") {
+          await ItineraryBooking.create({
+            itinerary: existingPlan._id,
+            tourist: tourist._id,
+            attended: false,
+            active: true,
+            booking_date: new Date(),
+          });
+        }
+      } catch (error) {
+        console.error("Error processing plan:", error);
+        return res
+          .status(500)
+          .json({ message: "Error processing plan", error: error.message });
+      }
     }
-
-    // Calculate the total price of the plans
-    const totalPrice = calculateTotalPrice(plans);
 
     // Check if the tourist has sufficient balance
     if (tourist.wallet < totalPrice) {
@@ -112,85 +189,27 @@ const touristPay = async (req, res) => {
     // Deduct the total price from the tourist's wallet
     tourist.wallet -= totalPrice;
 
-    // Assign badges based on the tourist's level
-    const badges = {
-      1: "Copper",
-      2: "Gold",
-      3: "Platinum",
-    };
+    // Update tourist's points, level, and badges
+    const updatedTourist = await updateTouristData(tourist, totalPrice);
 
-    // Check if the tourist's current level corresponds to a badge and if they haven't already been awarded that badge
-    if (
-      badges[tourist.level] &&
-      !tourist.badges.includes(badges[tourist.level])
-    ) {
-      // Add the badge to the tourist's badges
-      tourist.badges.push(badges[tourist.level]);
-    }
+    // Save the updated wallet balance
+    await tourist.save();
 
-    // Create bookings for the itineraries
-    const bookings = plans.map((plan) => {
-      return {
-        tourist: tourist._id,
-        itinerary: plan._id,
-        booking_date: new Date(),
-      };
-    });
-
-    // Save the bookings to the database
-    await Promise.all(
-      bookings.map(async (booking) => {
-        const newBooking = new ItineraryBooking(booking);
-        await newBooking.save();
-      })
-    );
-
-    // Update the tourist's data with the plans and total price
-    const updatedTourist = await updateTouristData(tourist, plans, totalPrice);
-
-    // Return the updated tourist
+    // Respond with the updated tourist data
     res.json(updatedTourist);
   } catch (error) {
-    // Return an error response with a 500 Internal Server Error status code
+    console.error("Error in touristPay:", error);
     res.status(500).json({ error: error.message });
   }
 };
 
 /**
- * Retrieve plans by their IDs.
- * @param {Array} itineraryIds - Array of itinerary IDs.
- * @returns {Array} Plans corresponding to the itinerary IDs.
- */
-const getPlans = async (itineraryIds) => {
-  try {
-    // Find the plans by their IDs
-    const plans = await Itinerary.find({ _id: { $in: itineraryIds } });
-    // Return the plans
-    return plans;
-  } catch (error) {
-    // Rethrow the error
-    throw error;
-  }
-};
-
-/**
- * Calculate the total price of the plans.
- * @param {Array} plans - Array of plans.
- * @returns {Number} Total price of the plans.
- */
-const calculateTotalPrice = (plans) => {
-  // Use the reduce method to calculate the total price
-  return plans.reduce((total, plan) => total + plan.price, 0);
-};
-
-/**
- * Update the tourist's data with the plans and total price.
- * @param {Object} tourist - Tourist object.
- * @param {Array} plans - Array of plans.
+ * Update the tourist's data with the total price.
+ * @param {Object} tourist - Tourist Mongoose document.
  * @param {Number} totalPrice - Total price of the plans.
  * @returns {Object} Updated tourist object.
  */
-const updateTouristData = async (tourist, plans, totalPrice) => {
+const updateTouristData = async (tourist, totalPrice) => {
   try {
     // Define the level multipliers
     const levelMultipliers = {
@@ -199,35 +218,69 @@ const updateTouristData = async (tourist, plans, totalPrice) => {
       3: 1.5,
     };
 
-    // Update the tourist's points
-    tourist.points += totalPrice * levelMultipliers[tourist.level] || 0;
+    // Calculate and update the tourist's points
+    const multiplier = levelMultipliers[tourist.level] || 0;
+    tourist.points += totalPrice * multiplier;
 
-    // Define the level requirements
+    // Define the level requirements in ascending order
     const levels = [
       { points: 0, level: 1 },
       { points: 100000, level: 2 },
       { points: 500000, level: 3 },
     ];
 
-    // Find the new level based on the tourist's points
-    const newLevel =
-      levels.find((level) => tourist.points >= level.points)?.level || 1;
+    // Determine the new level based on updated points
+    let newLevel = tourist.level;
+    for (const lvl of levels) {
+      if (tourist.points >= lvl.points) {
+        newLevel = lvl.level;
+      } else {
+        break;
+      }
+    }
 
-    // Update the tourist's level
-    tourist.level = newLevel;
+    // Update the tourist's level if it has changed
+    if (newLevel !== tourist.level) {
+      tourist.level = newLevel;
 
-    // Add the plans to the tourist's plans
-    plans.forEach((plan) => {
-      tourist.plans.push(plan);
-    });
+      // Assign badges based on the new level
+      const badges = {
+        1: "Copper",
+        2: "Gold",
+        3: "Platinum",
+      };
+
+      const newBadge = badges[newLevel];
+      if (newBadge && !tourist.badges.includes(newBadge)) {
+        tourist.badges.push(newBadge);
+      }
+    }
 
     // Save the updated tourist
     await tourist.save();
+
     // Return the updated tourist
     return tourist;
   } catch (error) {
-    // Rethrow the error
+    // Rethrow the error for upstream handling
     throw error;
+  }
+};
+
+/**
+ * Delete a tourist.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const deleteTourist = async (req, res) => {
+  try {
+    // Find the tourist by ID and remove them
+    await Tourist.findByIdAndDelete(req.params.touristId);
+    // Return a success response with a 200 OK status code
+    res.status(200).json({ message: "Tourist deleted successfully" });
+  } catch (error) {
+    // Return an error response with a 500 Internal Server Error status code
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -239,7 +292,7 @@ const updateTouristData = async (tourist, plans, totalPrice) => {
 const rateItinerary = async (req, res) => {
   try {
     // Retrieve the tourist by their ID
-    const tourist = await getTouristByIdHelper(req.params.id);
+    const tourist = await getTouristByIdHelper(req.params.touristId);
 
     // Check if the tourist is not found
     if (!tourist) return res.status(404).json({ message: "Tourist not found" });
@@ -306,7 +359,7 @@ const rateItinerary = async (req, res) => {
 const rateTourGuide = async (req, res) => {
   try {
     // Retrieve the tourist by their ID
-    const tourist = await getTouristByIdHelper(req.params.id);
+    const tourist = await getTouristByIdHelper(req.params.touristId);
 
     // Check if the tourist is not found
     if (!tourist) return res.status(404).json({ message: "Tourist not found" });
@@ -371,38 +424,18 @@ const rateTourGuide = async (req, res) => {
  * @param {Object} req - Express request object.
  * @param {Object} res - Express response object.
  */
-const updateTouristProfile = async (req, res) => {
+
+const updateTourist = async (req, res) => {
   try {
-    // Retrieve the tourist by their ID
-    const tourist = await getTouristByIdHelper(req.params.id);
-    // Check if the tourist is not found
-    if (!tourist) return res.status(404).json({ message: "Tourist not found" });
-
-    // Retrieve the profile details from the request body
-    const { name, phone } = req.body;
-
-    // Check if any of the profile details is missing
-    if (!name || !phone) {
-      return res.status(400).json({ message: "Name and phone are required" });
-    }
-
-    // Retrieve the user document from the database
-    const user = await User.findById(tourist.user);
-
-    // Check if the user is not found
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    // Update the user's profile
-    user.name = name;
-    user.phone = phone;
-
-    // Save the updated user
-    await user.save();
-
-    // Return the updated user
-    res.json(user);
+    const updatedTourist = await Tourist.findByIdAndUpdate(
+      req.params.touristId,
+      { $set: req.body },
+      { new: true }
+    );
+    if (!updatedTourist)
+      return res.status(404).json({ message: "Tourist not found" });
+    res.status(200).json(updatedTourist);
   } catch (error) {
-    // Return an error response with a 500 Internal Server Error status code
     res.status(500).json({ error: error.message });
   }
 };
@@ -415,7 +448,7 @@ const updateTouristProfile = async (req, res) => {
 const rateActivity = async (req, res) => {
   try {
     // Retrieve the tourist by their ID
-    const tourist = await getTouristByIdHelper(req.params.id);
+    const tourist = await getTouristByIdHelper(req.params.touristId);
     // Check if the tourist is not found
     if (!tourist) return res.status(404).json({ message: "Tourist not found" });
 
@@ -479,7 +512,7 @@ const rateActivity = async (req, res) => {
 const getTouristBalance = async (req, res) => {
   try {
     // Retrieve the tourist by their ID
-    const touristId = req.params.id;
+    const touristId = req.params.touristId;
     const tourist = await Tourist.findById(touristId);
 
     if (!tourist) {
@@ -502,7 +535,7 @@ const getTouristBalance = async (req, res) => {
 const rateProduct = async (req, res) => {
   try {
     // Retrieve the tourist by their ID
-    const tourist = await getTouristByIdHelper(req.params.id);
+    const tourist = await getTouristByIdHelper(req.params.touristId);
     // Check if the tourist is not found
     if (!tourist) return res.status(404).json({ message: "Tourist not found" });
 
@@ -564,14 +597,14 @@ const rateProduct = async (req, res) => {
 const redeemPoints = async (req, res) => {
   try {
     // Retrieve the tourist by their ID
-    const tourist = await getTouristByIdHelper(req.params.id);
+    const tourist = await getTouristByIdHelper(req.params.touristId);
     // Check if the tourist is not found
     if (!tourist) return res.status(404).json({ message: "Tourist not found" });
 
     // Retrieve the points to redeem
     const pointsToRedeem = tourist.points;
     // Check if the points are not enough
-    if (pointsToRedeem < 10) {
+    if (pointsToRedeem < 10000) {
       return res.status(400).json({ message: "Invalid points provided" });
     }
 
@@ -591,6 +624,7 @@ const redeemPoints = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 /**
  * File a complaint.
  * @param {Object} req - Express request object.
@@ -599,7 +633,7 @@ const redeemPoints = async (req, res) => {
 const fileComplaint = async (req, res) => {
   try {
     // Retrieve the tourist by their ID
-    const tourist = await getTouristByIdHelper(req.params.id);
+    const tourist = await getTouristByIdHelper(req.params.touristId);
     // Check if the tourist is not found
     if (!tourist) return res.status(404).json({ message: "Tourist not found" });
 
@@ -636,8 +670,8 @@ const fileComplaint = async (req, res) => {
  * @param {Object} res - Express response object.
  */
 const cancelItineraryBooking = async (req, res) => {
-try {
-    const bookingId = req.params.bookingId;
+  try {
+    const bookingId = req.params.itineraryBookingId;
 
     // Find the Itinerary Booking by its ID
     const booking = await ItineraryBooking.findById(bookingId);
@@ -667,18 +701,23 @@ try {
 
     // Check if the cancellation deadline has passed
     if (new Date() < cancellationDeadline) {
-    // Delete the booking
+      // Delete the booking
       await booking.delete();
-    
+
       // Refund the tourist
       tourist.wallet += refundAmount;
       await tourist.save();
-    
+
       // Return a success message
-      return res.json({ message: "Itinerary booking cancelled successfully and amount refunded." });
+      return res.json({
+        message:
+          "Itinerary booking cancelled successfully and amount refunded.",
+      });
     } else {
       // Return an error message if the cancellation deadline has passed
-      return res.status(400).json({ message: "Cancellation deadline has passed" });
+      return res
+        .status(400)
+        .json({ message: "Cancellation deadline has passed" });
     }
   } catch (error) {
     // Log the error and return a server error response
@@ -694,7 +733,7 @@ try {
  */
 const cancelActivityBooking = async (req, res) => {
   try {
-    const bookingId = req.params.bookingId;
+    const bookingId = req.params.activityBookingId;
 
     // Find the Activity Booking by its ID
     const booking = await ActivityBooking.findById(bookingId);
@@ -720,20 +759,21 @@ const cancelActivityBooking = async (req, res) => {
 
     // Delete the booking
     await booking.delete();
-  
+
     // Refund the tourist
     tourist.wallet += refundAmount;
     await tourist.save();
 
     // Return a success message
-    return res.json({ message: "Activity booking cancelled successfully and amount refunded." });
+    return res.json({
+      message: "Activity booking cancelled successfully and amount refunded.",
+    });
   } catch (error) {
     // Log the error and return a server error response
     console.error("Error cancelling activity booking:", error);
     return res.status(500).json({ error: error.message });
   }
 };
-
 
 /**
  * View my list of issued complaints and its status (pending/resolved)
@@ -743,7 +783,8 @@ const cancelActivityBooking = async (req, res) => {
 const viewComplaints = async (req, res) => {
   try {
     // Retrieve the tourist by their ID
-    const tourist = await getTouristByIdHelper(req.params.id);
+    const tourist = await getTouristByIdHelper(req.params.touristId);
+
     // Check if the tourist is not found
     if (!tourist) return res.status(404).json({ message: "Tourist not found" });
 
@@ -766,7 +807,7 @@ export default {
   rateProduct,
   touristPay,
   redeemPoints,
-  getTouristById,
+  getTourist,
   fileComplaint,
   cancelActivityBooking,
   cancelItineraryBooking,
@@ -774,6 +815,10 @@ export default {
   rateActivity,
   rateItinerary,
   getTouristBalance,
-  updateTouristProfile,
+  updateTourist,
+  deleteTourist,
   rateTourGuide,
+  getAllTourists,
+  getAllTouristsItineraryBooking,
+  getAllTouristActivityBooking,
 };

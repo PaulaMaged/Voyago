@@ -2,49 +2,79 @@ import express from "express";
 import TouristController from "../controllers/TouristController.js";
 const router = express.Router();
 
-router.post("/tourists", TouristController.createTourist);
-router.get("/tourists/:id", TouristController.getTouristById);
+// Create a new tourist
+router.post("/create-tourist", TouristController.createTourist);
+
+router.get("/get-tourist/:touristId", TouristController.getTourist);
 
 // Receive loyalty points upon payment for any event/itinerary
-router.post("/tourists/:id/pay", TouristController.touristPay);
+router.post("/tourist-pay/:touristId", TouristController.touristPay);
+
+router.get("/get-all-tourists-itinerary-bookings/:touristId", TouristController.getAllTouristsItineraryBooking);
+
+router.get("/get-all-tourists-activity-bookings/:touristId", TouristController.getAllTouristActivityBooking);
+
+// Get all tourists
+router.get("/get-all-tourists", TouristController.getAllTourists);
 
 // Receive a badge based on my level and Redeem my points to cash in my wallet
-router.put("/tourists/:id/redeem", TouristController.redeemPoints);
+router.put("/tourist-redeem-points/:touristId", TouristController.redeemPoints);
 
 // Rate a product that I purchased
-router.post("/tourists/:id/rate/product", TouristController.rateProduct);
+router.post("/tourist-rate-product/:touristId", TouristController.rateProduct);
 
 // Rate an activity
-router.post("/tourists/:id/rate/activity", TouristController.rateActivity);
+router.post(
+  "/tourist-rate-activity/:touristId",
+  TouristController.rateActivity
+);
 
 // Rate an itinerary
-router.post("/tourists/:id/rate/itinerary", TouristController.rateItinerary);
+router.post(
+  "/tourist-rate-itinerary/:touristId",
+  TouristController.rateItinerary
+);
 
 // Get the balance of a tourist
-router.get("/tourists/:id/balance", TouristController.getTouristBalance);
+router.get(
+  "/tourist-get-balance/touristId",
+  TouristController.getTouristBalance
+);
 
 // Update the tourist's profile
-router.put("/tourists/:id/profile", TouristController.updateTouristProfile);
+router.put("/update-tourist/:touristId", TouristController.updateTourist);
 
 // Rate a tour guide
-router.post("/tourists/:id/rate/tour-guide", TouristController.rateTourGuide);
+router.post(
+  "/tourist-rate-tourguide/:touristId",
+  TouristController.rateTourGuide
+);
 
 // File a complaint
-router.post("/tourists/:id/complaint", TouristController.fileComplaint);
+router.post(
+  "/tourist-file-complaint/:touristId",
+  TouristController.fileComplaint
+);
+
+// Delete tourist
+router.delete("/delete-tourist/:touristId", TouristController.deleteTourist);
 
 // Cancel an Activity Booking
 router.delete(
-  "/activity-bookings/:bookingId",
+  "/tourist-cancel-activity-booking/:activityBookingId",
   TouristController.cancelActivityBooking
 );
 
 // Cancel an Itinerary Booking
 router.delete(
-  "/itinerary-bookings/:bookingId",
+  "/tourist-cancel-itinerary-booking/:itineraryBookingId",
   TouristController.cancelItineraryBooking
 );
 
 // View my list of issued complaints and its status (pending/resolved)
-router.get("/tourists/:id/complaints", TouristController.viewComplaints);
+router.get(
+  "/tourist-get-all-complaints/:touristId",
+  TouristController.viewComplaints
+);
 
 export default router;

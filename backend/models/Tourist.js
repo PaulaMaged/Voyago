@@ -23,7 +23,6 @@ const touristSchema = new mongoose.Schema({
       type: String,
     },
   ],
-  plans: [{ type: mongoose.Schema.Types.ObjectId, ref: "Itinerary" }],
   phone_number: { type: String },
   nationality: { type: String },
   is_student: { type: Boolean, default: false },

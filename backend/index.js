@@ -2,14 +2,14 @@ import mongo_conn from "./connection/mongo.js";
 import express from "express";
 import "dotenv/config"; // Use this for dotenv in ES Modules
 
-import advertiserRoutes from "./routes/AdvertiserRoutes.js";
-import publicRoutes from "./routes/PublicRoutes.js";
-import tourGuideRoutes from "./routes/TourGuideRoutes.js";
-import tourismGovernorRoutes from "./routes/TourismGovernorRoutes.js";
-import touristRoute from "./routes/TouristRoutes.js";
-import sellerRoutes from "./routes/SellerRoutes.js";
-import adminRoutes from "./routes/AdminRoutes.js";
-import userRoutes from "./routes/UserRoutes.js";
+import AdvertiserRoutes from "./routes/AdvertiserRoutes.js";
+import PublicRoutes from "./routes/PublicRoutes.js";
+import TourGuideRoutes from "./routes/TourGuideRoutes.js";
+import TourismGovernorRoutes from "./routes/TourismGovernorRoutes.js";
+import TouristRoutes from "./routes/TouristRoutes.js";
+import SellerRoutes from "./routes/SellerRoutes.js";
+import AdminRoutes from "./routes/AdminRoutes.js";
+import UserRoutes from "./routes/UserRoutes.js";
 import cors from "cors";
 
 const app = express();
@@ -23,14 +23,14 @@ app.use(express.json());
 mongo_conn().catch((err) => console.log("Error Connecting to database ", err));
 
 // Routes
-app.use("/api/advertiser", advertiserRoutes);
-app.use("/api/public", publicRoutes);
-app.use("/api/tour-guide", tourGuideRoutes);
-app.use("/api/admin", adminRoutes);
-app.use("/api/user", userRoutes);
-app.use("/api/tourism-governor", tourismGovernorRoutes);
-app.use("/api/seller", sellerRoutes);
-app.use("/api/tourist", touristRoute);
+app.use("/api/advertiser", AdvertiserRoutes);
+app.use("/api/tourist", TouristRoutes);
+app.use("/api/public", PublicRoutes);
+app.use("/api/tour-guide", TourGuideRoutes);
+app.use("/api/admin", AdminRoutes);
+app.use("/api/user", UserRoutes);
+app.use("/api/tourism-governor", TourismGovernorRoutes);
+app.use("/api/seller", SellerRoutes);
 
 // Root route for testing
 app.get("/", (req, res) => {
