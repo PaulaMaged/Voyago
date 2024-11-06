@@ -2,6 +2,73 @@ import Complaint from "../models/Complaint.js";
 import User from "../models/User.js";
 import Admin from "../models/Admin.js";
 import ReplyComplaint from "../models/ReplyComplaint.js";
+import ActivityCategory from "../models/ActivityCategory.js";
+
+//create Activity Category
+const createActivityCategory = async (req, res) => {
+  const activityCategory = req.body;
+  try {
+    const newActivityCategory = new ActivityCategory(activityCategory);
+    const savedActivityCategory = await newActivityCategory.save();
+    res.status(201).json(savedActivityCategory);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+//GET All Activity Categories
+const getAllActivityCategories = async (req, res) => {
+  try {
+    const activityCategories = await ActivityCategory.find();
+    res.status(200).json(activityCategories);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+//GET Activity Category by id
+const getActivityCategory = async (req, res) => {
+  try {
+    const activityCategory = await ActivityCategory.findById(
+      req.params.activityCategoryId
+    );
+    if (!activityCategory)
+      return res.status(404).json({ message: "Activity Category not found" });
+    res.status(200).json(activityCategory);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+//Update Activity Category
+const updateActivityCategory = async (req, res) => {
+  try {
+    const updatedActivityCategory = await ActivityCategory.findByIdAndUpdate(
+      req.params.activityCategoryId,
+      { $set: req.body },
+      { new: true }
+    );
+    if (!updatedActivityCategory)
+      return res.status(404).json({ message: "Activity Category not found" });
+    res.status(200).json(updatedActivityCategory);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+//delete Activity Category
+const deleteActivityCategory = async (req, res) => {
+  try {
+    const deletedActivityCategory = await ActivityCategory.findByIdAndDelete(
+      req.params.activityCategoryId
+    );
+    if (!deletedActivityCategory)
+      return res.status(404).json({ message: "Activity Category not found" });
+    res.status(200).json({ message: "Activity Category deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 /**
  * Marks a complaint as either pending or resolved.
@@ -415,4 +482,9 @@ export default {
   createAdmin,
   updateAdmin,
   deleteAdmin,
+  createActivityCategory,
+  updateActivityCategory,
+  getActivityCategory,
+  deleteActivityCategory,
+  getAllActivityCategories
 };

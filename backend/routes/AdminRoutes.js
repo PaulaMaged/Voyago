@@ -79,5 +79,35 @@ router.get(
   AdminController.getComplaintDetails
 );
 
+// Create an Activity Category
+router.post(
+  "/create-activity-category",
+  AdminController.createActivityCategory
+);
+
+// Get Activity Category by ID
+router.get(
+  "/get-activity-category/:activityCategoryId",
+  AdminController.getActivityCategoryById
+);
+
+// Get All Activity Categories
+router.get(
+  "/get-all-activity-categories",
+  AdminController.getAllActivityCategories
+);
+
+// Update Activity Category by ID
+router.put(
+  "/update-activity-category/:activityCategoryId",
+  AdminController.updateActivityCategory
+);
+
+// Delete Activity Category by ID
+router.delete(
+  "/delete-activity-category/:activityCategoryId",
+  AdminController.deleteActivityCategory
+);
+
 // Export the router
 export default router;

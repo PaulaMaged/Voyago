@@ -2,36 +2,6 @@ import express from "express";
 const router = express.Router();
 import AdvertiserController from "../controllers/AdvertiserController.js";
 
-// Create an Activity Category
-router.post(
-  "/create-activity-category",
-  AdvertiserController.createActivityCategory
-);
-
-// Get Activity Category by ID
-router.get(
-  "/get-activity-category/:activityCategoryId",
-  AdvertiserController.getActivityCategoryById
-);
-
-// Get All Activity Categories
-router.get(
-  "/get-all-activity-categories",
-  AdvertiserController.getAllActivityCategories
-);
-
-// Update Activity Category by ID
-router.put(
-  "/update-activity-category/:activityCategoryId",
-  AdvertiserController.updateActivityCategory
-);
-
-// Delete Activity Category by ID
-router.delete(
-  "/delete-activity-category/:activityCategoryId",
-  AdvertiserController.deleteActivityCategory
-);
-
 // Create an Advertiser
 router.post("/create-advertiser", AdvertiserController.createAdvertiser);
 
