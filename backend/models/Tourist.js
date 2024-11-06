@@ -13,6 +13,11 @@ const touristSchema = new mongoose.Schema({
     min: 1,
     max: 3,
   },
+  wallet: {
+    type: Number,
+    default: 0,
+    min: 0,
+  },
   badges: [
     {
       type: String,
