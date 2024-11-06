@@ -15,7 +15,10 @@ router.get(
 );
 
 // Update a Landmark
-router.put("/update-landmark/:landmarkId", TourismGovernorController.updateLandmark);
+router.put(
+  "/update-landmark/:landmarkId",
+  TourismGovernorController.updateLandmark
+);
 
 // Delete a Landmark
 router.delete("/delete/:landmarkId", TourismGovernorController.deleteLandmark);
@@ -30,13 +33,22 @@ router.delete("/delete-tag/:TagId", TourismGovernorController.deleteTag);
 router.get("/get-all-tags", TourismGovernorController.getAllTags);
 
 //create a TourismGov
-router.post("/create-tourgovernor", TourismGovernorController.createTourGovernor);
+router.post(
+  "/create-tourgovernor",
+  TourismGovernorController.createTourGovernor
+);
 
 //GET TourGoverner
-router.get("/get-tourgovernor/:tourgovernorId", TourismGovernorController.getTourGovernor);
+router.get(
+  "/get-tourgovernor/:tourgovernorId",
+  TourismGovernorController.getTourGovernor
+);
 
 //Update TourGovernor
-router.put("/update-tourgovernor/:tourgovernorId", TourismGovernorController.updateTourGovernor);
+router.put(
+  "/update-tourgovernor/:tourgovernorId",
+  TourismGovernorController.updateTourGovernor
+);
 
 // Delete TourGovernor
 router.delete(
@@ -50,7 +62,10 @@ router.post("/create-location", TourismGovernorController.createLocation);
 router.get("/get-location/:locationId", TourismGovernorController.getLocation);
 
 //delete Location
-router.delete("/delete-location/:locationId", TourismGovernorController.deleteLocation);
+router.delete(
+  "/delete-location/:locationId",
+  TourismGovernorController.deleteLocation
+);
 
 // View All Tourism Governor's Landmarks
 router.get(
