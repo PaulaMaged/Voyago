@@ -7,6 +7,7 @@ function ItineraryComponent() {
   const createItinerary = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
+    console.log(formData);
     const data = {
       tour_guide: formData.get("tour_guide"),
       name: formData.get("name"),
@@ -28,7 +29,7 @@ function ItineraryComponent() {
     };
 
     try {
-      const response = await axios.post("http://localhost:5000/api/seller/itineraries", data);
+      const response = await axios.post("http://localhost:5000/api/tour-guide/create-itinerary", data);
       setResult(JSON.stringify(response.data));
     } catch (error) {
       console.log(error);
@@ -41,7 +42,7 @@ function ItineraryComponent() {
     const id = event.target.id.value;
 
     try {
-      const response = await axios.get(`http://localhost:5000/api/seller/itineraries/${id}`);
+      const response = await axios.get(`http://localhost:5000/api/tour-guide/get-itinerary/${id}`);
       setResult(JSON.stringify(response.data));
     } catch (error) {
       console.log(error);
@@ -54,7 +55,7 @@ function ItineraryComponent() {
     const id = event.target.id.value;
 
     try {
-      const response = await axios.delete(`http://localhost:5000/api/seller/itineraries/${id}`);
+      const response = await axios.delete(`http://localhost:5000/api/tour-guide/delete-itinerary/${id}`);
       setResult(JSON.stringify(response.data));
     } catch (error) {
       console.log(error);
