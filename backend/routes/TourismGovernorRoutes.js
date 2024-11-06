@@ -14,6 +14,10 @@ router.get(
   TourismGovernorController.getLandmarksByTag
 );
 
+//GET TourGoverner By User ID
+router.get("/get-tourgovernor-by-userid/:userId", TourismGovernorController.getTourGovernorByUserId);
+
+
 // Get All Landmarks
 router.get("/get-all-landmarks", TourismGovernorController.getAllLandmarks);
 

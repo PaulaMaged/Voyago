@@ -10,9 +10,15 @@ router.get("/get-tourist/:touristId", TouristController.getTourist);
 // Receive loyalty points upon payment for any event/itinerary
 router.post("/tourist-pay/:touristId", TouristController.touristPay);
 
-router.get("/get-all-tourists-itinerary-bookings/:touristId", TouristController.getAllTouristsItineraryBooking);
+router.get(
+  "/get-all-tourists-itinerary-bookings/:touristId",
+  TouristController.getAllTouristsItineraryBooking
+);
 
-router.get("/get-all-tourists-activity-bookings/:touristId", TouristController.getAllTouristActivityBooking);
+router.get(
+  "/get-all-tourists-activity-bookings/:touristId",
+  TouristController.getAllTouristActivityBooking
+);
 
 // Get all tourists
 router.get("/get-all-tourists", TouristController.getAllTourists);
@@ -54,6 +60,11 @@ router.post(
 router.post(
   "/tourist-file-complaint/:touristId",
   TouristController.fileComplaint
+);
+
+router.get(
+  "/get-tourist-by-user-id/:userId",
+  TouristController.getTouristByUserId
 );
 
 // Delete tourist

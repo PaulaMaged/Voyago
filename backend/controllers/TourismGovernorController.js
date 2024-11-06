@@ -67,6 +67,23 @@ const getTourGovernor = async (req, res) => {
   }
 };
 
+const getTourGovernorByUserId = async (req, res) => {
+  try {
+    const tourGovernor = await TourGovernor.findOne({
+      user: req.params.userId,
+    }).populate("user");
+
+    if (!tourGovernor) {
+      return res
+        .status(404)
+        .json({ message: "Tour Governor not found for this user" });
+    }
+    res.status(200).json(tourGovernor);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 //create a Tag
 const createTag = async (req, res) => {
   try {
@@ -213,6 +230,7 @@ export default {
   getGovernorLandmarks,
   createTag,
   deleteTag,
+  getAllLandmarks,
   getLandmarksByTag,
   getAllTags,
   createTourGovernor,
@@ -222,4 +240,5 @@ export default {
   createLocation,
   deleteLocation,
   getLocation,
+  getTourGovernorByUserId,
 };

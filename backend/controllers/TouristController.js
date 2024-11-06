@@ -32,6 +32,23 @@ const createTourist = async (req, res) => {
   }
 };
 
+const getTouristByUserId = async (req, res) => {
+  try {
+    const tourist = await Tourist.findOne({
+      user: req.params.userId,
+    }).populate("user");
+
+    if (!tourist) {
+      return res
+        .status(404)
+        .json({ message: "Tourist not found for this user" });
+    }
+    res.status(200).json(tourist);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 /**
  * Retrieve a tourist by their ID.
  * @param {Object} req - Express request object.
@@ -821,4 +838,5 @@ export default {
   getAllTourists,
   getAllTouristsItineraryBooking,
   getAllTouristActivityBooking,
+  getTouristByUserId,
 };
