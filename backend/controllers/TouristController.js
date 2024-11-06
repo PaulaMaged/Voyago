@@ -78,7 +78,7 @@ const getAllTouristsItineraryBooking = async (req, res) => {
     const tourist = await getTouristByIdHelper(touristId);
     const itineraryBookings = await ItineraryBooking.find({
       tourist: tourist._id,
-    });
+    }).populate("itinerary");
     res.status(200).json(itineraryBookings);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -91,7 +91,7 @@ const getAllTouristActivityBooking = async (req, res) => {
     const tourist = await getTouristByIdHelper(touristId);
     const activityBookings = await ActivityBooking.find({
       tourist: tourist._id,
-    });
+    }).populate("activity");
     res.status(200).json(activityBookings);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -702,7 +702,7 @@ const cancelItineraryBooking = async (req, res) => {
     // Check if the cancellation deadline has passed
     if (new Date() < cancellationDeadline) {
       // Delete the booking
-      await booking.delete();
+      await ItineraryBooking.findByIdAndDelete(bookingId);
 
       // Refund the tourist
       tourist.wallet += refundAmount;
@@ -758,7 +758,7 @@ const cancelActivityBooking = async (req, res) => {
     const refundAmount = activity.price;
 
     // Delete the booking
-    await booking.delete();
+    await ActivityBooking.findByIdAndDelete(bookingId);
 
     // Refund the tourist
     tourist.wallet += refundAmount;
