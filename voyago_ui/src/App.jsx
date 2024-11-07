@@ -1,35 +1,72 @@
-import TestComp from "./components/TourGuide.jsx"
-import Adv from "./components/advertiser.jsx"
-import ActivityComponent from "./components/Activ.jsx"
-import ItineraryComponent from "./components/Itin.jsx"
-import ReviewComponent from "./components/Rev.jsx"
-import SellerComponent from "./components/Sel.jsx"
-import TouristComponent from "./components/tour.jsx"
-import UserComponent from "./components/User.jsx"
-import LandmarkComponent from "./components/lm.jsx"
-import TourGovernorComponent from "./components/tourgoverner.jsx"
-import LocationComponent from "./components/location.jsx"
-import ProductComponent from "./components/products.jsx"
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Home from "./components/home";
+import AddTourismGovenor from "./components/Admin_/add_tourism_govenor";
+import AddAdmin from "./components/Admin_/add_admin";
+import ViewAdvertiserProfile from "./components/Profiles/Advertiser_profile";
+import ViewTourGuideProfile from "./components/Profiles/Tour_guide_profile";
+import ViewSellerProfile from "./components/Profiles/Seller_profile";
+import ViewTourist from "./components/Profiles/Tourist_profile";
+import ViewActivityAdv from "./components/viewActivityAdv";
+
+import ViewActivityGuest from "./components/viewActivityGuest";
+import ViewItineraryGuest from "./components/viewItineraryGuest";
+import ViewLandmarks from "./components/viewLandmarks";
+import ViewProductAdmin from "./components/viewProductAdmin";
+import ViewProductTourist from "./components/viewProductTourist";
+import EditProduct from "./components/editProduct";
+import SignUpAll from "./components/signLogin/signUpAll";
+
 function App() {
   return (
     <>
-      <h1>Home Page</h1>
-      <TestComp />
-      <Adv />
-      <ActivityComponent />
-      <ItineraryComponent />
-      <ReviewComponent />
-      <SellerComponent />
-      <ProductComponent />
-      <TouristComponent />
-      <UserComponent />
-      <LandmarkComponent />
-      <TourGovernorComponent />
-      <LocationComponent />
-      
-      
+      <BrowserRouter>
+        <Routes>
+          <Route index element={<Home />}></Route>
+          <Route path="/home" element={<Home />}></Route>
+          <Route path="/signUp" element={<SignUpAll />}></Route>
+
+          <Route
+            path="/addTourismGovenor"
+            element={<AddTourismGovenor />}
+          ></Route>
+
+          <Route path="/addAdmin" element={<AddAdmin />}></Route>
+
+          <Route
+            path="/ViewAdvertiserProfile"
+            element={<ViewAdvertiserProfile />}
+          ></Route>
+          <Route
+            path="ViewTourGuideProfile"
+            element={<ViewTourGuideProfile />}
+          ></Route>
+          <Route
+            path="/ViewSellerProfile"
+            element={<ViewSellerProfile />}
+          ></Route>
+
+          <Route path="/ViewTourist" element={<ViewTourist />}></Route>
+
+          <Route path="/viewActivityAdv" element={<ViewActivityAdv />}></Route>
+          <Route
+            path="/viewActivityGuest"
+            element={<ViewActivityGuest />}
+          ></Route>
+          <Route path="/viewItineraryGuest" element={<ViewItineraryGuest />}></Route>
+          <Route path="/viewLandmarks" element={<ViewLandmarks />}></Route>
+          <Route
+            path="/viewProductAdmin"
+            element={<ViewProductAdmin />}
+          ></Route>
+          <Route
+            path="/viewProductTourist"
+            element={<ViewProductTourist />}
+          ></Route>
+          <Route path="/editProduct" element={<EditProduct />}></Route>
+        </Routes>
+      </BrowserRouter>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
