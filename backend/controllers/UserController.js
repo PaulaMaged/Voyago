@@ -8,6 +8,7 @@ import TourGuide from "../models/TourGuide.js";
 import Tourist from "../models/Tourist.js";
 import bcrypt from "bcrypt";
 import createToken from "../Data/cookiesArr.js";
+
 const createUser = async (req, res) => {
   try {
     const payload = req.body;

@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 
 const orderSchema = new mongoose.Schema({
-  seller: {
+  tourist: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Seller",
+    ref: "Tourist",
     required: true,
   },
   Product: {
@@ -12,10 +12,8 @@ const orderSchema = new mongoose.Schema({
     required: true,
   },
   description: { type: String },
-  price: { type: Number, required: true },
   quantity: { type: Number, required: true },
   arrival_date: { type: Date },
-  arrival_time: { type: String },
   arrival_location: { type: mongoose.Schema.Types.ObjectId, ref: "Location" },
 });
 

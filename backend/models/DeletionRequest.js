@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 
 const deletionRequestSchema = new Schema({
-  userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+  user: { type: Schema.Types.ObjectId, ref: "User", required: true },
   reason: { type: String },
   status: {
     type: String,

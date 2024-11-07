@@ -3,10 +3,10 @@ import mongoose from "mongoose";
 const itineraryReviewSchema = new mongoose.Schema({
   reviewer: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: "Tourist",
     required: true,
   },
-  product: {
+  itinerary: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Itinerary",
     required: true,

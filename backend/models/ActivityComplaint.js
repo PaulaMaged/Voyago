@@ -1,10 +1,11 @@
-// models/Complaint.js
+
+// models/ActivityComplaint.js
 import mongoose, { Schema } from "mongoose";
 
-const complaintSchema = new Schema({
-  itinerary: {
+const activityComplaintSchema = new Schema({
+activity: {
     type: Schema.Types.ObjectId,
-    ref: "Itinerary",
+    ref: "Activity",
     required: true,
   },
   reviewer: { type: Schema.Types.ObjectId, ref: "User", required: true },
@@ -18,5 +19,5 @@ const complaintSchema = new Schema({
   date: { type: Date, default: Date.now },
 });
 
-const Complaint = mongoose.model("Complaint", complaintSchema);
-export default Complaint;
+const ActivityComplaint = mongoose.model("ActivityComplaint", activityComplaintSchema);
+export default ActivityComplaint;

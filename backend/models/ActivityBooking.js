@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const ActivityBookingSchema = new mongoose.Schema(
-{
+  {
     activity: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Activity",
@@ -30,6 +30,9 @@ const ActivityBookingSchema = new mongoose.Schema(
   }
 );
 
-const ActivityBooking = mongoose.model("ActivityBooking", ActivityBookingSchema);
+const ActivityBooking = mongoose.model(
+  "ActivityBooking",
+  ActivityBookingSchema
+);
 
 export default ActivityBooking;

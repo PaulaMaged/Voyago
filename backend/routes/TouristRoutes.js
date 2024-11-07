@@ -56,10 +56,14 @@ router.post(
   TouristController.rateTourGuide
 );
 
-// File a complaint
 router.post(
-  "/tourist-file-complaint/:touristId",
-  TouristController.fileComplaint
+  "/tourist-file-activity-complaint/:touristId",
+  TouristController.fileActivityComplaint
+);
+
+router.post(
+  "/tourist-file-itinerary-complaint/:touristId",
+  TouristController.fileItineraryComplaint
 );
 
 router.get(

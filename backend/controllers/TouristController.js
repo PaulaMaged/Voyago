@@ -643,11 +643,11 @@ const redeemPoints = async (req, res) => {
 };
 
 /**
- * File a complaint.
+ * File an itinerary complaint.
  * @param {Object} req - Express request object.
  * @param {Object} res - Express response object.
  */
-const fileComplaint = async (req, res) => {
+const fileItineraryComplaint = async (req, res) => {
   try {
     // Retrieve the tourist by their ID
     const tourist = await getTouristByIdHelper(req.params.touristId);
@@ -655,16 +655,61 @@ const fileComplaint = async (req, res) => {
     if (!tourist) return res.status(404).json({ message: "Tourist not found" });
 
     // Retrieve the complaint details from the request body
-    const { title, body } = req.body;
+    const { title, body, itineraryId } = req.body;
 
-    // Check if the title or body is missing
-    if (!title || !body) {
-      return res.status(400).json({ message: "Title and body are required" });
+    // Check if the title, body, or itinerary ID is missing
+    if (!title || !body || !itineraryId) {
+      return res
+        .status(400)
+        .json({ message: "Title, body, and itinerary ID are required" });
     }
 
-    // Create a new complaint
-    const newComplaint = new Complaint({
+    // Create a new itinerary complaint
+    const newComplaint = new ItineraryComplaint({
       tourist: tourist._id,
+      itinerary: itineraryId,
+      title: title,
+      body: body,
+      date: new Date(),
+    });
+
+    // Save the new complaint
+    const savedComplaint = await newComplaint.save();
+
+    // Return the saved complaint
+    res.status(201).json(savedComplaint);
+  } catch (error) {
+    // Return an error response with a 500 Internal Server Error status code
+    res.status(500).json({ error: error.message });
+  }
+};
+
+/**
+ * File an activity complaint.
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const fileActivityComplaint = async (req, res) => {
+  try {
+    // Retrieve the tourist by their ID
+    const tourist = await getTouristByIdHelper(req.params.touristId);
+    // Check if the tourist is not found
+    if (!tourist) return res.status(404).json({ message: "Tourist not found" });
+
+    // Retrieve the complaint details from the request body
+    const { title, body, activityId } = req.body;
+
+    // Check if the title, body, or activity ID is missing
+    if (!title || !body || !activityId) {
+      return res
+        .status(400)
+        .json({ message: "Title, body, and activity ID are required" });
+    }
+
+    // Create a new activity complaint
+    const newComplaint = new ActivityComplaint({
+      tourist: tourist._id,
+      activity: activityId,
       title: title,
       body: body,
       date: new Date(),
@@ -825,7 +870,8 @@ export default {
   touristPay,
   redeemPoints,
   getTourist,
-  fileComplaint,
+  fileActivityComplaint,
+  fileItineraryComplaint,
   cancelActivityBooking,
   cancelItineraryBooking,
   viewComplaints,
