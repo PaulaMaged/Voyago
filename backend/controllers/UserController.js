@@ -7,8 +7,6 @@ import TourGovernor from "../models/TourGovernor.js";
 import TourGuide from "../models/TourGuide.js";
 import Tourist from "../models/Tourist.js";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
 import createToken from "../Data/cookiesArr.js";
 const createUser = async (req, res) => {
   try {
@@ -202,10 +200,11 @@ const login = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
-    // Generate a JSON Web Token (JWT) for the authenticated user
-    const token = createToken(user);
-    // Return a 200 success response with the JWT and user object
+    const username = user.username;
     const role = user.role;
+    // Generate a JSON Web Token (JWT) for the authenticated user
+    const token = createToken({username, role});
+    // Return a 200 success response with the JWT and user object
     // Check the user's role and retrieve additional data based on the role
     switch(role){
       case "TOURIST":
