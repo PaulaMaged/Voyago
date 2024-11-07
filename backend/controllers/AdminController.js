@@ -1,8 +1,10 @@
-import Complaint from "../models/Complaint.js";
 import User from "../models/User.js";
 import Admin from "../models/Admin.js";
-import ReplyComplaint from "../models/ReplyComplaint.js";
 import ActivityCategory from "../models/ActivityCategory.js";
+import ActivityComplaint from "../models/ActivityComplaint.js";
+import ItineraryComplaint from "../models/ItineraryComplaint.js";
+import ReplyActivityComplaint from "../models/ReplyActivityComplaint.js";
+import ReplyItineraryComplaint from "../models/ReplyItineraryComplaint.js";
 
 //create Activity Category
 const createActivityCategory = async (req, res) => {
@@ -71,179 +73,273 @@ const deleteActivityCategory = async (req, res) => {
 };
 
 /**
- * Marks a complaint as either pending or resolved.
+ * Marks an Activity Complaint as either pending or resolved.
  *
  * A POST Request
  *
  * @param {Object} req - The incoming HTTP request.
  * @param {Object} res - The outgoing HTTP response.
  */
-const markComplaint = async (req, res) => {
+const markActivityComplaint = async (req, res) => {
   try {
-    // Extract the complaint ID and status from the request body
     const { complaintId, status } = req.body;
 
-    // Validate the presence of required fields in the request body
     if (!complaintId || !status) {
-      // Return a 400 error if either field is missing
       return res
         .status(400)
-        .json({ message: "Complaint ID and status are required" });
+        .json({ message: "Activity Complaint ID and status are required" });
     }
 
-    // Validate the status value to ensure it's either 'pending' or 'resolved'
     if (status !== "pending" && status !== "resolved") {
-      // Return a 400 error if the status is invalid
       return res
         .status(400)
         .json({ message: 'Invalid status. Must be "pending" or "resolved"' });
     }
 
-    // Retrieve the complaint from the database by its ID
-    const complaint = await Complaint.findById(complaintId);
+    const complaint = await ActivityComplaint.findById(complaintId);
 
-    // Check if the complaint exists
     if (!complaint) {
-      // Return a 404 error if the complaint is not found
-      return res.status(404).json({ message: "Complaint not found" });
+      return res.status(404).json({ message: "Activity Complaint not found" });
     }
 
-    // Update the complaint's status
-    complaint.status = status;
-
-    // Save the updated complaint to the database
+    complaint.state = status;
     await complaint.save();
 
-    // Return a 200 success response with the updated complaint
-    res
-      .status(200)
-      .json({ message: "Complaint status updated successfully", complaint });
+    res.status(200).json({
+      message: "Activity Complaint status updated successfully",
+      complaint,
+    });
   } catch (error) {
-    // Log any errors that occur during the execution of this function
-    console.error("Error marking complaint:", error);
-
-    // Return a 500 error response to indicate an internal server error
+    console.error("Error marking activity complaint:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
 /**
- * Adds a reply to a complaint.
+ * Marks an Itinerary Complaint as either pending or resolved.
  *
- * A POST request to add a reply to a specific complaint
+ * A POST Request
  *
  * @param {Object} req - The incoming HTTP request.
  * @param {Object} res - The outgoing HTTP response.
  */
-const replyToComplaint = async (req, res) => {
+const markItineraryComplaint = async (req, res) => {
   try {
-    // Extract the complaint ID and reply text from the request body
-    const { complaintId, text } = req.body;
+    const { complaintId, status } = req.body;
 
-    // Validate the presence of required fields in the request body
-    if (!complaintId || !text) {
-      // Return a 400 error if either field is missing
+    if (!complaintId || !status) {
       return res
         .status(400)
-        .json({ message: "Complaint ID and reply text are required." });
+        .json({ message: "Itinerary Complaint ID and status are required" });
     }
 
-    // Retrieve the complaint from the database by its ID
-    const complaint = await Complaint.findById(complaintId);
+    if (status !== "pending" && status !== "resolved") {
+      return res
+        .status(400)
+        .json({ message: 'Invalid status. Must be "pending" or "resolved"' });
+    }
 
-    // Check if the complaint exists
+    const complaint = await ItineraryComplaint.findById(complaintId);
+
     if (!complaint) {
-      // Return a 404 error if the complaint is not found
-      return res.status(404).json({ message: "Complaint not found." });
+      return res.status(404).json({ message: "Itinerary Complaint not found" });
     }
 
-    // Create a new reply document and associate it with the complaint
-    const reply = new ReplyComplaint({ text, complaint: complaint._id });
+    complaint.state = status;
+    await complaint.save();
 
-    // Save the reply to the database
+    res.status(200).json({
+      message: "Itinerary Complaint status updated successfully",
+      complaint,
+    });
+  } catch (error) {
+    console.error("Error marking itinerary complaint:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+/**
+ * Adds a reply to an Activity Complaint.
+ *
+ * A POST request to add a reply to a specific activity complaint
+ *
+ * @param {Object} req - The incoming HTTP request.
+ * @param {Object} res - The outgoing HTTP response.
+ */
+const replyToActivityComplaint = async (req, res) => {
+  try {
+    const { complaintId, text } = req.body;
+
+    if (!complaintId || !text) {
+      return res.status(400).json({
+        message: "Activity Complaint ID and reply text are required.",
+      });
+    }
+
+    const complaint = await ActivityComplaint.findById(complaintId);
+
+    if (!complaint) {
+      return res.status(404).json({ message: "Activity Complaint not found." });
+    }
+
+    const reply = new ReplyActivityComplaint({
+      description: text,
+      complaint: complaint._id,
+    });
     await reply.save();
 
-    // Optionally, update the complaint's state if it's resolved by the reply
     complaint.state = "resolved";
     await complaint.save();
 
-    // Return a 200 success response with the updated complaint and reply
     res.status(200).json({
-      message: "Reply added to complaint successfully.",
+      message: "Reply added to activity complaint successfully.",
       complaint,
       reply,
     });
   } catch (error) {
-    // Log any errors that occur during the execution of this function
-    console.error("Error replying to complaint:", error);
-
-    // Return a 500 error response to indicate an internal server error
+    console.error("Error replying to activity complaint:", error);
     res.status(500).json({ message: "Internal server error." });
   }
 };
 
 /**
- * Retrieves and returns all complaints, sorted by date in descending order.
+ * Adds a reply to an Itinerary Complaint.
+ *
+ * A POST request to add a reply to a specific itinerary complaint
+ *
+ * @param {Object} req - The incoming HTTP request.
+ * @param {Object} res - The outgoing HTTP response.
+ */
+const replyToItineraryComplaint = async (req, res) => {
+  try {
+    const { complaintId, text } = req.body;
+
+    if (!complaintId || !text) {
+      return res.status(400).json({
+        message: "Itinerary Complaint ID and reply text are required.",
+      });
+    }
+
+    const complaint = await ItineraryComplaint.findById(complaintId);
+
+    if (!complaint) {
+      return res
+        .status(404)
+        .json({ message: "Itinerary Complaint not found." });
+    }
+
+    const reply = new ReplyItineraryComplaint({
+      description: text,
+      complaint: complaint._id,
+    });
+    await reply.save();
+
+    complaint.state = "resolved";
+    await complaint.save();
+
+    res.status(200).json({
+      message: "Reply added to itinerary complaint successfully.",
+      complaint,
+      reply,
+    });
+  } catch (error) {
+    console.error("Error replying to itinerary complaint:", error);
+    res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+/**
+ * Retrieves and returns all Activity Complaints, sorted by date in descending order.
  *
  * A GET request
  *
  * @param {Object} req - The incoming HTTP request.
  * @param {Object} res - The outgoing HTTP response.
  */
-
-const getComplaintsByDate = async (req, res) => {
+const getActivityComplaintsByDate = async (req, res) => {
   try {
-    // Retrieve all complaints from the database, sorted by date in descending order
-    const complaints = await Complaint.find().sort({ date: -1 });
-
-    // Return a 200 success response with the sorted complaints
+    const complaints = await ActivityComplaint.find().sort({ date: -1 });
     res.status(200).json({ complaints });
   } catch (error) {
-    // Log any errors that occur during the execution of this function
-    console.error("Error retrieving complaints:", error);
-
-    // Return a 500 error response to indicate an internal server error
+    console.error("Error retrieving activity complaints:", error);
     res.status(500).json({ message: "Internal server error." });
   }
 };
 
 /**
- * Retrieves and returns complaints filtered by status.
+ * Retrieves and returns all Itinerary Complaints, sorted by date in descending order.
  *
- * A POST request to filter complaints by status
+ * A GET request
  *
  * @param {Object} req - The incoming HTTP request.
  * @param {Object} res - The outgoing HTTP response.
  */
-const getComplaintsByStatus = async (req, res) => {
+const getItineraryComplaintsByDate = async (req, res) => {
   try {
-    // Extract the status from the request body
+    const complaints = await ItineraryComplaint.find().sort({ date: -1 });
+    res.status(200).json({ complaints });
+  } catch (error) {
+    console.error("Error retrieving itinerary complaints:", error);
+    res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+/**
+ * Retrieves and returns Activity Complaints filtered by status.
+ *
+ * A POST request to filter activity complaints by status
+ *
+ * @param {Object} req - The incoming HTTP request.
+ * @param {Object} res - The outgoing HTTP response.
+ */
+const getActivityComplaintsByStatus = async (req, res) => {
+  try {
     const { status } = req.body;
 
-    // Validate the presence of required fields in the request body
     if (!status) {
-      // Return a 400 error if the status is missing
       return res.status(400).json({ message: "Status is required" });
     }
 
-    // Validate the status value to ensure it's either 'pending' or 'resolved'
     if (status !== "pending" && status !== "resolved") {
-      // Return a 400 error if the status is invalid
       return res
         .status(400)
         .json({ message: 'Invalid status. Must be "pending" or "resolved"' });
     }
 
-    // Retrieve complaints from the database where the status matches the filter
-    const complaints = await Complaint.find({ status: status });
-
-    // Return a 200 success response with the filtered complaints
+    const complaints = await ActivityComplaint.find({ state: status });
     res.status(200).json({ complaints });
   } catch (error) {
-    // Log any errors that occur during the execution of this function
-    console.error("Error retrieving complaints by status:", error);
+    console.error("Error retrieving activity complaints by status:", error);
+    res.status(500).json({ message: "Internal server error." });
+  }
+};
 
-    // Return a 500 error response to indicate an internal server error
+/**
+ * Retrieves and returns Itinerary Complaints filtered by status.
+ *
+ * A POST request to filter itinerary complaints by status
+ *
+ * @param {Object} req - The incoming HTTP request.
+ * @param {Object} res - The outgoing HTTP response.
+ */
+const getItineraryComplaintsByStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+
+    if (!status) {
+      return res.status(400).json({ message: "Status is required" });
+    }
+
+    if (status !== "pending" && status !== "resolved") {
+      return res
+        .status(400)
+        .json({ message: 'Invalid status. Must be "pending" or "resolved"' });
+    }
+
+    const complaints = await ItineraryComplaint.find({ state: status });
+    res.status(200).json({ complaints });
+  } catch (error) {
+    console.error("Error retrieving itinerary complaints by status:", error);
     res.status(500).json({ message: "Internal server error." });
   }
 };
@@ -257,7 +353,7 @@ const getComplaintsByStatus = async (req, res) => {
  * @param {Object} res - The outgoing HTTP response.
  */
 const createAdmin = async (req, res) => {
-try {
+  try {
     // Validate the presence of required fields in the request body
     if (!req.body) {
       // Return a 400 error if the request body is empty
@@ -266,7 +362,7 @@ try {
 
     const adminUser = await User.findById(req.body.user);
 
-    if (adminUser.role != 'ADMIN') {
+    if (adminUser.role != "ADMIN") {
       return res.status(400).json({ message: "User not assigned as admin" });
     }
 
@@ -277,7 +373,9 @@ try {
     await newAdmin.save();
 
     // Return a 201 success response with the created admin
-    res.status(201).json({ message: "Admin created successfully", admin: newAdmin });
+    res
+      .status(201)
+      .json({ message: "Admin created successfully", admin: newAdmin });
   } catch (error) {
     // Log any errors that occur during the execution of this function
     console.error("Error creating admin:", error);
@@ -360,38 +458,15 @@ const updateAdmin = async (req, res) => {
     });
 
     // Return a 200 success response with the updated admin
-    res.status(200).json({ message: "Admin updated successfully", admin: updatedAdmin });
+    res
+      .status(200)
+      .json({ message: "Admin updated successfully", admin: updatedAdmin });
   } catch (error) {
     // Log any errors that occur during the execution of this function
     console.error("Error updating admin:", error);
 
     // Return a 500 error response to indicate an internal server error
     res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-
-/**
- * Retrieves and returns all complaints with their statuses.
- *
- * A GET request to view all complaints and their statuses
- *
- * @param {Object} req - The incoming HTTP request.
- * @param {Object} res - The outgoing HTTP response.
- */
-const getAllComplaints = async (req, res) => {
-  try {
-    // Retrieve all complaints from the database
-    const complaints = await Complaint.find({}, "status");
-
-    // Return a 200 success response with the complaints and their statuses
-    res.status(200).json({ complaints });
-  } catch (error) {
-    // Log any errors that occur during the execution of this function
-    console.error("Error retrieving all complaints:", error);
-
-    // Return a 500 error response to indicate an internal server error
-    res.status(500).json({ message: "Internal server error." });
   }
 };
 
@@ -433,52 +508,16 @@ const getAdminByUserId = async (req, res) => {
   }
 };
 
-/**
- * Retrieves and returns the details of a specific complaint.
- *
- * A GET request to view the details of a selected complaint
- *
- * @param {Object} req - The incoming HTTP request.
- * @param {Object} res - The outgoing HTTP response.
- */
-
-const getComplaintDetails = async (req, res) => {
-  try {
-    // Extract the complaint ID from the request parameters
-    const { complaintId } = req.params;
-
-    // Validate the presence of the complaint ID
-    if (!complaintId) {
-      return res.status(400).json({ message: "Complaint ID is required" });
-    }
-
-    // Retrieve the complaint from the database by its ID
-    const complaint = await Complaint.findById(complaintId);
-
-    // Check if the complaint exists
-    if (!complaint) {
-      return res.status(404).json({ message: "Complaint not found" });
-    }
-
-    // Return a 200 success response with the complaint details
-    res.status(200).json({ complaint });
-  } catch (error) {
-    // Log any errors that occur during the execution of this function
-    console.error("Error retrieving complaint details:", error);
-
-    // Return a 500 error response to indicate an internal server error
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-
 export default {
-  markComplaint,
   getAdminByUserId,
-  getComplaintDetails,
-  replyToComplaint,
-  getComplaintsByDate,
-  getComplaintsByStatus,
-  getAllComplaints,
+  getItineraryComplaintsByStatus,
+  getActivityComplaintsByStatus,
+  getItineraryComplaintsByDate,
+  getActivityComplaintsByDate,
+  replyToItineraryComplaint,
+  replyToActivityComplaint,
+  markItineraryComplaint,
+  markActivityComplaint,
   createAdmin,
   updateAdmin,
   deleteAdmin,
@@ -486,5 +525,5 @@ export default {
   updateActivityCategory,
   getActivityCategory,
   deleteActivityCategory,
-  getAllActivityCategories
+  getAllActivityCategories,
 };

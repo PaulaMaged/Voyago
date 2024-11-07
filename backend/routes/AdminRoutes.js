@@ -5,13 +5,9 @@ import AdminController from "../controllers/AdminController.js";
 // Create a new router instance
 const router = express.Router();
 
-// Define the admin routes
-/**
- * Marks a complaint as either pending or resolved.
- *
- * A POST Request
- */
-router.post("/mark-complaint", AdminController.markComplaint);
+// =====================================
+// Admin Management Routes
+// =====================================
 
 /**
  * Creates a new admin.
@@ -34,26 +30,90 @@ router.delete("/delete-admin/:adminId", AdminController.deleteAdmin);
  */
 router.put("/update-admin/:adminId", AdminController.updateAdmin);
 
-/**
- * Add a reply to a complaint.
- *
- * A POST request to add a reply to a specific complaint
- */
-router.post("/reply-to-complaint", AdminController.replyToComplaint);
+// =====================================
+// Complaint Management Routes
+// =====================================
 
 /**
- * Retrieves and returns all complaints, sorted by date in descending order.
+ * Marks an itinerary complaint as either pending or resolved.
+ *
+ * A POST Request
+ */
+router.post(
+  "/mark-itinerary-complaint",
+  AdminController.markItineraryComplaint
+);
+
+/**
+ * Marks an activity complaint as either pending or resolved.
+ *
+ * A POST Request
+ */
+router.post("/mark-activity-complaint", AdminController.markActivityComplaint);
+
+/**
+ * Add a reply to an itinerary complaint.
+ *
+ * A POST request to add a reply to a specific itinerary complaint
+ */
+router.post(
+  "/reply-to-itinerary-complaint",
+  AdminController.replyToItineraryComplaint
+);
+
+/**
+ * Add a reply to an activity complaint.
+ *
+ * A POST request to add a reply to a specific activity complaint
+ */
+router.post(
+  "/reply-to-activity-complaint",
+  AdminController.replyToActivityComplaint
+);
+
+// =====================================
+// Complaint Retrieval Routes
+// =====================================
+
+/**
+ * Retrieves and returns all itinerary complaints, sorted by date in descending order.
  *
  * A GET request
  */
-router.get("/get-complaints-by-date", AdminController.getComplaintsByDate);
+router.get(
+  "/get-itinerary-complaints-by-date",
+  AdminController.getItineraryComplaintsByDate
+);
 
 /**
- * Retrieves and returns complaints filtered by status.
+ * Retrieves and returns all activity complaints, sorted by date in descending order.
  *
- * A POST request to filter complaints by status
+ * A GET request
  */
-router.post("/get-complaints-by-status", AdminController.getComplaintsByStatus);
+router.get(
+  "/get-activity-complaints-by-date",
+  AdminController.getActivityComplaintsByDate
+);
+
+/**
+ * Retrieves and returns itinerary complaints filtered by status.
+ *
+ * A POST request to filter itinerary complaints by status
+ */
+router.post(
+  "/get-itinerary-complaints-by-status",
+  AdminController.getItineraryComplaintsByStatus
+);
+
+/**
+ * Retrieves and returns activity complaints filtered by status.
+ *
+ * A POST request to filter activity complaints by status
+ */
+router.post(
+  "/get-activity-complaints-by-status",
+  AdminController.getActivityComplaintsByStatus
+);
 
 /**
  * Retrieves and returns the admin by user ID.
@@ -62,22 +122,9 @@ router.post("/get-complaints-by-status", AdminController.getComplaintsByStatus);
  */
 router.get("/get-admin-by-userId/:userId", AdminController.getAdminByUserId);
 
-/**
- * Retrieves and returns all complaints with their statuses.
- *
- * A GET request to view all complaints and their statuses
- */
-router.get("/get-all-complaints", AdminController.getAllComplaints);
-
-/**
- * Retrieves and returns the details of a specific complaint.
- *
- * A GET request to view the details of a selected complaint
- */
-router.get(
-  "/get-complaint-details/:complaintId",
-  AdminController.getComplaintDetails
-);
+// =====================================
+// Activity Category Management Routes
+// =====================================
 
 // Create an Activity Category
 router.post(
@@ -88,7 +135,7 @@ router.post(
 // Get Activity Category by ID
 router.get(
   "/get-activity-category/:activityCategoryId",
-  AdminController.getActivityCategoryById
+  AdminController.getActivityCategory
 );
 
 // Get All Activity Categories

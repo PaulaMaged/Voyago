@@ -3,13 +3,37 @@ const router = express.Router();
 
 import UserController from "../controllers/UserController.js";
 
-// Define routes for user actions
+// Create User Route
 router.post("/create-user", UserController.createUser);
-router.put("/change-password/:userId", UserController.changePassword); // Using PUT method for changing password
+
+// ================================= {{
+// User Update and Delete Routes
+// ================================= {{
+
+// Change Password Route
+router.put("/change-password/:userId", UserController.changePassword);
+
+// Update User Route
 router.put("/update-user/:userId", UserController.updateUser);
-router.get("/get-all-users", UserController.getAllUsers);
+
+// Delete User Route
 router.delete("/delete-user/:userId", UserController.deleteUser);
+
+// ================================= {{
+// User Retrieval Routes
+// ================================= {{
+
+// Get All Users Route
+router.get("/get-all-users", UserController.getAllUsers);
+
+// Get User Route
 router.get("/get-user/:userId", UserController.getUser);
+
+// ================================= {{
+// User Request Routes
+// ================================= {{
+
+// Create Deletion Request Route
 router.post(
   "/create-delete-request/:userId",
   UserController.createDeletionRequest

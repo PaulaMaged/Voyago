@@ -10,7 +10,10 @@ import TouristRoutes from "./routes/TouristRoutes.js";
 import SellerRoutes from "./routes/SellerRoutes.js";
 import AdminRoutes from "./routes/AdminRoutes.js";
 import UserRoutes from "./routes/UserRoutes.js";
+import cookieParser from 'cookie-parser';
 import cors from "cors";
+
+
 
 const app = express();
 const port = process.env.PORT || 8000;

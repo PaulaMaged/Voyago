@@ -2,6 +2,10 @@ import express from "express";
 const router = express.Router();
 import SellerController from "../controllers/SellerController.js";
 
+// ==============================================
+//                Seller Routes
+// ==============================================
+
 // Create a Seller
 router.post("/create-seller", SellerController.createSeller);
 
@@ -22,6 +26,10 @@ router.put("/update-seller/:sellerId", SellerController.updateSeller);
 
 // Delete Seller by ID
 router.delete("/delete-seller/:sellerId", SellerController.deleteSeller);
+
+// ==============================================
+//                Product Routes
+// ==============================================
 
 // Create a Product
 router.post("/create-product", SellerController.createProduct);

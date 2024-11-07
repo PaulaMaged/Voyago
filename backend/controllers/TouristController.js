@@ -2,7 +2,8 @@
 import Itinerary from "../models/Itinerary.js";
 import Activity from "../models/Activity.js";
 import Tourist from "../models/Tourist.js";
-import Complaint from "../models/Complaint.js";
+import ActivityComplaint from "../models/ActivityComplaint.js";
+import ItineraryComplaint from "../models/ItineraryComplaint.js";
 import ItineraryBooking from "../models/ItineraryBooking.js";
 import ActivityBooking from "../models/ActivityBooking.js";
 import ProductReview from "../models/ProductReview.js";
@@ -838,11 +839,11 @@ const cancelActivityBooking = async (req, res) => {
 };
 
 /**
- * View my list of issued complaints and its status (pending/resolved)
+ * View all itinerary complaints and its status (pending/resolved)
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
-const viewComplaints = async (req, res) => {
+const viewAllItineraryComplaints = async (req, res) => {
   try {
     // Retrieve the tourist by their ID
     const tourist = await getTouristByIdHelper(req.params.touristId);
@@ -850,8 +851,34 @@ const viewComplaints = async (req, res) => {
     // Check if the tourist is not found
     if (!tourist) return res.status(404).json({ message: "Tourist not found" });
 
-    // Find all complaints by the tourist
-    const complaints = await Complaint.find({ tourist: tourist._id })
+    // Find all itinerary complaints by the tourist
+    const complaints = await ItineraryComplaint.find({ tourist: tourist._id })
+      .populate("tourist")
+      .exec();
+
+    // Return the complaints
+    res.json(complaints);
+  } catch (error) {
+    // Return an error response with a 500 Internal Server Error status code
+    res.status(500).json({ error: error.message });
+  }
+};
+
+/**
+ * View all activity complaints and its status (pending/resolved)
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+const viewAllActivityComplaints = async (req, res) => {
+  try {
+    // Retrieve the tourist by their ID
+    const tourist = await getTouristByIdHelper(req.params.touristId);
+
+    // Check if the tourist is not found
+    if (!tourist) return res.status(404).json({ message: "Tourist not found" });
+
+    // Find all activity complaints by the tourist
+    const complaints = await ActivityComplaint.find({ tourist: tourist._id })
       .populate("tourist")
       .exec();
 
@@ -874,7 +901,8 @@ export default {
   fileItineraryComplaint,
   cancelActivityBooking,
   cancelItineraryBooking,
-  viewComplaints,
+  viewAllActivityComplaints,
+  viewAllItineraryComplaints,
   rateActivity,
   rateItinerary,
   getTouristBalance,

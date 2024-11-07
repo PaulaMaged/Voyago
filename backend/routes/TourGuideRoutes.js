@@ -1,8 +1,11 @@
 import express from "express";
-
-const router = express.Router();
 import TourGuideController from "../controllers/TourGuideController.js";
 
+const router = express.Router();
+
+// *********************************************
+// *************** ITINERARY ENDPOINTS *********
+// *********************************************
 // Create an Itinerary
 router.post("/create-itinerary", TourGuideController.createItinerary);
 
@@ -21,39 +24,44 @@ router.delete(
   TourGuideController.deleteItinerary
 );
 
-//create Tour Guide
+// *********************************************
+// *************** TOUR GUIDE ENDPOINTS ********
+// *********************************************
+// Create Tour Guide
 router.post("/create-tourguide", TourGuideController.createTourGuide);
 
-//get Tour Guide Profile
+// Get Tour Guide Profile
 router.get(
   "/get-tourguide/:tourGuideId",
   TourGuideController.getTourGuideProfileInfo
 );
 
-//get all itineraries
-router.get("/get-all-itineraries", TourGuideController.getAllItineraries);
-
-
-//get Tour Guide
+// Get Tour Guide Information
 router.get("/get-tourguide/:tourGuideId", TourGuideController.getTourGuide);
 
-//get Tour Guide by User ID
+// Get Tour Guide by User ID
 router.get(
   "/get-tourguide-by-userId/:userId",
   TourGuideController.getTourGuideByUserId
 );
 
-//update Tour Guide
+// Update Tour Guide
 router.put(
   "/update-tourguide/:tourGuideId",
   TourGuideController.updateTourGuide
 );
 
-//delete Tour Guide
+// Delete Tour Guide
 router.delete(
   "/delete-tourguide/:tourGuideId",
   TourGuideController.deleteTourGuide
 );
+
+// ***********************************************
+// ********* TOUR GUIDE ITINERARY ENDPOINTS ********
+// ***********************************************
+// Get All Itineraries
+router.get("/get-all-itineraries", TourGuideController.getAllItineraries);
 
 // View All Tour Guide's Itineraries
 router.get(
