@@ -47,4 +47,20 @@ router.put("/update-product-by-id/:id", ProductController.updateProductById);
 // Delete a product by ID
 router.delete("/delete-product-by-id/:id", ProductController.deleteProductById);
 
+// Create an order
+router.post("/create-order", ProductController.createOrder);
+
+// Retrieve all orders
+router.get("/retrieve-all-orders", ProductController.getAllOrders);
+
+// Retrieve an order by ID
+router.get("/retrieve-order-by-id/:id", ProductController.getOrderById);
+
+// Update an order by ID
+router.put("/update-order-by-id/:id", ProductController.updateOrderById);
+
+// Delete an order by ID
+router.delete("/delete-order-by-id/:id", ProductController.deleteOrderById);
+
+
 export default router;

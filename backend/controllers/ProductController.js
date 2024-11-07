@@ -266,7 +266,6 @@ const getSingleProductSalesAndQuantity = async (req, res) => {
   }
 };
 
-
 const createProduct = async (req, res) => {
   const product = req.body;
   try {
@@ -290,7 +289,9 @@ const getProductById = async (req, res) => {
 
 const getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find().populate("seller".populate("reviews"));
+    const products = await Product.find().populate(
+      "seller".populate("reviews")
+    );
     res.json(products);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -323,6 +324,64 @@ const deleteProductById = async (req, res) => {
   }
 };
 
+const createOrder = async (req, res) => {
+  const order = req.body;
+  try {
+    const newOrder = new Order(order);
+    const savedOrder = await newOrder.save();
+    res.status(201).json(savedOrder);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getOrderById = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id)
+      .populate("products")
+      .populate("customer");
+    if (!order) return res.status(404).json({ message: "Order not found" });
+    res.json(order);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getAllOrders = async (req, res) => {
+  try {
+    const orders = await Order.find().populate("products").populate("customer");
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const updateOrderById = async (req, res) => {
+  try {
+    const updatedOrder = await Order.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+    if (!updatedOrder)
+      return res.status(404).json({ message: "Order not found" });
+    res.json(updatedOrder);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const deleteOrderById = async (req, res) => {
+  try {
+    const deletedOrder = await Order.findByIdAndDelete(req.params.id);
+    if (!deletedOrder)
+      return res.status(404).json({ message: "Order not found" });
+    res.json({ message: "Order deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 // Export all functions for use in other parts of the application
 export default {
   getAllProductsSalesAndQuantity,
@@ -335,4 +394,9 @@ export default {
   getAllProducts,
   updateProductById,
   deleteProductById,
+  createOrder,
+  getOrderById,
+  getAllOrders,
+  updateOrderById,
+  deleteOrderById,
 };
