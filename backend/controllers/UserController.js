@@ -1,6 +1,15 @@
 import User from "../models/User.js";
 import DeletionRequest from "../models/DeletionRequest.js";
-
+import Advertiser from "../models/Advertiser.js";
+import Seller from "../models/Seller.js";
+import Admin from "../models/Admin.js";
+import TourGovernor from "../models/TourGovernor.js";
+import TourGuide from "../models/TourGuide.js";
+import Tourist from "../models/Tourist.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+import createToken from "../Data/cookiesArr.js";
 const createUser = async (req, res) => {
   try {
     const payload = req.body;
@@ -178,6 +187,60 @@ const updateUser = async (req, res) => {
   }
 };
 
+const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    // Retrieve the user with the provided email from the database
+    const user = await User.findOne({ email });
+    // If the user does not exist, return a 404 error response
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    // Compare the provided password with the hashed password stored in the database
+    const isMatch = await bcrypt.compare(password, user.password);
+    // If the passwords do not match, return a 401 error response
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+    // Generate a JSON Web Token (JWT) for the authenticated user
+    const token = createToken(user);
+    // Return a 200 success response with the JWT and user object
+    const role = user.role;
+    // Check the user's role and retrieve additional data based on the role
+    switch(role){
+      case "TOURIST":
+        const tourist = await Tourist.findOne({user: user._id});
+        res.status(200).json({ token, user, tourist });
+      break;
+      case "TOUR_GUIDE":
+         const tourGuide = await TourGuide.findOne({user: user._id});
+         res.status(200).json({ token, user, tourGuide });
+      break;
+      case "ADVERTISER":
+        const advertiser = await Advertiser.findOne({user: user._id});
+        res.status(200).json({ token, user, advertiser });
+      break;
+      case "TOUR_GOVERNOR":
+        const tourGovernor = await TourGovernor.findOne({user: user._id});
+        res.status(200).json({ token, user, tourGovernor });
+      break;
+      case "SELLER":
+        const seller = await Seller.findOne({user: user._id});
+        res.status(200).json({ token, user, seller });
+      break;
+      case "ADMIN":
+        const admin = await Admin.findOne({user: user._id});
+        res.status(200).json({ token, user, admin });
+      break;
+    }
+  }
+  catch (error) {
+    // Catch any errors that occur during the process and return a 400 error response with the error message
+    res.status(400).json({ message: error.message });
+  }
+}
+
+
 export default {
   changePassword,
   createDeletionRequest,
@@ -186,4 +249,5 @@ export default {
   deleteUser,
   updateUser,
   getUser,
+  login
 };

@@ -18,6 +18,7 @@ const port = process.env.PORT || 8000;
 // Middleware setup
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 
 // Database connection
 mongo_conn().catch((err) => console.log("Error Connecting to database ", err));
