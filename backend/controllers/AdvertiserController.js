@@ -2,7 +2,6 @@ import Activity from "../models/Activity.js";
 import Advertiser from "../models/Advertiser.js";
 import User from "../models/User.js";
 
-
 //create Advertiser
 const createAdvertiser = async (req, res) => {
   const advertiser = req.body;
@@ -155,7 +154,9 @@ const getAdvertiserActivities = async (req, res) => {
 
 const getAllActivities = async (req, res) => {
   try {
-    const activities = await Activity.find().populate("advertiser");
+    const activities = await Activity.find()
+      .populate("advertiser")
+      .populate("category");
     res.status(200).json(activities);
   } catch (error) {
     res.status(500).json({ error: error.message });
