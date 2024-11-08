@@ -3,7 +3,7 @@ import axios from 'axios';
 import AddProduct from './addProduct';
 import EditProduct from './editProduct';
 
-const viewProductAdmin = () => {
+const ViewProductAdmin = () => {
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [minPrice, setMinPrice] = useState('');
@@ -12,10 +12,9 @@ const viewProductAdmin = () => {
   const [editingProductId, setEditingProductId] = useState(null);
   const [editingProductData, setEditingProductData] = useState(null);
 
-  // Fetch products from the API
   const fetchProducts = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/seller/get-all-products'); // Adjust API endpoint as needed
+      const response = await axios.get('http://localhost:8000/api/seller/get-all-products');
       setProducts(response.data);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -23,7 +22,7 @@ const viewProductAdmin = () => {
   };
 
   useEffect(() => {
-    fetchProducts(); // Fetch products on component load
+    fetchProducts();
   }, []);
 
   const handleEditClick = (product) => {
@@ -31,10 +30,15 @@ const viewProductAdmin = () => {
     setEditingProductData(product);
   };
 
+  const handleCancelEdit = () => {
+    setEditingProductId(null);
+    setEditingProductData(null);
+  };
+
   const calculateAverageRating = (reviews) => {
     if (reviews.length === 0) return 0;
     const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
-    return (totalRating / reviews.length).toFixed(1); // Round to 1 decimal place
+    return (totalRating / reviews.length).toFixed(1);
   };
 
   const filteredProducts = products
@@ -50,9 +54,9 @@ const viewProductAdmin = () => {
 
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     if (sortRating === 'asc') {
-      return a.rating - b.rating;
+      return calculateAverageRating(a.reviews) - calculateAverageRating(b.reviews);
     } else if (sortRating === 'desc') {
-      return b.rating - a.rating;
+      return calculateAverageRating(b.reviews) - calculateAverageRating(a.reviews);
     }
     return 0;
   });
@@ -60,15 +64,19 @@ const viewProductAdmin = () => {
   return (
     <div>
       <AddProduct fetchProducts={fetchProducts} />
+      
       {editingProductId && (
-        <EditProduct product={editingProductData} fetchProducts={fetchProducts} />
+        <EditProduct 
+          product={editingProductData} 
+          fetchProducts={fetchProducts} 
+          onCancel={handleCancelEdit}
+        />
       )}
 
       <h1>Product List</h1>
       <hr />
       <br />
 
-      {/* Search Input */}
       <div style={{ marginBottom: '20px', display: 'inline-block', marginLeft: '10px' }}>
         <input
           type="text"
@@ -79,7 +87,6 @@ const viewProductAdmin = () => {
         />
       </div>
 
-      {/* Price Range Filter */}
       <div style={{ marginBottom: '20px', display: 'inline-block', marginLeft: '20px' }}>
         <input
           type="number"
@@ -97,7 +104,6 @@ const viewProductAdmin = () => {
         />
       </div>
 
-      {/* Sort by Rating */}
       <div style={{ marginBottom: '20px', display: 'inline-block', marginLeft: '20px' }}>
         <label htmlFor="ratingSort" style={{ marginRight: '10px' }}>
           Sort by Rating:
@@ -127,11 +133,10 @@ const viewProductAdmin = () => {
             <div
               key={product._id}
               style={{
-                border: '1px solid lightgray', // Default border color
+                border: '1px solid',
+                borderColor: product._id === editingProductId ? 'blue' : 'lightgray',
+                borderWidth: product._id === editingProductId ? '2px' : '1px',
                 padding: '15px',
-                ...(product._id === editingProductId
-                  ? { borderColor: 'blue', borderWidth: '2px' }
-                  : {}), // Apply blue border for editing product
               }}
             >
               <img
@@ -149,7 +154,7 @@ const viewProductAdmin = () => {
               <ul>
                 {product.reviews.map((review) => (
                   <li key={review._id}>
-                    <strong>{review.reviewer.username || 'Unknown User'}:</strong> {review.comment}
+                    <strong>{review.reviewer.user.username || 'Unknown User'}:</strong> {review.comment}
                   </li>
                 ))}
               </ul>
@@ -164,4 +169,4 @@ const viewProductAdmin = () => {
   );
 };
 
-export default viewProductAdmin;
+export default ViewProductAdmin;

@@ -3,14 +3,14 @@ import axios from 'axios';
 import { useParams } from 'react-router-dom';
 
 const EditProduct = ({ product, fetchProducts }) => {
-  const { productId } = useParams(); 
+  const { productId } = useParams();
   const [productData, setProductData] = useState({
     name: '',
     description: '',
     price: '',
-    available_quantity: '', // Updated field name to match schema
-    picture: '', // Updated field name to match schema
+    available_quantity: '',
   });
+  const [file, setFile] = useState(null);
 
   useEffect(() => {
     if (product) {
@@ -18,7 +18,6 @@ const EditProduct = ({ product, fetchProducts }) => {
     }
   }, [product]);
 
-  // Handle form input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setProductData((prevData) => ({
@@ -27,12 +26,27 @@ const EditProduct = ({ product, fetchProducts }) => {
     }));
   };
 
-  // Update product
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+  };
+
   const updateProduct = async (e) => {
-    e.preventDefault(); // Prevent form submission from reloading the page
+    e.preventDefault();
     try {
-      await axios.put(`http://localhost:8000/api/seller/update-product/${productId}`, productData); // Update product by ID
-      fetchProducts(); // Refresh product list after update
+      const formData = new FormData();
+      Object.keys(productData).forEach(key => {
+        formData.append(key, productData[key]);
+      });
+      if (file) {
+        formData.append('picture', file);
+      }
+
+      await axios.put(`http://localhost:8000/api/seller/update-product/${productId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      fetchProducts();
     } catch (error) {
       console.error('Error updating product:', error);
     }
@@ -51,6 +65,7 @@ const EditProduct = ({ product, fetchProducts }) => {
             onChange={handleChange}
             placeholder="Product Name"
             style={{ marginLeft: '5px' }}
+            required
           />
         </label>
         <label style={{ marginLeft: '5px' }}>
@@ -61,6 +76,7 @@ const EditProduct = ({ product, fetchProducts }) => {
             onChange={handleChange}
             placeholder="Description"
             style={{ marginLeft: '5px', width: '300px', height: '100px' }}
+            required
           />
         </label>
         <label style={{ marginLeft: '5px' }}>
@@ -72,27 +88,28 @@ const EditProduct = ({ product, fetchProducts }) => {
             onChange={handleChange}
             placeholder="Price"
             style={{ marginLeft: '5px' }}
+            required
           />
         </label>
         <label style={{ marginLeft: '5px' }}>
           Available Quantity:
           <input
             type="number"
-            name="available_quantity" // Updated field name to match schema
+            name="available_quantity"
             value={productData.available_quantity}
             onChange={handleChange}
             placeholder="Available Quantity"
             style={{ marginLeft: '5px' }}
+            required
           />
         </label>
         <label style={{ marginLeft: '5px' }}>
-          Image URL:
+          Product Image:
           <input
-            type="text"
-            name="picture" // Updated field name to match schema
-            value={productData.picture}
-            onChange={handleChange}
-            placeholder="Image URL"
+            type="file"
+            name="picture"
+            onChange={handleFileChange}
+            accept="image/*"
             style={{ marginLeft: '5px' }}
           />
         </label>

@@ -6,11 +6,10 @@ const AddProduct = ({ fetchProducts }) => {
     name: '',
     description: '',
     price: '',
-    available_quantity: '', // Updated field name
-    picture: '', // Updated field name
+    available_quantity: '',
   });
+  const [file, setFile] = useState(null);
 
-  // Handle input change
   const handleChange = (e) => {
     const { name, value } = e.target;
     setProductData({
@@ -19,18 +18,34 @@ const AddProduct = ({ fetchProducts }) => {
     });
   };
 
-  // Function to handle product creation
-  const createProduct = async () => {
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+  };
+
+  const createProduct = async (e) => {
+    e.preventDefault();
     try {
-      await axios.post('http://localhost:8000/api/seller/create-product', productData); // Make API call
-      fetchProducts(); // Refresh products list
+      const formData = new FormData();
+      Object.keys(productData).forEach(key => {
+        formData.append(key, productData[key]);
+      });
+      if (file) {
+        formData.append('picture', file);
+      }
+
+      await axios.post('http://localhost:8000/api/seller/create-product', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      fetchProducts();
       setProductData({
         name: '',
         description: '',
         price: '',
-        available_quantity: '', // Reset field name
-        picture: '', // Reset field name
+        available_quantity: '',
       });
+      setFile(null);
     } catch (error) {
       console.error('Error adding product:', error);
     }
@@ -39,7 +54,7 @@ const AddProduct = ({ fetchProducts }) => {
   return (
     <div>
       <h1>Add New Product</h1>
-      <form>
+      <form onSubmit={createProduct}>
         <input
           type="text"
           name="name"
@@ -47,6 +62,7 @@ const AddProduct = ({ fetchProducts }) => {
           onChange={handleChange}
           placeholder="Product Name"
           style={{ marginLeft: '10px' }}
+          required
         />
         <input
           type="text"
@@ -55,6 +71,7 @@ const AddProduct = ({ fetchProducts }) => {
           onChange={handleChange}
           placeholder="Description"
           style={{ marginLeft: '10px' }}
+          required
         />
         <input
           type="number"
@@ -64,25 +81,26 @@ const AddProduct = ({ fetchProducts }) => {
           placeholder="Price"
           min="0"
           style={{ marginLeft: '10px' }}
+          required
         />
         <input
           type="number"
-          name="available_quantity" // Updated field name
+          name="available_quantity"
           value={productData.available_quantity}
           onChange={handleChange}
           placeholder="Available Quantity"
           min="0"
           style={{ marginLeft: '10px' }}
+          required
         />
         <input
-          type="text"
-          name="picture" // Updated field name
-          value={productData.picture}
-          onChange={handleChange}
-          placeholder="Image URL"
+          type="file"
+          name="picture"
+          onChange={handleFileChange}
+          accept="image/*"
           style={{ marginLeft: '10px' }}
         />
-        <button type="button" onClick={createProduct} style={{ marginLeft: '10px' }}>
+        <button type="submit" style={{ marginLeft: '10px' }}>
           Add Product
         </button>
       </form>
