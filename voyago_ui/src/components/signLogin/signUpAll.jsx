@@ -29,10 +29,16 @@ function SignUp() {
       role: role.toUpperCase(),
     };
     const register_user = async () => {
+      console.log(step1Data);
       try {
-        const response = await axios.put("", step1Data);
+        const response = await axios.post(
+          "http://localhost:8000/api/user/create-user",
+          step1Data
+        );
         if (response.status === 201) {
           setStep(2);
+          alert("Registration successful");
+
           return response.data._id;
         } else {
           alert("This Email is already been in use");
