@@ -9,7 +9,7 @@ function AddTourismGovernor() {
         {
           username: data.username,
           password: data.password,
-          email: data.username,
+
           role: "TOUR_GOVERNOR",
         }
       );

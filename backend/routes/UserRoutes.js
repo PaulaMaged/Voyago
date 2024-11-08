@@ -10,6 +10,9 @@ router.post("/create-user", UserController.createUser);
 // User Update and Delete Routes
 // ================================= {{
 
+//user get password
+router.get("/get-user-password/:userId", UserController.getUserPassword);
+
 // Change Password Route
 router.put("/change-password/:userId", UserController.changePassword);
 
