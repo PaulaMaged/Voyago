@@ -64,7 +64,21 @@ const getSellerByUserId = async (req, res) => {
 
 const getProductsBelongingToSeller = async (req, res) => {
   try {
-    const products = await Product.find({ seller: req.params.sellerId });
+    const products = await Product.find({ seller: req.params.sellerId })
+      .populate({
+        path: "seller",
+        select: "store_name", // Include only 'store_name' from the 'Seller' schema
+      })
+      .populate({
+        path: "reviews",
+        populate: {
+          path: "reviewer",
+          populate: {
+            path: "user",
+            select: "username", // Include only 'username' from the 'User' schema
+          },
+        },
+      });
     res.json(products);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -120,7 +134,22 @@ const getProduct = async (req, res) => {
 
 const getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find();
+    // Populate 'seller' to only include the 'store_name' and 'reviews' with 'reviewer' up to 'user' level
+    const products = await Product.find()
+      .populate({
+        path: "seller",
+        select: "store_name", // Only include the 'store_name' field from the 'Seller' schema
+      })
+      .populate({
+        path: "reviews",
+        populate: {
+          path: "reviewer",
+          populate: {
+            path: "user",
+            select: "username", // Include only the 'username' field from the 'User' schema
+          },
+        },
+      });
     res.json(products);
   } catch (error) {
     res.status(500).json({ error: error.message });

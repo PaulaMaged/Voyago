@@ -558,7 +558,7 @@ const rateProduct = async (req, res) => {
     if (!tourist) return res.status(404).json({ message: "Tourist not found" });
 
     // Retrieve the product ID, rating, and comment from the request body
-    const productId = req.body.productId;
+    const productId = req.body.product;
     const rating = req.body.rating;
     const comment = req.body.comment;
 
@@ -599,6 +599,11 @@ const rateProduct = async (req, res) => {
 
     // Save the new review
     const savedReview = await newReview.save();
+    await Product.findByIdAndUpdate(
+      productId,
+      { $push: { reviews: savedReview._id } },
+      { new: true } // Returns the updated document
+    );
     // Return the saved review
     res.json(savedReview);
   } catch (error) {

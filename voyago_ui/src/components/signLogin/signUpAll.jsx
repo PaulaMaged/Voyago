@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import axios from "axios";
 import "./signUp.css";
 
 function SignUp() {
@@ -16,25 +17,61 @@ function SignUp() {
   const [companyName, setCompanyName] = useState("");
   const [companyInfo, setCompanyInfo] = useState("");
   const [description, setDescription] = useState("");
+  const [nationality, setNationality] = useState("");
+  const [isStudent, setIsStudent] = useState(false);
 
   const handleNext = (e) => {
     e.preventDefault();
-    setStep(2);
+    const step1Data = {
+      username: username,
+      password: password,
+      email: email,
+      role: role.toUpperCase(),
+    };
+    const register_user = async () => {
+      try {
+        const response = await axios.put("", step1Data);
+        if (response.status === 201) {
+          setStep(2);
+          return response.data._id;
+        } else {
+          alert("This Email is already been in use");
+        }
+      } catch (error) {
+        console.error(error);
+        alert("An error occurred during registration.");
+      }
+    };
+    register_user();
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Validate mobile number format
+    const mobilePattern = /^[0-9-]*$/;
+    if (
+      (role === "Tourist" || role === "Tour Guide" || role === "Advertiser") &&
+      !mobilePattern.test(mobile)
+    ) {
+      alert("Please enter a valid mobile number.");
+      setMobile("");
+      return;
+    }
+    if ((role == "Advertiser") & !mobilePattern.test(hotline)) {
+      alert("Please enter a valid hotline number.");
+      setMobile("");
+      return;
+    }
+
     // Handle form submission logic here
-    const step1Data = {
-      role,
-      username,
-      email,
-      password,
-    };
 
     const step2Data = {
       dob: role === "Tourist" || role === "Tour Guide" ? dob : undefined,
-      mobile: role === "Tourist" || role === "Tour Guide" ? mobile : undefined,
+      mobile:
+        role === "Tourist" || role === "Tour Guide" || role === "Advertiser"
+          ? mobile
+          : undefined,
       yearsOfExperience: role === "Tour Guide" ? yearsOfExperience : undefined,
       previousWork: role === "Tour Guide" ? previousWork : undefined,
       website: role === "Advertiser" ? website : undefined,
@@ -45,7 +82,18 @@ function SignUp() {
       description: role === "Seller" ? description : undefined,
     };
 
-    console.log({ step1Data, step2Data });
+    console.log({ step2Data });
+    const registerUser = async () => {
+      try {
+        await axios.post("http://localhost:5000/api/users/register", {
+          ...step2Data,
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    registerUser();
   };
 
   return (
@@ -113,7 +161,24 @@ function SignUp() {
             value={mobile}
             onChange={(e) => setMobile(e.target.value)}
             pattern="[0-9-]*"
+            placeholder="123-456-789"
             required
+          />
+          <label htmlFor="nationality">Nationality:</label>
+          <input
+            type="text"
+            id="nationality"
+            value={nationality}
+            onChange={(e) => setNationality(e.target.value)}
+            required
+          />
+
+          <label htmlFor="isStudent">Are you a student?</label>
+          <input
+            type="checkbox"
+            id="isStudent"
+            checked={isStudent}
+            onChange={(e) => setIsStudent(e.target.checked)}
           />
 
           <button type="submit">Submit</button>
@@ -138,6 +203,7 @@ function SignUp() {
             value={mobile}
             onChange={(e) => setMobile(e.target.value)}
             pattern="[0-9-]*"
+            placeholder="123-456-789"
             required
           />
 
@@ -175,7 +241,7 @@ function SignUp() {
             required
           />
 
-          <label htmlFor="hotline">Hotline:</label>
+          <label htmlFor="hotline">Company_Hotline:</label>
           <input
             type="tel"
             id="hotline"
@@ -183,6 +249,7 @@ function SignUp() {
             onChange={(e) => setHotline(e.target.value)}
             pattern="[0-9-]*"
             required
+            placeholder="123-456-789"
           />
 
           <label htmlFor="companyName">Company Name:</label>

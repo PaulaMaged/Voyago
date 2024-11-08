@@ -2,7 +2,6 @@ import Activity from "../models/Activity.js";
 import Advertiser from "../models/Advertiser.js";
 import User from "../models/User.js";
 
-
 //create Advertiser
 const createAdvertiser = async (req, res) => {
   const advertiser = req.body;
@@ -85,6 +84,7 @@ const createActivity = async (req, res) => {
 const getActivity = async (req, res) => {
   try {
     const activity = await Activity.findById(req.params.activityId);
+
     if (!activity)
       return res.status(404).json({ message: "Activity not found" });
     res.status(200).json(activity);
@@ -155,7 +155,10 @@ const getAdvertiserActivities = async (req, res) => {
 
 const getAllActivities = async (req, res) => {
   try {
-    const activities = await Activity.find().populate("advertiser");
+    const activities = await Activity.find()
+      .populate("advertiser")
+      .populate("location")
+      .populate("tags");
     res.status(200).json(activities);
   } catch (error) {
     res.status(500).json({ error: error.message });

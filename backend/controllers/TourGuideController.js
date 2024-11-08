@@ -111,10 +111,26 @@ const getItinerary = async (req, res) => {
 const getAllItineraries = async (req, res) => {
   try {
     const itineraries = await Itinerary.find()
-      .populate("activities")
-      .populate("tour_guide");
-    if (!itineraries)
+      .populate({
+        path: "activities",
+        populate: {
+          path: "tags",
+          model: "Tag",
+        },
+      })
+      .populate({
+        path: "tour_guide",
+        populate: {
+          path: "user",
+          model: "User",
+          select: "username", // Assuming you want to include the username
+        },
+      })
+      .populate("pick_up")
+      .populate("drop_off");
+    if (itineraries.length === 0) {
       return res.status(404).json({ message: "No itineraries found" });
+    }
     res.status(200).json(itineraries);
   } catch (error) {
     res.status(500).json({ error: error.message });
