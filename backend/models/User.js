@@ -5,11 +5,20 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   email: {
     type: String,
+    unique: true,
   },
   role: {
     type: String,
-    enum: ["ADMIN", "USER", "TOURIST", "TOUR_GUIDE", "TOUR_GOVERNOR", "SELLER", "ADVERTISER"],
-    default: "USER",
+    enum: [
+      "ADMIN",
+      "USER",
+      "TOURIST",
+      "TOUR_GUIDE",
+      "TOUR_GOVERNOR",
+      "SELLER",
+      "ADVERTISER",
+    ],
+    required: true,
   },
   description: { type: String },
   DOB: { type: String },

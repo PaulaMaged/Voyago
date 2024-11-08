@@ -7,7 +7,7 @@ import ViewTourGuideProfile from "./components/Profiles/Tour_guide_profile";
 import ViewSellerProfile from "./components/Profiles/Seller_profile";
 import ViewTourist from "./components/Profiles/Tourist_profile";
 import ViewActivityAdv from "./components/viewActivityAdv";
-
+import Login from "./components/signLogin/Login";
 import ViewActivityGuest from "./components/viewActivityGuest";
 import ViewItineraryGuest from "./components/viewItineraryGuest";
 import ViewLandmarks from "./components/viewLandmarks";
@@ -24,6 +24,7 @@ function App() {
           <Route index element={<Home />}></Route>
           <Route path="/home" element={<Home />}></Route>
           <Route path="/signUp" element={<SignUpAll />}></Route>
+          <Route path="/login" element={<Login />}></Route>
 
           <Route
             path="/addTourismGovenor"
@@ -52,7 +53,10 @@ function App() {
             path="/viewActivityGuest"
             element={<ViewActivityGuest />}
           ></Route>
-          <Route path="/viewItineraryGuest" element={<ViewItineraryGuest />}></Route>
+          <Route
+            path="/viewItineraryGuest"
+            element={<ViewItineraryGuest />}
+          ></Route>
           <Route path="/viewLandmarks" element={<ViewLandmarks />}></Route>
           <Route
             path="/viewProductAdmin"

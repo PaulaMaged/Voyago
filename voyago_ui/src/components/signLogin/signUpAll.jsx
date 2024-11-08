@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import axios from "axios";
 import "./signUp.css";
 
 function SignUp() {
+  const [done, Setdone] = useState(false);
   const [step, setStep] = useState(1);
-  const [role, setRole] = useState("Tourist");
+  const [role, setRole] = useState("TOURIST");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -16,40 +18,138 @@ function SignUp() {
   const [companyName, setCompanyName] = useState("");
   const [companyInfo, setCompanyInfo] = useState("");
   const [description, setDescription] = useState("");
+  const [nationality, setNationality] = useState("");
+  const [isStudent, setIsStudent] = useState(false);
+  const [user_Id, SetUserId] = useState(null);
 
   const handleNext = (e) => {
     e.preventDefault();
-    setStep(2);
+    const step1Data = {
+      username: username,
+      password: password,
+      email: email,
+      role: role.toUpperCase(),
+    };
+    const register_user = async () => {
+      console.log(step1Data);
+      try {
+        const response = await axios.post(
+          "http://localhost:8000/api/user/create-user",
+          step1Data
+        );
+        if (response.status === 201) {
+          setStep(2);
+          SetUserId(response.data._id);
+          alert("Registration successful");
+        } else {
+          throw new Error("Registration failed");
+        }
+      } catch (error) {
+        if (error.response && error.response.status === 400) {
+          alert(error.response.data.message);
+          if (error.response.data.message.includes("Username")) setUsername("");
+          else setEmail("");
+        } else {
+          console.error(error);
+          alert("An error occurred during registration.");
+        }
+      }
+    };
+    register_user();
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // Validate mobile number format
+
+    const mobilePattern = /^[0-9-]*$/;
+    if (
+      (role === "TOURIST" || role === "TOUR_GUIDE" || role === "ADVERTISER") &&
+      !mobilePattern.test(mobile)
+    ) {
+      alert("Please enter a valid mobile number.");
+      setMobile("");
+      return;
+    }
+    if ((role == "ADVERTISER") & !mobilePattern.test(hotline)) {
+      alert("Please enter a valid hotline number.");
+      setHotline("");
+      return;
+    }
+
     // Handle form submission logic here
-    const step1Data = {
-      role,
-      username,
-      email,
-      password,
-    };
 
     const step2Data = {
-      dob: role === "Tourist" || role === "Tour Guide" ? dob : undefined,
-      mobile: role === "Tourist" || role === "Tour Guide" ? mobile : undefined,
-      yearsOfExperience: role === "Tour Guide" ? yearsOfExperience : undefined,
-      previousWork: role === "Tour Guide" ? previousWork : undefined,
-      website: role === "Advertiser" ? website : undefined,
-      hotline: role === "Advertiser" ? hotline : undefined,
-      companyName:
-        role === "Advertiser" || role === "Seller" ? companyName : undefined,
-      companyInfo: role === "Advertiser" ? companyInfo : undefined,
-      description: role === "Seller" ? description : undefined,
+      user: user_Id,
+      dob: role === "TOURIST" || role === "TOUR_GUIDE" ? dob : undefined,
+      phone_number:
+        role === "TOURIST" || role === "TOUR_GUIDE" || role === "ADVERTISER"
+          ? mobile
+          : undefined,
+
+      nationality: role === "TOURIST" ? nationality : undefined,
+      is_student: role === "TOURIST" ? isStudent : undefined,
+      years_of_experience:
+        role === "TOUR_GUIDE" ? yearsOfExperience : undefined,
+      previous_work: role === "TOUR_GUIDE" ? previousWork : undefined,
+      URL_Website: role === "ADVERTISER" ? website : undefined,
+      company_hotline: role === "ADVERTISER" ? hotline : undefined,
+      company_name:
+        role === "ADVERTISER" || role === "SELLER" ? companyName : undefined,
+      store_name: role === "SELLER" ? companyName : undefined,
+      contact_info: role === "ADVERTISER" ? companyInfo : undefined,
+      description: role === "SELLER" ? description : undefined,
+    };
+    console.log({ step2Data });
+    let url = "";
+    switch (role) {
+      case "TOURIST":
+        url = "http://localhost:8000/api/tourist/create-tourist";
+        break;
+      case "TOUR_GUIDE":
+        url = "http://localhost:8000/api/tour-guide/create-tourguide";
+        break;
+      case "ADVERTISER":
+        url = "http://localhost:8000/api/advertiser/create-advertiser";
+        break;
+      case "SELLER":
+        url = "http://localhost:8000/api/seller/create-seller";
+        break;
+      default:
+        url = "http://localhost:8000/api/user/register";
+    }
+    const registerUser = async () => {
+      try {
+        console.log(url);
+        console.log(role);
+        const response = await axios.post(url, step2Data);
+        if (response.status === 201 || response.status === 200) {
+          alert("Registration successful");
+          Setdone(true);
+        } else {
+          throw new Error("Registration failed");
+        }
+      } catch (err) {
+        console.error(err);
+      }
     };
 
-    console.log({ step1Data, step2Data });
+    registerUser(url);
   };
 
   return (
     <div className="signup-form">
+      {done && (
+        <div>
+          <h1>
+            Registration has been Successful!, Please wait until we Review your
+            Application
+            {/* {setTimeout(() => {
+              window.location.href = "http://localhost:5173/";
+            }, 3000)} */}
+          </h1>
+        </div>
+      )}
       {step === 1 && (
         <form onSubmit={handleNext}>
           <label htmlFor="role">Select Role:</label>
@@ -58,10 +158,10 @@ function SignUp() {
             value={role}
             onChange={(e) => setRole(e.target.value)}
           >
-            <option value="Tourist">Tourist</option>
-            <option value="Advertiser">Advertiser</option>
-            <option value="Tour Guide">Tour Guide</option>
-            <option value="Seller">Seller</option>
+            <option value="TOURIST">Tourist</option>
+            <option value="ADVERTISER">Advertiser</option>
+            <option value="TOUR_GUIDE">TourGuide</option>
+            <option value="SELLER">Seller</option>
           </select>
 
           <label htmlFor="username">Username:</label>
@@ -95,7 +195,7 @@ function SignUp() {
         </form>
       )}
 
-      {step === 2 && role === "Tourist" && (
+      {step === 2 && !done && role === "TOURIST" && (
         <form onSubmit={handleSubmit}>
           <label htmlFor="dob">Date of Birth:</label>
           <input
@@ -113,14 +213,31 @@ function SignUp() {
             value={mobile}
             onChange={(e) => setMobile(e.target.value)}
             pattern="[0-9-]*"
+            placeholder="123-456-789"
             required
+          />
+          <label htmlFor="nationality">Nationality:</label>
+          <input
+            type="text"
+            id="nationality"
+            value={nationality}
+            onChange={(e) => setNationality(e.target.value)}
+            required
+          />
+
+          <label htmlFor="isStudent">Are you a student?</label>
+          <input
+            type="checkbox"
+            id="isStudent"
+            checked={isStudent}
+            onChange={(e) => setIsStudent(e.target.checked)}
           />
 
           <button type="submit">Submit</button>
         </form>
       )}
 
-      {step === 2 && role === "Tour Guide" && (
+      {step === 2 && !done && role === "TOUR_GUIDE" && (
         <form onSubmit={handleSubmit}>
           <label htmlFor="dob">Date of Birth:</label>
           <input
@@ -138,6 +255,7 @@ function SignUp() {
             value={mobile}
             onChange={(e) => setMobile(e.target.value)}
             pattern="[0-9-]*"
+            placeholder="123-456-789"
             required
           />
 
@@ -164,7 +282,7 @@ function SignUp() {
         </form>
       )}
 
-      {step === 2 && role === "Advertiser" && (
+      {step === 2 && !done && role === "ADVERTISER" && (
         <form onSubmit={handleSubmit}>
           <label htmlFor="website">Link to my website:</label>
           <input
@@ -175,7 +293,7 @@ function SignUp() {
             required
           />
 
-          <label htmlFor="hotline">Hotline:</label>
+          <label htmlFor="hotline">Company_Hotline:</label>
           <input
             type="tel"
             id="hotline"
@@ -183,6 +301,7 @@ function SignUp() {
             onChange={(e) => setHotline(e.target.value)}
             pattern="[0-9-]*"
             required
+            placeholder="123-456-789"
           />
 
           <label htmlFor="companyName">Company Name:</label>
@@ -206,9 +325,9 @@ function SignUp() {
         </form>
       )}
 
-      {step === 2 && role === "Seller" && (
+      {step === 2 && !done && role === "SELLER" && (
         <form onSubmit={handleSubmit}>
-          <label htmlFor="companyName">Name:</label>
+          <label htmlFor="companyName">store Name:</label>
           <input
             type="text"
             id="companyName"

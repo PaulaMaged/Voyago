@@ -1,33 +1,39 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import "./Login.css";
+import axios from "axios";
 
-const Login = ({ onLogin }) => {
-  const [formData, setFormData] = useState({ email: '', password: '' });
-  const [error, setError] = useState('');
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post('/api/login', formData);
-      alert('Login successful!');
-      onLogin(response.data.user);  // Pass user data to parent component to set auth state
-    } catch (err) {
-      setError(err.response?.data?.error || 'Login failed');
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <input type="email" name="email" placeholder="Email" onChange={handleChange} />
-      <input type="password" name="password" placeholder="Password" onChange={handleChange} />
-      <button type="submit">Login</button>
-      {error && <p>{error}</p>}
-    </form>
-  );
+const handleSubmit = (e) => {
+  e.preventDefault();
+  const username = e.target.username.value;
+  const password = e.target.password.value;
+  login(username, password);
 };
+
+const login = async (username, password) => {
+  try {
+    const response = await axios.post("http://localhost:5000/login", {
+      username,
+      password,
+    });
+    if (response.status === 200 || response.status === 201) {
+      alert("login success");
+    } else throw new Error("login failed");
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+function Login() {
+  return (
+    <div className="login">
+      <form className="Login_form" onSubmit={handleSubmit}>
+        <label htmlFor="username">username:</label>
+        <input type="text" id="username" required></input>
+        <label htmlFor="password">password:</label>
+        <input type="password" id="password" required></input>
+        <button type="submit">Login</button>
+      </form>
+    </div>
+  );
+}
 
 export default Login;

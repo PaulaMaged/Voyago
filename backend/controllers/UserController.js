@@ -13,9 +13,13 @@ const createUser = async (req, res) => {
   try {
     const payload = req.body;
     const existingUser = await User.findOne({ email: payload.email });
+    const existingUsername = await User.findOne({ username: payload.username });
     if (existingUser) {
       return res.status(400).json({ message: "Email already in use" });
+    } else if (existingUsername) {
+      return res.status(400).json({ message: "Email already in use" });
     }
+
     const userRole = payload.role || "user";
     const newUser = new User({ ...payload, role: userRole });
     await newUser.save();
@@ -204,42 +208,40 @@ const login = async (req, res) => {
     const username = user.username;
     const role = user.role;
     // Generate a JSON Web Token (JWT) for the authenticated user
-    const token = createToken({username, role});
+    const token = createToken({ username, role });
     // Return a 200 success response with the JWT and user object
     // Check the user's role and retrieve additional data based on the role
-    switch(role){
+    switch (role) {
       case "TOURIST":
-        const tourist = await Tourist.findOne({user: user._id});
+        const tourist = await Tourist.findOne({ user: user._id });
         res.status(200).json({ token, user, tourist });
-      break;
+        break;
       case "TOUR_GUIDE":
-         const tourGuide = await TourGuide.findOne({user: user._id});
-         res.status(200).json({ token, user, tourGuide });
-      break;
+        const tourGuide = await TourGuide.findOne({ user: user._id });
+        res.status(200).json({ token, user, tourGuide });
+        break;
       case "ADVERTISER":
-        const advertiser = await Advertiser.findOne({user: user._id});
+        const advertiser = await Advertiser.findOne({ user: user._id });
         res.status(200).json({ token, user, advertiser });
-      break;
+        break;
       case "TOUR_GOVERNOR":
-        const tourGovernor = await TourGovernor.findOne({user: user._id});
+        const tourGovernor = await TourGovernor.findOne({ user: user._id });
         res.status(200).json({ token, user, tourGovernor });
-      break;
+        break;
       case "SELLER":
-        const seller = await Seller.findOne({user: user._id});
+        const seller = await Seller.findOne({ user: user._id });
         res.status(200).json({ token, user, seller });
-      break;
+        break;
       case "ADMIN":
-        const admin = await Admin.findOne({user: user._id});
+        const admin = await Admin.findOne({ user: user._id });
         res.status(200).json({ token, user, admin });
-      break;
+        break;
     }
-  }
-  catch (error) {
+  } catch (error) {
     // Catch any errors that occur during the process and return a 400 error response with the error message
     res.status(400).json({ message: error.message });
   }
-}
-
+};
 
 export default {
   changePassword,
@@ -249,5 +251,5 @@ export default {
   deleteUser,
   updateUser,
   getUser,
-  login
+  login,
 };
