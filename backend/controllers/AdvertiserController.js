@@ -156,7 +156,9 @@ const getAdvertiserActivities = async (req, res) => {
 const getAllActivities = async (req, res) => {
   try {
     const activities = await Activity.find()
+
       .populate("advertiser")
+      .populate("category")
       .populate("location")
       .populate("tags");
     res.status(200).json(activities);

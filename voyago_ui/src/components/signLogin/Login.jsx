@@ -24,7 +24,7 @@ const login = async (username, password) => {
 
 function Login() {
   return (
-    <div>
+    <div className="login">
       <form className="Login_form" onSubmit={handleSubmit}>
         <label htmlFor="username">username:</label>
         <input type="text" id="username" required></input>

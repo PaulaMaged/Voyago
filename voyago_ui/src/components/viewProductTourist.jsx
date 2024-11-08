@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import './ViewProductTourist.css';
+import './viewProductTourist.css';
 
 const ViewProductTourist = () => {
   const [products, setProducts] = useState([]);
@@ -121,7 +121,7 @@ const ViewProductTourist = () => {
                     <ul className="reviews-list">
                       {product.reviews.slice(0, 3).map((review) => (
                         <li key={review._id} className="review-item">
-                          <span className="reviewer-name">{review.reviewer.username}:</span> {review.comment}
+                          <span className="reviewer-name">{review.reviewer.user.username }:</span> {review.comment}
                         </li>
                       ))}
                     </ul>
