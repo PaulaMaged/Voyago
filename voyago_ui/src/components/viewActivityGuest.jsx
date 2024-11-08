@@ -1,44 +1,44 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import useFetch from "../hooks/useFetch";
 
 export default function ViewActivityGuest() {
-  const [activities, setActivities] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [budget, setBudget] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [sortOrder, setSortOrder] = useState("");
 
-  const fetchActivities = async () => {
-    try {
-      const response = await axios.get('http://localhost:8000/api/advertiser/get-all-activities');
-      setActivities(response.data);
-    } catch (error) {
-      console.error('Error fetching activities:', error);
-    }
-  };
-
-  useEffect(() => {
-    fetchActivities();
-  }, []);
+  const { data: activities } = useFetch(
+    "http://localhost:8000/api/advertiser/get-all-activities"
+  );
 
   const filteredActivities = activities
     .filter((activity) => {
-      const matchesSearch = activity.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        (activity.category && activity.category.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (activity.tags && activity.tags.some(tag => tag.tag_name.toLowerCase().includes(searchTerm.toLowerCase())));
+      const matchesSearch =
+        activity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (activity.category &&
+          activity.category.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (activity.tags &&
+          activity.tags.some((tag) =>
+            tag.tag_name.toLowerCase().includes(searchTerm.toLowerCase())
+          ));
 
       const withinBudget = budget ? activity.price <= parseFloat(budget) : true;
 
-      const matchesDate = selectedDate ? new Date(activity.start_time).toLocaleDateString() === new Date(selectedDate).toLocaleDateString() : true;
+      const matchesDate = selectedDate
+        ? new Date(activity.start_time).toLocaleDateString() ===
+          new Date(selectedDate).toLocaleDateString()
+        : true;
 
-      const matchesCategory = selectedCategory ? activity.category === selectedCategory : true;
+      const matchesCategory = selectedCategory
+        ? activity.category === selectedCategory
+        : true;
 
       return matchesSearch && withinBudget && matchesDate && matchesCategory;
     })
     .sort((a, b) => {
-      if (sortOrder === 'asc') return a.price - b.price;
-      if (sortOrder === 'desc') return b.price - a.price;
+      if (sortOrder === "asc") return a.price - b.price;
+      if (sortOrder === "desc") return b.price - a.price;
       return 0;
     });
 
@@ -73,8 +73,12 @@ export default function ViewActivityGuest() {
           style={styles.select}
         >
           <option value="">All Categories</option>
-          {Array.from(new Set(activities.map(activity => activity.category))).map((category, index) => (
-            <option key={index} value={category}>{category}</option>
+          {Array.from(
+            new Set(activities.map((activity) => activity.category))
+          ).map((category, index) => (
+            <option key={index} value={category}>
+              {category}
+            </option>
           ))}
         </select>
         <select
@@ -94,15 +98,32 @@ export default function ViewActivityGuest() {
             <div key={activity._id} style={styles.card}>
               <h2 style={styles.cardTitle}>{activity.title}</h2>
               <p style={styles.cardDescription}>{activity.description}</p>
-              <p><strong>Date:</strong> {new Date(activity.start_time).toLocaleDateString()}</p>
-              <p><strong>Time:</strong> {new Date(activity.start_time).toLocaleTimeString()}</p>
-              <p><strong>Duration:</strong> {activity.duration} minutes</p>
-              <p><strong>Price:</strong> ${activity.price.toFixed(2)}</p>
-              <p><strong>Category:</strong> {activity.category}</p>
+              <p>
+                <strong>Date:</strong>{" "}
+                {new Date(activity.start_time).toLocaleDateString()}
+              </p>
+              <p>
+                <strong>Time:</strong>{" "}
+                {new Date(activity.start_time).toLocaleTimeString()}
+              </p>
+              <p>
+                <strong>Duration:</strong> {activity.duration} minutes
+              </p>
+              <p>
+                <strong>Price:</strong> ${activity.price.toFixed(2)}
+              </p>
+              <p>
+                <strong>Category:</strong> {activity.category}
+              </p>
               {activity.discount > 0 && (
-                <p><strong>Discount:</strong> {activity.discount}%</p>
+                <p>
+                  <strong>Discount:</strong> {activity.discount}%
+                </p>
               )}
-              <p><strong>Booking Open:</strong> {activity.booking_open ? 'Yes' : 'No'}</p>
+              <p>
+                <strong>Booking Open:</strong>{" "}
+                {activity.booking_open ? "Yes" : "No"}
+              </p>
               {activity.location && (
                 <div>
                   <strong>Location:</strong>
@@ -112,8 +133,12 @@ export default function ViewActivityGuest() {
               )}
               {activity.advertiser && (
                 <div>
-                  <p><strong>Company:</strong> {activity.advertiser.company_name}</p>
-                  <p><strong>Hotline:</strong> {activity.advertiser.contact_info}</p>
+                  <p>
+                    <strong>Company:</strong> {activity.advertiser.company_name}
+                  </p>
+                  <p>
+                    <strong>Hotline:</strong> {activity.advertiser.contact_info}
+                  </p>
                 </div>
               )}
               {activity.tags && activity.tags.length > 0 && (
@@ -121,7 +146,9 @@ export default function ViewActivityGuest() {
                   <strong>Tags:</strong>
                   <div style={styles.tagContainer}>
                     {activity.tags.map((tag) => (
-                      <span key={tag._id} style={styles.tag}>{tag.tag_name}</span>
+                      <span key={tag._id} style={styles.tag}>
+                        {tag.tag_name}
+                      </span>
                     ))}
                   </div>
                 </div>
@@ -138,71 +165,71 @@ export default function ViewActivityGuest() {
 
 const styles = {
   container: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    padding: '20px',
-    fontFamily: 'Arial, sans-serif',
+    maxWidth: "1200px",
+    margin: "0 auto",
+    padding: "20px",
+    fontFamily: "Arial, sans-serif",
   },
   title: {
-    fontSize: '24px',
-    fontWeight: 'bold',
-    marginBottom: '20px',
+    fontSize: "24px",
+    fontWeight: "bold",
+    marginBottom: "20px",
   },
   filterContainer: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '10px',
-    marginBottom: '20px',
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "10px",
+    marginBottom: "20px",
   },
   input: {
-    padding: '8px',
-    border: '1px solid #ccc',
-    borderRadius: '4px',
-    fontSize: '14px',
+    padding: "8px",
+    border: "1px solid #ccc",
+    borderRadius: "4px",
+    fontSize: "14px",
   },
   select: {
-    padding: '8px',
-    border: '1px solid #ccc',
-    borderRadius: '4px',
-    fontSize: '14px',
-    backgroundColor: 'white',
+    padding: "8px",
+    border: "1px solid #ccc",
+    borderRadius: "4px",
+    fontSize: "14px",
+    backgroundColor: "white",
   },
   activityGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
-    gap: '40px',
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(350px, 1fr))",
+    gap: "40px",
   },
   card: {
-    border: '1px solid #ccc',
-    borderRadius: '8px',
-    padding: '15px',
-    backgroundColor: 'white',
+    border: "1px solid #ccc",
+    borderRadius: "8px",
+    padding: "15px",
+    backgroundColor: "white",
   },
   cardTitle: {
-    fontSize: '18px',
-    fontWeight: 'bold',
-    marginBottom: '10px',
+    fontSize: "18px",
+    fontWeight: "bold",
+    marginBottom: "10px",
   },
   cardDescription: {
-    fontSize: '14px',
-    color: '#666',
-    marginBottom: '10px',
+    fontSize: "14px",
+    color: "#666",
+    marginBottom: "10px",
   },
   tagContainer: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '5px',
-    marginTop: '5px',
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "5px",
+    marginTop: "5px",
   },
   tag: {
-    backgroundColor: '#e0e0e0',
-    padding: '3px 8px',
-    borderRadius: '4px',
-    fontSize: '12px',
+    backgroundColor: "#e0e0e0",
+    padding: "3px 8px",
+    borderRadius: "4px",
+    fontSize: "12px",
   },
   noActivities: {
-    gridColumn: '1 / -1',
-    textAlign: 'center',
-    color: '#666',
+    gridColumn: "1 / -1",
+    textAlign: "center",
+    color: "#666",
   },
 };
