@@ -154,7 +154,7 @@ const ViewProductAdmin = () => {
               <ul>
                 {product.reviews.map((review) => (
                   <li key={review._id}>
-                    <strong>{review.reviewer.user.username || 'Unknown User'}:</strong> {review.comment}
+                    <strong>{review.reviewer && review.reviewer.user ? review.reviewer.user.username : 'Anonymous'}:</strong> {review.comment}
                   </li>
                 ))}
               </ul>

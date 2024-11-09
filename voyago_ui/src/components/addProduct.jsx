@@ -54,6 +54,8 @@ const AddProduct = ({ fetchProducts }) => {
   return (
     <div>
       <h1>Add New Product</h1>
+      <hr />
+      <br />
       <form onSubmit={createProduct}>
         <input
           type="text"

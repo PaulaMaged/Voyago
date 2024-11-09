@@ -5,7 +5,7 @@ export default function ViewActivityGuest() {
   const [searchTerm, setSearchTerm] = useState("");
   const [budget, setBudget] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
-  const [checkedboxes, setCheckedboxes] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [sortOrder, setSortOrder] = useState("");
 
   const { data: activities } = useFetch(
@@ -16,22 +16,11 @@ export default function ViewActivityGuest() {
     "http://localhost:8000/api/admin/get-all-activity-categories"
   );
 
-  const handlecheckboxChange = (event) => {
-    const { value, checked } = event.target;
-
-    checked
-      ? setCheckedboxes((prev) => {
-          const resultingCheckedboxes = [...checkedboxes, value];
-          return resultingCheckedboxes;
-        })
-      : setCheckedboxes(checkedboxes.filter((checkbox) => checkbox != value));
-  };
-
   const filteredActivities = activities
     .filter((activity) => {
       const matchesSearch =
         activity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (activity?.category.category &&
+        (activity.category &&
           activity.category.category
             .toLowerCase()
             .includes(searchTerm.toLowerCase())) ||
@@ -42,19 +31,16 @@ export default function ViewActivityGuest() {
 
       const withinBudget = budget ? activity.price <= parseFloat(budget) : true;
 
-      const matchesCategories =
-        checkedboxes != ""
-          ? checkedboxes.some(
-              (checkedbox) => activity.category?.category == checkedbox
-            )
-          : true;
+      const matchesCategory = selectedCategory
+        ? activity.category && activity.category._id === selectedCategory
+        : true;
 
       const matchesDate = selectedDate
         ? new Date(activity.start_time).toLocaleDateString() ===
           new Date(selectedDate).toLocaleDateString()
         : true;
 
-      return matchesSearch && withinBudget && matchesDate && matchesCategories;
+      return matchesSearch && withinBudget && matchesDate && matchesCategory;
     })
     .sort((a, b) => {
       if (sortOrder === "asc") return a.price - b.price;
@@ -88,16 +74,18 @@ export default function ViewActivityGuest() {
           style={styles.input}
         />
 
-        {categories.map((category) => (
-          <label>
-            <input
-              type="checkbox"
-              value={category.category}
-              onChange={handlecheckboxChange}
-            />
-            {category.category}
-          </label>
-        ))}
+        <select
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+          style={styles.select}
+        >
+          <option value="">All Categories</option>
+          {categories.map((category) => (
+            <option key={category._id} value={category._id}>
+              {category.category}
+            </option>
+          ))}
+        </select>
 
         <select
           value={sortOrder}

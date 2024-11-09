@@ -113,10 +113,14 @@ const getAllItineraries = async (req, res) => {
     const itineraries = await Itinerary.find()
       .populate({
         path: "activities",
-        populate: {
+        populate: [{
           path: "tags",
           model: "Tag",
         },
+        {
+          path: "category",
+          model: "ActivityCategory",
+        }],
       })
       .populate({
         path: "tour_guide",

@@ -5,6 +5,7 @@ import './viewItinerary.css';
 const ViewItineraryGuest = () => {
   const [itineraries, setItineraries] = useState([]);
   const [filteredItineraries, setFilteredItineraries] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTag, setSelectedTag] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -13,22 +14,40 @@ const ViewItineraryGuest = () => {
   const [maxPrice, setMaxPrice] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
   const [sortCriteria, setSortCriteria] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchItineraries();
+    fetchCategories();
   }, []);
 
   useEffect(() => {
-    applyFilters();
+    if (itineraries.length > 0) {
+      applyFilters();
+    }
   }, [searchTerm, selectedTag, selectedCategory, selectedLanguage, minPrice, maxPrice, selectedDate, sortCriteria, itineraries]);
 
   const fetchItineraries = async () => {
     try {
+      setIsLoading(true);
       const response = await axios.get('http://localhost:8000/api/tour-guide/get-all-itineraries');
       setItineraries(response.data);
       setFilteredItineraries(response.data);
+      setIsLoading(false);
     } catch (error) {
       console.error('Error fetching itineraries:', error);
+      setError('Failed to fetch itineraries. Please try again later.');
+      setIsLoading(false);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get('http://localhost:8000/api/admin/get-all-activity-categories');
+      setCategories(response.data);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
     }
   };
 
@@ -39,7 +58,7 @@ const ViewItineraryGuest = () => {
         activity.tags.some(tag => tag._id === selectedTag)
       );
       const matchesCategory = !selectedCategory || itinerary.activities.some(activity => 
-        activity.category === selectedCategory
+        activity.category && activity.category._id === selectedCategory
       );
       const matchesLanguage = !selectedLanguage || itinerary.language === selectedLanguage;
       const matchesPrice = (!minPrice || itinerary.price >= parseFloat(minPrice)) &&
@@ -62,26 +81,25 @@ const ViewItineraryGuest = () => {
     const tagSet = new Set();
     itineraries.forEach(itinerary => {
       itinerary.activities.forEach(activity => {
-        activity.tags.forEach(tag => tagSet.add(JSON.stringify(tag)));
+        if (activity.tags) {
+          activity.tags.forEach(tag => tagSet.add(JSON.stringify(tag)));
+        }
       });
     });
     return Array.from(tagSet).map(tag => JSON.parse(tag));
-  };
-
-  const getAllCategories = () => {
-    const categorySet = new Set();
-    itineraries.forEach(itinerary => {
-      itinerary.activities.forEach(activity => {
-        categorySet.add(activity.category);
-      });
-    });
-    return Array.from(categorySet);
   };
 
   const getAllLanguages = () => {
     return Array.from(new Set(itineraries.map(itinerary => itinerary.language)));
   };
 
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>{error}</div>;
+  }
 
   return (
     <div className="itinerary-viewer">
@@ -105,8 +123,8 @@ const ViewItineraryGuest = () => {
 
         <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} className="filter-select">
           <option value="">All Categories</option>
-          {getAllCategories().map((category) => (
-            <option key={category} value={category}>{category}</option>
+          {categories.map((category) => (
+            <option key={category._id} value={category._id}>{category.category}</option>
           ))}
         </select>
 
@@ -148,24 +166,26 @@ const ViewItineraryGuest = () => {
       </div>
 
       <div className="itinerary-list">
-        {filteredItineraries.map((itinerary) => {
-          return (
-            <div key={itinerary._id} className="itinerary-card">
-              <h2>{itinerary.name}</h2>
-              <p><strong>Description:</strong> {itinerary.description}</p>
-              <p><strong>Tour Guide:</strong> {itinerary.tour_guide.user.username}</p>
-              <p><strong>Language:</strong> {itinerary.language}</p>
-              <p><strong>Price:</strong> ${itinerary.price}</p>
-              <p><strong>Start Date:</strong> {new Date(itinerary.start_date).toLocaleDateString()}</p>
-              <p><strong>Start Time:</strong> {itinerary.start_time}</p>
-              <p><strong>Accessibility:</strong> {itinerary.accessibility ? 'Yes' : 'No'}</p>
-              <p><strong>Active:</strong> {itinerary.active ? 'Yes' : 'No'}</p>
-              <p><strong>Pick-up Location:</strong> {itinerary.pick_up ? itinerary.pick_up.name : 'Not specified'}</p>
-              <p><strong>Drop-off Location:</strong> {itinerary.drop_off ? itinerary.drop_off.name : 'Not specified'}</p>
-              <ActivitiesSection activities={itinerary.activities} />
-            </div>
-          );
-        })}
+        {filteredItineraries.map((itinerary) => (
+          <div key={itinerary._id} className="itinerary-card">
+            <h2>{itinerary.name}</h2>
+            <p><strong>Description:</strong> {itinerary.description}</p>
+            <p><strong>Tour Guide:</strong> {itinerary.tour_guide.user ? itinerary.tour_guide.user.username : 'N/A'}</p>
+            <p><strong>Language:</strong> {itinerary.language}</p>
+            <p><strong>Price:</strong> ${itinerary.price}</p>
+            <p><strong>Start Date:</strong> {new Date(itinerary.start_date).toLocaleDateString()}</p>
+            <p><strong>Start Time:</strong> {itinerary.start_time}</p>
+            <p><strong>Accessibility:</strong> {itinerary.accessibility ? 'Yes' : 'No'}</p>
+            <p><strong>Active:</strong> {itinerary.active ? 'Yes' : 'No'}</p>
+            {itinerary.pick_up && (
+              <p><strong>Pick-up Location:</strong> Latitude: {itinerary.pick_up.latitude}, Longitude: {itinerary.pick_up.longitude}</p>
+            )}
+            {itinerary.drop_off && (
+              <p><strong>Drop-off Location:</strong> Latitude: {itinerary.drop_off.latitude}, Longitude: {itinerary.drop_off.longitude}</p>
+            )}
+            <ActivitiesSection activities={itinerary.activities} />
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -186,7 +206,7 @@ const ActivitiesSection = ({ activities }) => {
     );
   }, []);
 
-  if (activities.length === 0) {
+  if (!activities || activities.length === 0) {
     return <p>No activities for this itinerary.</p>;
   }
 
@@ -214,13 +234,17 @@ const ActivitiesSection = ({ activities }) => {
       </div>
       <div className="activity-item">
         <p><strong>Title:</strong> {currentActivity.title}</p>
-        <p><strong>Category:</strong> {currentActivity.category}</p>
+        <p><strong>Description:</strong> {currentActivity.description}</p>
+        <p><strong>Start Time:</strong> {new Date(currentActivity.start_time).toLocaleString()}</p>
         <p><strong>Duration:</strong> {currentActivity.duration} minutes</p>
-        {currentActivity.tags.length > 0 && (
+        {currentActivity.category && (
+          <p><strong>Category:</strong> {currentActivity.category.category}</p>
+        )}
+        {currentActivity.tags && currentActivity.tags.length > 0 && (
           <div>
             <strong>Tags:</strong>
             <ul className="tags-list">
-              {currentActivity.tags.map(tag => (
+              {currentActivity.tags.map((tag) => (
                 <li key={tag._id}>{tag.tag_name}</li>
               ))}
             </ul>

@@ -121,7 +121,7 @@ const ViewProductTourist = () => {
                     <ul className="reviews-list">
                       {product.reviews.slice(0, 3).map((review) => (
                         <li key={review._id} className="review-item">
-                          <span className="reviewer-name">{review.reviewer.user.username }:</span> {review.comment}
+                          <span className="reviewer-name">{review.reviewer && review.reviewer.user ? review.reviewer.user.username : 'Anonymous'}:</span> {review.comment}
                         </li>
                       ))}
                     </ul>

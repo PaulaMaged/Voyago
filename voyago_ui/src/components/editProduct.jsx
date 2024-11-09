@@ -55,6 +55,8 @@ const EditProduct = ({ product, fetchProducts }) => {
   return (
     <div>
       <h1>Edit Product</h1>
+      <hr />
+      <br />
       <form onSubmit={updateProduct}>
         <label>
           Name:
