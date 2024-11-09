@@ -22,6 +22,7 @@ const userSchema = new mongoose.Schema({
   },
   description: { type: String },
   DOB: { type: String },
+  requested_to_be_deleted: { type: Boolean, default: false },
 });
 
 const User = mongoose.model("User", userSchema);

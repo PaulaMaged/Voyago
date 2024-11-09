@@ -28,12 +28,16 @@ export default function ViewActivityAdv() {
   // Fetching activities and categories
   useEffect(() => {
     async function fetchActivities() {
-      const response = await axios.get("http://localhost:8000/api/advertiser/get-all-activities");
+      const response = await axios.get(
+        "http://localhost:8000/api/advertiser/get-all-activities"
+      );
       setActivities(response.data);
     }
 
     async function fetchCategories() {
-      const response = await axios.get("http://localhost:8000/api/admin/get-all-activity-categories");
+      const response = await axios.get(
+        "http://localhost:8000/api/admin/get-all-activity-categories"
+      );
       setCategories(response.data);
     }
 
@@ -47,7 +51,9 @@ export default function ViewActivityAdv() {
       const matchesSearch =
         activity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (activity.category &&
-          activity.category.category.toLowerCase().includes(searchTerm.toLowerCase())) ||
+          activity.category.category
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())) ||
         (activity.tags &&
           activity.tags.some((tag) =>
             tag.tag_name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -101,6 +107,7 @@ export default function ViewActivityAdv() {
       });
     } catch (error) {
       console.error("Error creating activity:", error);
+      console.error("Error creating activity:", error);
     }
   };
 
@@ -139,15 +146,19 @@ export default function ViewActivityAdv() {
       });
     } catch (error) {
       console.error("Error updating activity:", error);
+      console.error("Error updating activity:", error);
     }
   };
 
   // Handle Delete Activity
   const handleDeleteActivity = async (id) => {
     try {
-      await axios.delete(`http://localhost:8000/api/advertiser/delete-activity/${id}`);
+      await axios.delete(
+        `http://localhost:8000/api/advertiser/delete-activity/${id}`
+      );
       setActivities(activities.filter((activity) => activity._id !== id));
     } catch (error) {
+      console.error("Error deleting activity:", error);
       console.error("Error deleting activity:", error);
     }
   };
@@ -273,7 +284,9 @@ export default function ViewActivityAdv() {
           style={styles.input}
         />
         <button
-          onClick={editingActivity ? handleUpdateActivity : handleCreateActivity}
+          onClick={
+            editingActivity ? handleUpdateActivity : handleCreateActivity
+          }
           style={styles.button}
         >
           {editingActivity ? "Update Activity" : "Create Activity"}
@@ -367,7 +380,12 @@ const styles = {
     gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
     gap: "20px",
   },
-  card: { padding: "15px", backgroundColor: "#fff", borderRadius: "5px", boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)" },
+  card: {
+    padding: "15px",
+    backgroundColor: "#fff",
+    borderRadius: "5px",
+    boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
+  },
   cardTitle: { fontSize: "18px", fontWeight: "bold" },
   cardDescription: { fontSize: "14px", marginBottom: "10px" },
 };

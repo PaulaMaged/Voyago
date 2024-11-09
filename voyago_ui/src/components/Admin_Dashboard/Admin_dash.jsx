@@ -1,7 +1,8 @@
 import { useState } from "react";
 import AddUser from "./AddUser";
-import DeleteAccount from "./DeleteAccount";
+// import DeleteAccount from "./DeleteAccount";
 import ViewDocuments from "./ViewDoucments";
+import ViewUsers from "./ViewAllusers";
 import ManageComplaints from "./ManageComplaints";
 import ManageActCategories from "./manageActCategories";
 import ManageTags from "./manageTags";
@@ -13,8 +14,9 @@ export default function AdminDashboard() {
     switch (activeTab) {
       case "addUser":
         return <AddUser />;
-      case "deleteAccount":
-        return <DeleteAccount />;
+
+      case "View Users":
+        return <ViewUsers />;
       case "viewDocuments":
         return <ViewDocuments />;
       case "manageComplaints":
@@ -37,8 +39,8 @@ export default function AdminDashboard() {
             <button onClick={() => setActiveTab("addUser")}>Add User</button>
           </li>
           <li>
-            <button onClick={() => setActiveTab("deleteAccount")}>
-              Delete Account
+            <button onClick={() => setActiveTab("View Users")}>
+              View Users
             </button>
           </li>
           <li>
