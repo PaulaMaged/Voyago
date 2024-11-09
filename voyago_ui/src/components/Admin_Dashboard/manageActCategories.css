@@ -1,0 +1,70 @@
+.activity-categories-container {
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+    font-family: Arial, sans-serif;
+  }
+  
+  .activity-categories-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  
+  .activity-categories-form {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .activity-categories-input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    flex: 1;
+  }
+  
+  .activity-categories-button {
+    padding: 8px 12px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .activity-categories-button:hover {
+    background-color: #0056b3; /* Darker shade for hover */
+  }
+  
+  .activity-categories-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .activity-categories-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 4px;
+  }
+  
+  .activity-categories-text {
+    flex: 1;
+  }
+  
+  .edit-button {
+    margin-right: 10px; /* Add space between Edit and Delete buttons */
+  }
+
+  .delete-button {
+    background-color: #dc3545;
+  }
+  
+  .delete-button:hover {
+    background-color: #c82333;
+  }

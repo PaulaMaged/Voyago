@@ -20,6 +20,7 @@ router.delete("/delete/:landmarkId", TourismGovernorController.deleteLandmark);
 router.post("/create-tag", TourismGovernorController.createTag);
 router.delete("/delete-tag/:TagId", TourismGovernorController.deleteTag);
 router.get("/get-all-tags", TourismGovernorController.getAllTags);
+router.put('/update-tag/:TagId', TourismGovernorController.updateTag);
 
 // ====================================== Tourism Governor Routes ======================================
 router.post(

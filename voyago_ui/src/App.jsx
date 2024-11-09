@@ -19,6 +19,8 @@ import ViewLandmarks from "./components/viewLandmarks";
 import ViewProductAdmin from "./components/viewProductAdmin";
 import ViewProductTourist from "./components/viewProductTourist";
 import EditProduct from "./components/editProduct";
+import CrudCategory from "./components/Admin_Dashboard/manageActCategories";
+
 
 function App() {
   return (
@@ -76,6 +78,7 @@ function App() {
             element={<ViewProductTourist />}
           ></Route>
           <Route path="/editProduct" element={<EditProduct />}></Route>
+          <Route path="/crudCategory" element={<CrudCategory />}></Route>
         </Routes>
       </BrowserRouter>
     </>

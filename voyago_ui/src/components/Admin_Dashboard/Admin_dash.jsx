@@ -3,6 +3,8 @@ import AddUser from "./AddUser";
 import DeleteAccount from "./DeleteAccount";
 import ViewDocuments from "./ViewDoucments";
 import ManageComplaints from "./ManageComplaints";
+import ManageActCategories from "./manageActCategories";
+import ManageTags from "./manageTags";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("addUser");
@@ -17,6 +19,10 @@ export default function AdminDashboard() {
         return <ViewDocuments />;
       case "manageComplaints":
         return <ManageComplaints />;
+      case "manageActCategories":
+        return <ManageActCategories />;  
+      case "manageTags":
+        return <ManageTags />;      
       default:
         return <AddUser />;
     }
@@ -43,6 +49,16 @@ export default function AdminDashboard() {
           <li>
             <button onClick={() => setActiveTab("manageComplaints")}>
               Manage Complaints
+            </button>
+          </li>
+          <li>
+            <button onClick={() => setActiveTab("manageActCategories")}>
+             Manage Activity Categories
+            </button>
+          </li>
+          <li>
+            <button onClick={() => setActiveTab("manageTags")}>
+             Manage Tags
             </button>
           </li>
         </ul>

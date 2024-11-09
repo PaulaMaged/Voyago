@@ -95,6 +95,29 @@ const createTag = async (req, res) => {
   }
 };
 
+
+// Update a Tag
+const updateTag = async (req, res) => {
+  try {
+    const { tag_name, description } = req.body;
+
+    // Find the tag by its ID and update it
+    const updatedTag = await Tag.findByIdAndUpdate(
+      req.params.TagId,
+      { tag_name, description }, // Using tag_name to match the schema
+      { new: true }
+    );
+
+    if (!updatedTag) return res.status(404).json({ message: "Tag not found" });
+
+    // Send back the updated tag
+    res.status(200).json(updatedTag);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
 // Delete a Tag
 const deleteTag = async (req, res) => {
   try {
@@ -230,6 +253,7 @@ export default {
   getGovernorLandmarks,
   createTag,
   deleteTag,
+  updateTag,
   getAllLandmarks,
   getLandmarksByTag,
   getAllTags,

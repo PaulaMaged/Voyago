@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const tagSchema = new mongoose.Schema({
-  tag_name: { type: String, required: true },
+  tag_name: { type: String, required: true , uppercase: true, },
   description: { type: String },
 });
 
