@@ -605,6 +605,13 @@ const rateProduct = async (req, res) => {
       { $push: { reviews: savedReview._id } },
       { new: true } // Returns the updated document
     );
+
+     // Update the product to include the new review
+     await Product.findByIdAndUpdate(
+      productId,
+      { $push: { reviews: savedReview._id } },
+      { new: true } // Returns the updated document
+    );
     // Return the saved review
     res.json(savedReview);
   } catch (error) {
