@@ -1,5 +1,6 @@
 import express from "express";
 import TourGuideController from "../controllers/TourGuideController.js";
+import ItineraryController from "../controllers/ItineraryController.js";
 
 const router = express.Router();
 
@@ -68,9 +69,11 @@ router.get(
   "/get-tourguide-itineraries/:tourGuideId",
   TourGuideController.getTourGuideItineraries
 );
-
-router.post("/getActivityReviews", TourGuideController.getActivityRate);
-router.post("/getTourGuideReviews", TourGuideController.getTourGuideReview);
+router.post("/getItineraryReview/:itineraryId", ItineraryController.getItineraryRating);
+router.post("/deactivateItinerary/:itineraryId", ItineraryController.deactivateItinerary );
+router.post("/activateItinerary/:itineraryId", ItineraryController.activateItinerary );
+router.post("/getActivityReviews/:activityId", TourGuideController.getActivityRate);
+router.post("/getTourGuideReviews/:tourGuideId", TourGuideController.getTourGuideReview);
 
 
 export default router;
