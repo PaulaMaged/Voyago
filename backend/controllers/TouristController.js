@@ -317,7 +317,7 @@ const rateItinerary = async (req, res) => {
     if (!tourist) return res.status(404).json({ message: "Tourist not found" });
 
     // Retrieve the itinerary ID, rating, and comment from the request body
-    const itineraryId = req.body.itineraryId;
+    const itineraryId = req.body.itinerary;
     const rating = req.body.rating;
     const comment = req.body.comment;
 
@@ -384,7 +384,7 @@ const rateTourGuide = async (req, res) => {
     if (!tourist) return res.status(404).json({ message: "Tourist not found" });
 
     // Retrieve the tour guide ID, rating, and comment from the request body
-    const tourGuideId = req.body.tourGuideId;
+    const tourGuideId = req.body.tourGuide;
     const rating = req.body.rating;
     const comment = req.body.comment;
 
@@ -472,7 +472,7 @@ const rateActivity = async (req, res) => {
     if (!tourist) return res.status(404).json({ message: "Tourist not found" });
 
     // Retrieve the activity ID, rating, and comment from the request body
-    const activityId = req.body.activityId;
+    const activityId = req.body.activity;
     const rating = req.body.rating;
     const comment = req.body.comment;
 
@@ -606,8 +606,8 @@ const rateProduct = async (req, res) => {
       { new: true } // Returns the updated document
     );
 
-     // Update the product to include the new review
-     await Product.findByIdAndUpdate(
+    // Update the product to include the new review
+    await Product.findByIdAndUpdate(
       productId,
       { $push: { reviews: savedReview._id } },
       { new: true } // Returns the updated document
