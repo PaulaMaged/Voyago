@@ -1,7 +1,8 @@
 import Itinerary from "../models/Itinerary.js";
 import ItineraryBooking from "../models/ItineraryBooking.js";
 import TourGuide from "../models/TourGuide.js";
-
+import ActivityReview from '../models/ActivityReview.js'
+import TourGuideReview from '../models/TourGuideReview.js'
 //create Tour Guide
 const createTourGuide = async (req, res) => {
   try {
@@ -192,6 +193,19 @@ const getTourGuideItineraries = async (req, res) => {
   }
 };
 
+const getActivityRate = async (req, res) => {
+  const activityReviews = ActivityReview.find(req.params.activityId);
+  res.send(activityReviews);
+}
+
+const getTourGuideReview = async (req, res) => {
+  const tourGuideReviews = TourGuideReview.find(req.params.tourGuideId);
+  res.send(tourGuideReviews);
+  }
+
+
+
+
 export default {
   createItinerary,
   getItinerary,
@@ -205,4 +219,6 @@ export default {
   deleteTourGuide,
   getTourGuideProfileInfo,
   getAllItineraries,
+  getActivityRate,
+  getTourGuideReview
 };

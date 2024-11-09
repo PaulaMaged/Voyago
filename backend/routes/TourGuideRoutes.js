@@ -69,4 +69,8 @@ router.get(
   TourGuideController.getTourGuideItineraries
 );
 
+router.post("/getActivityReviews", TourGuideController.getActivityRate);
+router.post("/getTourGuideReviews", TourGuideController.getTourGuideReview);
+
+
 export default router;
