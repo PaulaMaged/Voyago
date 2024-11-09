@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./components/home";
 import SignUpAll from "./components/signLogin/signUpAll";
 import Login from "./components/signLogin/Login";
-
+import AdminDash from "./components/Admin_Dashboard/Admin_dash";
 import TouristDashboard from "./components/Toursit_Dashboard/Tourist_dash";
 import ViewAdvertiserProfile from "./components/Profiles/Advertiser_profile";
 import ViewTourGuideProfile from "./components/Profiles/Tour_guide_profile";
@@ -34,7 +34,7 @@ function App() {
             path="/Tourist_Dashboard"
             element={<TouristDashboard />}
           ></Route>
-
+          <Route path="/Admin_Dashboard" element={<AdminDash />}></Route>
           <Route
             path="/addTourismGovenor"
             element={<AddTourismGovenor />}

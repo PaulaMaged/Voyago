@@ -919,6 +919,30 @@ const getAllUserComplaints = async (req, res) => {
   }
 };
 
+const getAllComplaints = async (req, res) => {
+  try {
+    const complaints = await Complain.find();
+    res.status(200).json(complaints);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+const updateComplaint = async (req, res) => {
+  try {
+    const updatedComplaint = await Complain.findByIdAndUpdate(
+      req.params.complaintId,
+      { $set: req.body },
+      { new: true }
+    );
+    if (!updatedComplaint)
+      return res.status(404).json({ message: "Complaint not found" });
+    res.status(200).json(updatedComplaint);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 // Export the controllers
 export default {
   createTourist,
@@ -944,4 +968,6 @@ export default {
   getTouristByUserId,
   createUserComplaint,
   getAllUserComplaints,
+  getAllComplaints,
+  updateComplaint,
 };

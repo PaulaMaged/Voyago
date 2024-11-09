@@ -72,7 +72,7 @@ export default function ViewComplaints() {
               <p>
                 <strong>Description:</strong> {complaint.body}
               </p>
-              {complaint.state === "resolved" && (
+              {complaint.state && (
                 <button
                   onClick={() => handleViewResponse(complaint)}
                   className="view-response-btn"
@@ -87,8 +87,13 @@ export default function ViewComplaints() {
       {selectedComplaint && (
         <div className="popup-overlay" onClick={closePopup}>
           <div className="popup-content" onClick={(e) => e.stopPropagation()}>
-            <h3>Response to: {selectedComplaint.title}</h3>
-            <p>{selectedComplaint.response}</p>
+            <h3>Response to complaint : {selectedComplaint.title}</h3>
+
+            <p>
+              response :
+              {selectedComplaint.reply ||
+                "Your complaint will be resolved as soon as possible!"}
+            </p>
             <button onClick={closePopup} className="close-btn">
               Close
             </button>

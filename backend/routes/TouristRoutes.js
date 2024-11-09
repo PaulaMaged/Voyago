@@ -95,6 +95,9 @@ router.get(
   TouristController.getAllUserComplaints
 );
 
+router.get("/get-all-complaints", TouristController.getAllComplaints);
+
+router.put("/update-complaint/:complaintId", TouristController.updateComplaint);
 /**
  *********************************************
  *              Management Routes
