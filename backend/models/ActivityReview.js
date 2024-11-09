@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const activityReviewSchema = new mongoose.Schema({
   reviewer: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: "Tourist",
     required: true,
   },
   activity: {

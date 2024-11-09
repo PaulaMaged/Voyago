@@ -6,7 +6,7 @@ const tourGuideReviewSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
-  product: {
+  tourGuide: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "TourGuide",
     required: true,
