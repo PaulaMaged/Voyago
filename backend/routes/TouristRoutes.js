@@ -85,6 +85,19 @@ router.post(
   TouristController.fileItineraryComplaint
 );
 
+router.post(
+  "/create-user-complaint/:userId",
+  TouristController.createUserComplaint
+);
+
+router.get(
+  "/get-all-user-complaints/:userId",
+  TouristController.getAllUserComplaints
+);
+
+router.get("/get-all-complaints", TouristController.getAllComplaints);
+
+router.put("/update-complaint/:complaintId", TouristController.updateComplaint);
 /**
  *********************************************
  *              Management Routes

@@ -22,6 +22,8 @@ function SignUp() {
   const [isStudent, setIsStudent] = useState(false);
   const [user_Id, SetUserId] = useState(null);
 
+  const handleUploading = (e) => {};
+
   const handleNext = (e) => {
     e.preventDefault();
     const step1Data = {
@@ -40,7 +42,6 @@ function SignUp() {
         if (response.status === 201) {
           setStep(2);
           SetUserId(response.data._id);
-          alert("Registration successful");
         } else {
           throw new Error("Registration failed");
         }
@@ -52,6 +53,8 @@ function SignUp() {
         } else {
           console.error(error);
           alert("An error occurred during registration.");
+          setEmail("");
+          setUsername("");
         }
       }
     };
@@ -126,6 +129,9 @@ function SignUp() {
         if (response.status === 201 || response.status === 200) {
           alert("Registration successful");
           Setdone(true);
+          setTimeout(() => {
+            window.location.href = "http://localhost:5173/";
+          }, 3000);
         } else {
           throw new Error("Registration failed");
         }
@@ -278,6 +284,19 @@ function SignUp() {
             onChange={(e) => setPreviousWork(e.target.value)}
           />
 
+          <p>
+            Please upload a doucment which includes Your ID and certificates
+            registery card
+          </p>
+
+          <label>Upload Document:</label>
+          <input
+            type="file"
+            id="document"
+            required
+            onChange={(e) => handleUploading(e)}
+          />
+
           <button type="submit">Submit</button>
         </form>
       )}
@@ -320,6 +339,18 @@ function SignUp() {
             onChange={(e) => setCompanyInfo(e.target.value)}
             required
           />
+          <p>
+            Please upload a doucment which includes the ID and taxation
+            registery card
+          </p>
+
+          <label>Upload Document:</label>
+          <input
+            type="file"
+            id="document"
+            required
+            onChange={(e) => handleUploading(e)}
+          />
 
           <button type="submit">Submit</button>
         </form>
@@ -335,7 +366,6 @@ function SignUp() {
             onChange={(e) => setCompanyName(e.target.value)}
             required
           />
-
           <label htmlFor="description">Description:</label>
           <textarea
             id="description"
@@ -343,7 +373,18 @@ function SignUp() {
             onChange={(e) => setDescription(e.target.value)}
             required
           />
+          <p>
+            Please upload a doucment which includes Your ID and taxation
+            registery card registery card
+          </p>
 
+          <label>Upload Document:</label>
+          <input
+            type="file"
+            id="document"
+            required
+            onChange={(e) => handleUploading(e)}
+          />
           <button type="submit">Submit</button>
         </form>
       )}

@@ -1,20 +1,24 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./components/home";
-import AddTourismGovenor from "./components/Admin_/add_tourism_govenor";
-import AddAdmin from "./components/Admin_/add_admin";
+import SignUpAll from "./components/signLogin/signUpAll";
+import Login from "./components/signLogin/Login";
+import AdminDash from "./components/Admin_Dashboard/Admin_dash";
+import TouristDashboard from "./components/Toursit_Dashboard/Tourist_dash";
 import ViewAdvertiserProfile from "./components/Profiles/Advertiser_profile";
 import ViewTourGuideProfile from "./components/Profiles/Tour_guide_profile";
 import ViewSellerProfile from "./components/Profiles/Seller_profile";
-import ViewTourist from "./components/Profiles/Tourist_profile";
+
+import AddTourismGovenor from "./components/Admin_/add_tourism_govenor";
+import AddAdmin from "./components/Admin_/add_admin";
+
 import ViewActivityAdv from "./components/viewActivityAdv";
-import Login from "./components/signLogin/Login";
+
 import ViewActivityGuest from "./components/viewActivityGuest";
 import ViewItineraryGuest from "./components/viewItineraryGuest";
 import ViewLandmarks from "./components/viewLandmarks";
 import ViewProductAdmin from "./components/viewProductAdmin";
 import ViewProductTourist from "./components/viewProductTourist";
 import EditProduct from "./components/editProduct";
-import SignUpAll from "./components/signLogin/signUpAll";
 
 function App() {
   return (
@@ -25,7 +29,12 @@ function App() {
           <Route path="/home" element={<Home />}></Route>
           <Route path="/signUp" element={<SignUpAll />}></Route>
           <Route path="/login" element={<Login />}></Route>
-
+          {/* <Route path="/Change" element={<ChangePassword />}></Route> */}
+          <Route
+            path="/Tourist_Dashboard"
+            element={<TouristDashboard />}
+          ></Route>
+          <Route path="/Admin_Dashboard" element={<AdminDash />}></Route>
           <Route
             path="/addTourismGovenor"
             element={<AddTourismGovenor />}
@@ -46,7 +55,7 @@ function App() {
             element={<ViewSellerProfile />}
           ></Route>
 
-          <Route path="/ViewTourist" element={<ViewTourist />}></Route>
+          {/* <Route path="/ViewTourist" element={<ViewTouristProfile />}></Route> */}
 
           <Route path="/viewActivityAdv" element={<ViewActivityAdv />}></Route>
           <Route

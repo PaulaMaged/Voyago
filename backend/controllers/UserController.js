@@ -8,6 +8,7 @@ import TourGuide from "../models/TourGuide.js";
 import Tourist from "../models/Tourist.js";
 import bcrypt from "bcrypt";
 import createToken from "../Data/cookiesArr.js";
+import { get } from "http";
 
 const createUser = async (req, res) => {
   try {
@@ -25,6 +26,24 @@ const createUser = async (req, res) => {
     await newUser.save();
     res.status(201).json(newUser);
   } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+const getUserPassword = async (req, res) => {
+  try {
+    // Retrieve the user with the provided ID from the database
+    const user = await User.findById(req.params.userId);
+
+    // If the user does not exist, return a 404 error response
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Return a 200 success response with the user's password
+    res.status(200).json({ password: user.password });
+  } catch (error) {
+    // Catch any errors that occur during the process and return a 400 error response with the error message
     res.status(400).json({ message: error.message });
   }
 };
@@ -252,4 +271,5 @@ export default {
   updateUser,
   getUser,
   login,
+  getUserPassword,
 };

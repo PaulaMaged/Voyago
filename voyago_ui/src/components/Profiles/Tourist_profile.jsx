@@ -7,7 +7,7 @@ function Tourist_profile() {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:8000/api/tourist/get-tourist/${"6707bd4514e8bbb34cff086a"}`
+          `http://localhost:8000/api/tourist/get-tourist/${"672e1322ee2a6ba6b26f1c2a"}`
         );
         if (response.status === 200) {
           const data = response.data;
