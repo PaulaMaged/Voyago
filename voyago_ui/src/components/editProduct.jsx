@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useParams } from 'react-router-dom';
 
-const EditProduct = ({ product, fetchProducts }) => {
-  const { productId } = useParams();
+const EditProduct = ({ product, fetchProducts, onCancel }) => {
   const [productData, setProductData] = useState({
     name: '',
     description: '',
     price: '',
     available_quantity: '',
+    archived: false,
   });
   const [file, setFile] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (product) {
@@ -20,9 +20,17 @@ const EditProduct = ({ product, fetchProducts }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setProductData((prevData) => ({
+    setProductData(prevData => ({
       ...prevData,
       [name]: value,
+    }));
+  };
+
+  const handleCheckboxChange = (e) => {
+    const { name, checked } = e.target;
+    setProductData(prevData => ({
+      ...prevData,
+      [name]: checked,
     }));
   };
 
@@ -32,31 +40,44 @@ const EditProduct = ({ product, fetchProducts }) => {
 
   const updateProduct = async (e) => {
     e.preventDefault();
+    setError(null);
     try {
       const formData = new FormData();
       Object.keys(productData).forEach(key => {
-        formData.append(key, productData[key]);
+        if (key === 'archived') {
+          formData.append(key, productData[key].toString());
+        } else {
+          formData.append(key, productData[key]);
+        }
       });
       if (file) {
         formData.append('picture', file);
       }
 
-      await axios.put(`http://localhost:8000/api/seller/update-product/${productId}`, formData, {
+      const response = await axios.put(`http://localhost:8000/api/seller/update-product/${product._id}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
-      fetchProducts();
+
+      console.log('Server response:', response.data);
+
+      if (response.status === 200) {
+        fetchProducts();
+        onCancel();
+      } else {
+        setError('Failed to update product. Please try again.');
+      }
     } catch (error) {
       console.error('Error updating product:', error);
+      setError('An error occurred while updating the product. Please try again.');
     }
   };
 
   return (
     <div>
-      <h1>Edit Product</h1>
-      <hr />
-      <br />
+      <h2>Edit Product</h2>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
       <form onSubmit={updateProduct}>
         <label>
           Name:
@@ -65,59 +86,58 @@ const EditProduct = ({ product, fetchProducts }) => {
             name="name"
             value={productData.name}
             onChange={handleChange}
-            placeholder="Product Name"
-            style={{ marginLeft: '5px' }}
             required
           />
         </label>
-        <label style={{ marginLeft: '5px' }}>
+        <label>
           Description:
           <textarea
             name="description"
             value={productData.description}
             onChange={handleChange}
-            placeholder="Description"
-            style={{ marginLeft: '5px', width: '300px', height: '100px' }}
             required
           />
         </label>
-        <label style={{ marginLeft: '5px' }}>
+        <label>
           Price:
           <input
             type="number"
             name="price"
             value={productData.price}
             onChange={handleChange}
-            placeholder="Price"
-            style={{ marginLeft: '5px' }}
             required
           />
         </label>
-        <label style={{ marginLeft: '5px' }}>
+        <label>
           Available Quantity:
           <input
             type="number"
             name="available_quantity"
             value={productData.available_quantity}
             onChange={handleChange}
-            placeholder="Available Quantity"
-            style={{ marginLeft: '5px' }}
             required
           />
         </label>
-        <label style={{ marginLeft: '5px' }}>
+        <label>
+          Archived:
+          <input
+            type="checkbox"
+            name="archived"
+            checked={productData.archived}
+            onChange={handleCheckboxChange}
+          />
+        </label>
+        <label>
           Product Image:
           <input
             type="file"
             name="picture"
             onChange={handleFileChange}
             accept="image/*"
-            style={{ marginLeft: '5px' }}
           />
         </label>
-        <button type="submit" style={{ marginLeft: '10px' }}>
-          Update Product
-        </button>
+        <button type="submit">Update Product</button>
+        <button type="button" onClick={onCancel}>Cancel</button>
       </form>
     </div>
   );
