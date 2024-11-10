@@ -1,13 +1,13 @@
 import express from "express";
 const router = express.Router();
 import SellerController from "../controllers/SellerController.js";
-
+import upload from "../middlewares/uploadMiddleware.js";
 // ==============================================
 //                Seller Routes
 // ==============================================
 
 // Create a Seller
-router.post("/create-seller", SellerController.createSeller);
+router.post("/create-seller", upload.single('upFile'), SellerController.createSeller);
 
 // Get Seller
 router.get("/get-seller/:sellerId", SellerController.getSeller);
