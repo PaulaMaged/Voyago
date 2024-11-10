@@ -20,7 +20,7 @@ import ViewProductAdmin from "./components/viewProductAdmin";
 import ViewProductTourist from "./components/viewProductTourist";
 import EditProduct from "./components/editProduct";
 import CrudCategory from "./components/Admin_Dashboard/manageActCategories";
-
+import NavigationPage from "./components/TouristNavigationPage";
 
 function App() {
   return (
@@ -32,6 +32,7 @@ function App() {
           <Route path="/signUp" element={<SignUpAll />}></Route>
           <Route path="/login" element={<Login />}></Route>
           {/* <Route path="/Change" element={<ChangePassword />}></Route> */}
+          <Route path = "/nav" element = {<NavigationPage/>}></Route>
           <Route
             path="/Tourist_Dashboard"
             element={<TouristDashboard />}
