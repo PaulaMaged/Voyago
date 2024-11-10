@@ -1,14 +1,13 @@
-
 // Import required libraries
-const multer = require('multer'); // Library for handling multipart/form-data
-const path = require('path'); // Library for handling file paths
+import multer from "multer"; // Library for handling multipart/form-data
+import path from "path"; // Library for handling file paths
 
 // Set storage engine for multer
 const storage = multer.diskStorage({
-/**
+  /**
    * Destination directory for uploaded files
    */
-  destination: './public/uploads/',
+  destination: "./public/uploads/",
 
   /**
    * Generates the filename for the uploaded file
@@ -20,7 +19,7 @@ const storage = multer.diskStorage({
     // Generate a filename by combining the fieldname, timestamp, and original file extension
     cb(
       null,
-      file.fieldname + '-' + Date.now() + path.extname(file.originalname)
+      file.fieldname + "-" + Date.now() + path.extname(file.originalname)
     );
   },
 });
@@ -34,11 +33,12 @@ const storage = multer.diskStorage({
 const fileFilter = (req, file, cb) => {
   // Check if the file has an allowed mimetype
   if (
-    file.mimetype === 'image/jpeg' || // Allow JPEG images
-    file.mimetype === 'image/png' || // Allow PNG images
-    file.mimetype === 'application/pdf' || // Allow PDF files
-    file.mimetype === 'application/msword' || // Allow MS Word files (.doc)
-    file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' // Allow MS Word files (.docx)
+    file.mimetype === "image/jpeg" || // Allow JPEG images
+    file.mimetype === "image/png" || // Allow PNG images
+    file.mimetype === "application/pdf" || // Allow PDF files
+    file.mimetype === "application/msword" || // Allow MS Word files (.doc)
+    file.mimetype ===
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document" // Allow MS Word files (.docx)
   ) {
     // If the file is allowed, return true
     cb(null, true);
