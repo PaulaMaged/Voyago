@@ -8,10 +8,10 @@ const handleSubmit = (e) => {
   login(username, password);
 };
 
-const login = async (username, password) => {
+const login = async (email, password) => {
   try {
-    const response = await axios.post("http://localhost:5000/login", {
-      username,
+    const response = await axios.post("http://localhost:8000/api/user/login", {
+      email,
       password,
     });
 
