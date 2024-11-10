@@ -1,8 +1,8 @@
 import Itinerary from "../models/Itinerary.js";
 import ItineraryBooking from "../models/ItineraryBooking.js";
 import TourGuide from "../models/TourGuide.js";
-import ActivityReview from '../models/ActivityReview.js'
-import TourGuideReview from '../models/TourGuideReview.js'
+import ActivityReview from "../models/ActivityReview.js";
+import TourGuideReview from "../models/TourGuideReview.js";
 //create Tour Guide
 const createTourGuide = async (req, res) => {
   try {
@@ -114,14 +114,16 @@ const getAllItineraries = async (req, res) => {
     const itineraries = await Itinerary.find()
       .populate({
         path: "activities",
-        populate: [{
-          path: "tags",
-          model: "Tag",
-        },
-        {
-          path: "category",
-          model: "ActivityCategory",
-        }],
+        populate: [
+          {
+            path: "tags",
+            model: "Tag",
+          },
+          {
+            path: "category",
+            model: "ActivityCategory",
+          },
+        ],
       })
       .populate({
         path: "tour_guide",
@@ -194,17 +196,18 @@ const getTourGuideItineraries = async (req, res) => {
 };
 
 const getActivityRate = async (req, res) => {
-  const activityReviews = ActivityReview.find(req.params.activityId);
+  const activityReviews = await ActivityReview.find({
+    activity: req.params.activityId,
+  });
   res.send(activityReviews);
-}
+};
 
 const getTourGuideReview = async (req, res) => {
-  const tourGuideReviews = TourGuideReview.find(req.params.tourGuideId);
+  const tourGuideReviews = await TourGuideReview.find({
+    tourGuide: req.params.tourGuideId,
+  });
   res.send(tourGuideReviews);
-  }
-
-
-
+};
 
 export default {
   createItinerary,
@@ -220,5 +223,5 @@ export default {
   getTourGuideProfileInfo,
   getAllItineraries,
   getActivityRate,
-  getTourGuideReview
+  getTourGuideReview,
 };

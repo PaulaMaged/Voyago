@@ -1,6 +1,6 @@
 import Itinerary from "../models/Itinerary.js";
 import ItineraryBooking from "../models/ItineraryBooking.js";
-import ItineraryReview from "../models/ItineraryReview.js"
+import ItineraryReview from "../models/ItineraryReview.js";
 const deactivateItinerary = async (req, res) => {
   const { id } = req.params;
 
@@ -76,10 +76,11 @@ const activateItinerary = async (req, res) => {
   }
 };
 
-
 const getItineraryRating = async (req, res) => {
-  const itineraryReviews = ItineraryReview.find(req.params.itineraryId);
-   res.send(itineraryReviews);
+  const itineraryReviews = await ItineraryReview.find({
+    itinerary: req.params.itineraryId,
+  });
+  res.send(itineraryReviews);
 };
 
 export default { activateItinerary, deactivateItinerary, getItineraryRating };

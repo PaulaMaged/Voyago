@@ -69,11 +69,25 @@ router.get(
   "/get-tourguide-itineraries/:tourGuideId",
   TourGuideController.getTourGuideItineraries
 );
-router.post("/getItineraryReview/:itineraryId", ItineraryController.getItineraryRating);
-router.post("/deactivateItinerary/:itineraryId", ItineraryController.deactivateItinerary );
-router.post("/activateItinerary/:itineraryId", ItineraryController.activateItinerary );
-router.post("/getActivityReviews/:activityId", TourGuideController.getActivityRate);
-router.post("/getTourGuideReviews/:tourGuideId", TourGuideController.getTourGuideReview);
-
+router.get(
+  "/getItineraryReview/:itineraryId",
+  ItineraryController.getItineraryRating
+);
+router.get(
+  "/deactivateItinerary/:itineraryId",
+  ItineraryController.deactivateItinerary
+);
+router.get(
+  "/activateItinerary/:itineraryId",
+  ItineraryController.activateItinerary
+);
+router.get(
+  "/getActivityReviews/:activityId",
+  TourGuideController.getActivityRate
+);
+router.get(
+  "/getTourGuideReviews/:tourGuideId",
+  TourGuideController.getTourGuideReview
+);
 
 export default router;
