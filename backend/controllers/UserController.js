@@ -20,8 +20,10 @@ const createUser = async (req, res) => {
     } else if (existingUsername) {
       return res.status(400).json({ message: "Email already in use" });
     }
-
+    const salt = await bcrypt.genSalt();
     const userRole = payload.role || "user";
+    const hashedPassword = await bcrypt.hash(payload.password, salt);
+    payload.password = hashedPassword;
     const newUser = new User({ ...payload, role: userRole });
     await newUser.save();
     res.status(201).json(newUser);
@@ -262,6 +264,16 @@ const login = async (req, res) => {
   }
 };
 
+const logout = async (req, res) => {
+  try {
+        res.clearCookie('jwt', { httpOnly: true });
+        res.status(200).json({ message: "User logged out successfully" });
+    } catch (error) {
+        res.status(400).json({ error: error.message })
+    }
+}
+
+
 export default {
   changePassword,
   createDeletionRequest,
@@ -272,4 +284,5 @@ export default {
   getUser,
   login,
   getUserPassword,
+  logout
 };

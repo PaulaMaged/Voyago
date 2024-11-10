@@ -293,6 +293,7 @@ function SignUp() {
           <input
             type="file"
             id="document"
+            name="upFile"
             required
             onChange={(e) => handleUploading(e)}
           />
@@ -302,7 +303,7 @@ function SignUp() {
       )}
 
       {step === 2 && !done && role === "ADVERTISER" && (
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} enctype="multipart/form-data">
           <label htmlFor="website">Link to my website:</label>
           <input
             type="url"
@@ -348,6 +349,7 @@ function SignUp() {
           <input
             type="file"
             id="document"
+            name="upFile"
             required
             onChange={(e) => handleUploading(e)}
           />
@@ -357,7 +359,7 @@ function SignUp() {
       )}
 
       {step === 2 && !done && role === "SELLER" && (
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} enctype="multipart/form-data">
           <label htmlFor="companyName">store Name:</label>
           <input
             type="text"
@@ -382,6 +384,7 @@ function SignUp() {
           <input
             type="file"
             id="document"
+            name="upFile"
             required
             onChange={(e) => handleUploading(e)}
           />
