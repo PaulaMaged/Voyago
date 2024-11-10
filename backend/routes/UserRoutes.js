@@ -32,6 +32,8 @@ router.get("/get-all-users", UserController.getAllUsers);
 // Get User Route
 router.get("/get-user/:userId", UserController.getUser);
 
+
+router.post("/login", UserController.login);
 // ================================= {{
 // User Request Routes
 // ================================= {{

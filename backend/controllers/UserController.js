@@ -20,8 +20,10 @@ const createUser = async (req, res) => {
     } else if (existingUsername) {
       return res.status(400).json({ message: "Email already in use" });
     }
-
+    const salt = await bcrypt.genSalt();
     const userRole = payload.role || "user";
+    const hashedPassword = await bcrypt.hash(payload.password, salt);
+    payload.password = hashedPassword;
     const newUser = new User({ ...payload, role: userRole });
     await newUser.save();
     res.status(201).json(newUser);
