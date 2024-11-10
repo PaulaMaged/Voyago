@@ -3,13 +3,14 @@ import axios from "axios";
 
 const useFetch = (url) => {
   const [data, setData] = useState([]);
+  const [error, setError] = useState(null);
 
   const fetchData = async (url) => {
     try {
       const response = await axios.get(url);
       setData(response.data);
     } catch (error) {
-      console.error("Error fetching activities:", error);
+      setError(error);
     }
   };
 
@@ -17,7 +18,7 @@ const useFetch = (url) => {
     fetchData(url);
   }, [url]);
 
-  return { data };
+  return { error, data };
 };
 
 export default useFetch;

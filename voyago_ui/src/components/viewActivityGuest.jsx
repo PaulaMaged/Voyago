@@ -8,13 +8,17 @@ export default function ViewActivityGuest() {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [sortOrder, setSortOrder] = useState("");
 
-  const { data: activities } = useFetch(
+  const { error: activitiesError, data: activities } = useFetch(
     "http://localhost:8000/api/advertiser/get-all-activities"
   );
 
-  const { data: categories } = useFetch(
+  console.log(activitiesError);
+
+  const { error: categoriesError, data: categories } = useFetch(
     "http://localhost:8000/api/admin/get-all-activity-categories"
   );
+
+  console.log(categoriesError);
 
   const filteredActivities = activities
     .filter((activity) => {
@@ -80,11 +84,13 @@ export default function ViewActivityGuest() {
           style={styles.select}
         >
           <option value="">All Categories</option>
-          {categories.map((category) => (
-            <option key={category._id} value={category._id}>
-              {category.category}
-            </option>
-          ))}
+          {!categoriesError
+            ? categories.map((category) => (
+                <option key={category._id} value={category._id}>
+                  {category.category}
+                </option>
+              ))
+            : "Can't fetch categories right now"}
         </select>
 
         <select
@@ -99,7 +105,7 @@ export default function ViewActivityGuest() {
       </div>
 
       <div style={styles.activityGrid}>
-        {filteredActivities.length > 0 ? (
+        {!activitiesError && filteredActivities.length > 0 ? (
           filteredActivities.map((activity) => (
             <div key={activity._id} style={styles.card}>
               <h2 style={styles.cardTitle}>{activity.title}</h2>
