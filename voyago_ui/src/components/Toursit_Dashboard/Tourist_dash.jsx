@@ -3,13 +3,17 @@ import ComplaintForm from "./Tourist_complaint";
 import ChangePassword from "../Profiles/Changepassword";
 import Profile from "../Profiles/Tourist_profile";
 import ViewComplaints from "./View_complaints";
+import ViewActivityGuest from "../viewActivityGuest";
+import ViewItineraryGuest from "../viewItineraryGuest";
+import ViewLandmarks from "../viewLandmarks";
+import ViewProductTourist from "../viewProductTourist";
+
 
 // Placeholder components for each section
 // const Profile = () => <div>Profile Content</div>;
 // const ChangePassword = () => <div>Change Password Form</div>;
 // const Complaint = () => <div>Complaint Form</div>;
-const Activities = () => <div>Activities List</div>;
-const Itineraries = () => <div>Itineraries List</div>;
+
 
 export default function TouristDashboard() {
   const [activeSection, setActiveSection] = useState("profile");
@@ -25,9 +29,13 @@ export default function TouristDashboard() {
       case "viewComplaints":
         return <ViewComplaints />;
       case "activities":
-        return <Activities />;
+        return <ViewActivityGuest />;
       case "itineraries":
-        return <Itineraries />;
+        return <ViewItineraryGuest />;
+      case "landmarks":
+        return <ViewLandmarks />;  
+      case "products":
+        return <ViewProductTourist />;  
       default:
         return <Profile />;
     }
@@ -53,6 +61,12 @@ export default function TouristDashboard() {
           </button>
           <button onClick={() => setActiveSection("itineraries")}>
             View Itineraries
+          </button>
+          <button onClick={() => setActiveSection("landmarks")}>
+            View LandMarks
+          </button>
+          <button onClick={() => setActiveSection("products")}>
+            View Products
           </button>
         </nav>
       </aside>
