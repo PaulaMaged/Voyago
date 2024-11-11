@@ -4,12 +4,32 @@ import User from "../models/User.js";
 
 //create Advertiser
 const createAdvertiser = async (req, res) => {
-  const advertiser = req.body;
   try {
-    const newAdvertiser = new Advertiser(advertiser);
+    // Log the received data for debugging
+    console.log("Received body:", req.body);
+    console.log("Received file:", req.file);
+
+    // Extract advertiser data from the request body
+    const advertiserData = {
+      user: req.body.user,
+      URL_Website: req.body.URL_Website,
+      company_hotline: req.body.company_hotline,
+      company_name: req.body.company_name,
+      contact_info: req.body.contact_info,
+      // Add the file path if a file was uploaded
+      document_path: req.file ? req.file.path : null,
+    };
+
+    // Create a new Advertiser instance
+    const newAdvertiser = new Advertiser(advertiserData);
+
+    // Save the advertiser to the database
     const savedAdvertiser = await newAdvertiser.save();
+
+    // Respond with the saved advertiser data
     res.status(201).json(savedAdvertiser);
   } catch (error) {
+    console.error("Error in createAdvertiser:", error);
     res.status(500).json({ error: error.message });
   }
 };

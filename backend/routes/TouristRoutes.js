@@ -115,5 +115,5 @@ router.get(
 
 router.get("/get-all-tourists", TouristController.getAllTourists);
 router.delete("/delete-tourist/:touristId", TouristController.deleteTourist);
-
+router.post("/book-activies", TouristController.bookActivity );
 export default router;

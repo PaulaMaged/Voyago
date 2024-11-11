@@ -13,7 +13,6 @@ import ActivityReview from "../models/ActivityReview.js";
 import TourGuide from "../models/TourGuide.js"; // Added
 import Product from "../models/Product.js"; // Added
 import Complain from "../models/Complaint.js";
-
 /**
  * Create a new tourist.
  * @param {Object} req - Express request object.
@@ -950,6 +949,42 @@ const updateComplaint = async (req, res) => {
   }
 };
 
+
+const bookActivity = async (req, res) => {
+  try {
+    const { activityId, touristId } = req.body;
+
+    // Check if the activity and tourist exist
+    const activity = await Activity.findById(activityId);
+    const tourist = await Tourist.findById(touristId);
+
+    if (!activity) {
+      return res.status(404).json({ error: "Activity not found" });
+    }
+
+    if (!tourist) {
+      return res.status(404).json({ error: "Tourist not found" });
+    }
+
+    // Create a new activity booking
+    const newBooking = new ActivityBooking({
+      activity: activityId,
+      tourist: touristId,
+    });
+
+    // Save the booking to the database
+    const savedBooking = await newBooking.save();
+
+    // Respond with the saved booking
+    res.status(201).json(savedBooking);
+  } catch (error) {
+    console.error("Error booking activity:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+
 // Export the controllers
 export default {
   createTourist,
@@ -977,4 +1012,5 @@ export default {
   getAllUserComplaints,
   getAllComplaints,
   updateComplaint,
+  bookActivity
 };

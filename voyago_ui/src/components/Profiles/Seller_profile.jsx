@@ -45,6 +45,22 @@ function Seller_profile() {
     }
   };
 
+  const deletionReq = async () => {
+    try {
+      const id = localStorage.getItem("roleId");
+      const response = await axios.get(
+        `http://localhost:8000/api/user/create-delete-request/${id}`
+      );
+      if (response.status === 200) {
+        alert("Deletion Request has been Sent!");
+      } else {
+        throw new Error("Failed to send Request");
+      }
+    }catch(e){
+
+    }
+  }  
+
   const [profileData, setProfileData] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isPending, setPending] = useState(true);
@@ -110,6 +126,7 @@ function Seller_profile() {
             </div>
           ))}
       </div>
+      <button className="profile-button" id="deletionReq" onClick={deletionReq}>Delete Account</button>
     </div>
   );
 }

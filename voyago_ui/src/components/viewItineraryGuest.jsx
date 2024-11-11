@@ -77,6 +77,17 @@ const ViewItineraryGuest = () => {
     setFilteredItineraries(filtered);
   };
 
+  const handleBookItinerary = async (itineraryId) => {
+    try {
+      const response = await axios.post(`http://localhost:8000/api/tour-guide/book-itinerary/${itineraryId}`);
+      console.log(response.data);
+      // Handle successful booking
+    } catch (error) {
+      console.error('Error booking itinerary:', error);
+      // Handle booking error
+    }
+  };
+
   const getAllTags = () => {
     const tagSet = new Set();
     itineraries.forEach(itinerary => {
@@ -184,6 +195,7 @@ const ViewItineraryGuest = () => {
               <p><strong>Drop-off Location:</strong> Latitude: {itinerary.drop_off.latitude}, Longitude: {itinerary.drop_off.longitude}</p>
             )}
             <ActivitiesSection activities={itinerary.activities} />
+            <button id="bookItin" onClick={() => handleBookItinerary(itinerary._id)}>Book Itinerary</button>
           </div>
         ))}
       </div>
