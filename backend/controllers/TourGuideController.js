@@ -3,6 +3,7 @@ import ItineraryBooking from "../models/ItineraryBooking.js";
 import TourGuide from "../models/TourGuide.js";
 import ActivityReview from "../models/ActivityReview.js";
 import TourGuideReview from "../models/TourGuideReview.js";
+
 //create Tour Guide
 const createTourGuide = async (req, res) => {
   try {

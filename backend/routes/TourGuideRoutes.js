@@ -1,7 +1,8 @@
 import express from "express";
 import TourGuideController from "../controllers/TourGuideController.js";
 import ItineraryController from "../controllers/ItineraryController.js";
-
+import upload from "../middlewares/uploadMiddleware.js";
+import multer from "multer";
 const router = express.Router();
 
 // *********************************************
@@ -21,7 +22,7 @@ router.post("/create-tourguide", (req, res) => {
     }
 
     // Everything went fine. Proceed with the controller function.
-    createTourGuide(req, res);
+    TourGuideController.createTourGuide(req, res);
   });
 });
 
