@@ -21,7 +21,6 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
   description: { type: String },
-  DOB: { type: String },
   requested_to_be_deleted: { type: Boolean, default: false },
 });
 

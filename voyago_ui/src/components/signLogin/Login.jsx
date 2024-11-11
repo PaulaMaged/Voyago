@@ -8,10 +8,10 @@ const handleSubmit = (e) => {
   login(username, password);
 };
 
-const login = async (email, password) => {
+const login = async (username, password) => {
   try {
     const response = await axios.post("http://localhost:8000/api/user/login", {
-      email,
+      username,
       password,
     });
 
@@ -50,11 +50,28 @@ const login = async (email, password) => {
       if (roleId) {
         localStorage.setItem("roleId", roleId);
         localStorage.setItem("roleName", roleName);
+      } else {
+        throw new Error("Login failed");
       }
 
+      // Retrieve the user object and parse it from JSON
+      const user2 = JSON.parse(localStorage.getItem("user"));
+      console.log("User:", user2);
+      console.log(user2._id);
+
+      // Retrieve the roleId and roleName if they exist
+      const roleId2 = localStorage.getItem("roleId");
+      const roleName2 = localStorage.getItem("roleName");
+      console.log("RoleId:", roleId2);
+      console.log("RoleName:", roleName2);
+
       alert("Login successful");
-    } else {
-      throw new Error("Login failed");
+      if (roleName2 === "TOURIST") {
+        window.location.href = "http://localhost:5173/Tourist_Dashboard";
+      }
+      if (roleName2 === "ADMIN") {
+        window.location.href = "http://localhost:5173/Admin_Dashboard";
+      }
     }
   } catch (error) {
     console.error(error);

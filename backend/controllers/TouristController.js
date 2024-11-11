@@ -599,7 +599,7 @@ const rateProduct = async (req, res) => {
 
     // Save the new review
     const savedReview = await newReview.save();
-   
+
     // Update the product to include the new review
     await Product.findByIdAndUpdate(
       productId,
@@ -944,7 +944,6 @@ const updateComplaint = async (req, res) => {
   }
 };
 
-
 const bookActivity = async (req, res) => {
   try {
     const { activityId, touristId } = req.body;
@@ -978,8 +977,6 @@ const bookActivity = async (req, res) => {
   }
 };
 
-
-
 // Export the controllers
 export default {
   createTourist,
@@ -1007,5 +1004,5 @@ export default {
   getAllUserComplaints,
   getAllComplaints,
   updateComplaint,
-  bookActivity
+  bookActivity,
 };

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ComplaintForm from "./Tourist_complaint";
 import ChangePassword from "../Profiles/Changepassword";
 import Profile from "../Profiles/Tourist_profile";
@@ -9,39 +9,47 @@ import ViewLandmarks from "../viewLandmarks";
 import ViewProductTourist from "../viewProductTourist";
 import ViewPurchasedProducts from "../viewPurchasedProducts";
 
-
-
-// Placeholder components for each section
-// const Profile = () => <div>Profile Content</div>;
-// const ChangePassword = () => <div>Change Password Form</div>;
-// const Complaint = () => <div>Complaint Form</div>;
-
-
 export default function TouristDashboard() {
   const [activeSection, setActiveSection] = useState("profile");
+  const [userId, setUserId] = useState(null);
+  const [touristId, setTouristId] = useState(null);
+
+  useEffect(() => {
+    // Retrieve the user data from localStorage
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user && user._id) {
+      setUserId(user._id); //dah el user id not tourist btw
+    }
+
+    const tourist_id = localStorage.getItem("roleId");
+    setTouristId(tourist_id);
+  }, []);
 
   const renderContent = () => {
+    if (userId === null) {
+      return <div>Loading...</div>;
+    }
     switch (activeSection) {
       case "profile":
-        return <Profile />;
+        return <Profile userId={userId} touristId={touristId} />;
       case "changePassword":
-        return <ChangePassword />;
+        return <ChangePassword userId={userId} touristId={touristId} />;
       case "complaint":
-        return <ComplaintForm />;
+        return <ComplaintForm userId={userId} touristId={touristId} />;
       case "viewComplaints":
-        return <ViewComplaints />;
+        return <ViewComplaints userId={userId} touristId={touristId} />;
       case "activities":
-        return <ViewActivityGuest />;
+        return <ViewActivityGuest userId={userId} touristId={touristId} />;
       case "itineraries":
-        return <ViewItineraryGuest />;
+        return <ViewItineraryGuest userId={userId} touristId={touristId} />;
       case "landmarks":
-        return <ViewLandmarks />;  
+        return <ViewLandmarks userId={userId} touristId={touristId} />;
       case "products":
-        return <ViewProductTourist />;  
+        return <ViewProductTourist userId={userId} touristId={touristId} />;
       case "purchasedProducts":
-        return <ViewPurchasedProducts />;  
+        return <ViewPurchasedProducts userId={userId} touristId={touristId} />;
       default:
-        return <Profile />;
+        return <Profile userId={userId} touristId={touristId} />;
     }
   };
 
@@ -58,7 +66,7 @@ export default function TouristDashboard() {
             Make a Complaint
           </button>
           <button onClick={() => setActiveSection("viewComplaints")}>
-            View My_Complaints{" "}
+            View My Complaints
           </button>
           <button onClick={() => setActiveSection("activities")}>
             View Activities
@@ -67,7 +75,7 @@ export default function TouristDashboard() {
             View Itineraries
           </button>
           <button onClick={() => setActiveSection("landmarks")}>
-            View LandMarks
+            View Landmarks
           </button>
           <button onClick={() => setActiveSection("products")}>
             View Products
