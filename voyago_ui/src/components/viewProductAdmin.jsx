@@ -41,6 +41,17 @@ const ViewProductAdmin = () => {
     return (totalRating / reviews.length).toFixed(1);
   };
 
+  const toggleArchiveStatus = async (productId, currentStatus) => {
+    try {
+      await axios.put(`http://localhost:8000/api/seller/update-product/${productId}`, {
+        archived: !currentStatus
+      });
+      fetchProducts(); // Refresh the product list
+    } catch (error) {
+      console.error('Error toggling archive status:', error);
+    }
+  };
+
   const filteredProducts = products
     .filter((product) =>
       product.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -137,6 +148,7 @@ const ViewProductAdmin = () => {
                 borderColor: product._id === editingProductId ? 'blue' : 'lightgray',
                 borderWidth: product._id === editingProductId ? '2px' : '1px',
                 padding: '15px',
+                backgroundColor: product.archived ? '#f0f0f0' : 'white',
               }}
             >
               <img
@@ -151,6 +163,7 @@ const ViewProductAdmin = () => {
               <p>Seller: {product.seller.store_name || 'External Seller'}</p>
               <p>Rating: {calculateAverageRating(product.reviews)} stars</p>
               <p>Reviews: {product.reviews.length} reviews</p>
+              <p>Status: {product.archived ? 'Archived' : 'Active'}</p>
               <ul>
                 {product.reviews.map((review) => (
                   <li key={review._id}>
@@ -159,6 +172,12 @@ const ViewProductAdmin = () => {
                 ))}
               </ul>
               <button onClick={() => handleEditClick(product)}>Edit</button>
+              <button 
+                onClick={() => toggleArchiveStatus(product._id, product.archived)}
+                style={{ marginLeft: '10px' }}
+              >
+                {product.archived ? 'Unarchive' : 'Archive'}
+              </button>
             </div>
           ))}
         </div>

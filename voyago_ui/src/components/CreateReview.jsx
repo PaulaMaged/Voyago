@@ -10,16 +10,20 @@ const CreateReview = () => {
 
   let reviewee;
   let entityName;
+  let displayName;
 
   if (location.state?.activity) {
     reviewee = location.state.activity;
     entityName = "activity";
+    displayName = "Activity";
   } else if (location.state?.tourGuide) {
     reviewee = location.state.tourGuide;
     entityName = "tourGuide";
+    displayName = "Tour Guide";
   } else if (location.state?.itinerary) {
     reviewee = location.state.itinerary;
     entityName = "itinerary";
+    displayName = "Itinerary";
   }
 
   const handleSubmit = async (e) => {
@@ -53,7 +57,7 @@ const CreateReview = () => {
 
   return (
     <div className="createReview">
-      <h2 className="review-header">Activity Feedback</h2>
+      <h2 className="review-header">{displayName} Feedback</h2>
       <form className="review-form" onSubmit={handleSubmit}>
         <label>
           Rating:

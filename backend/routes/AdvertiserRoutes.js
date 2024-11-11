@@ -1,13 +1,30 @@
 import express from "express";
 const router = express.Router();
 import AdvertiserController from "../controllers/AdvertiserController.js";
-
+import multer from "multer";
+import upload from "../middlewares/uploadMiddleware.js";
 // ================================================ //
 //                  Advertiser Routes             //
 // ================================================ //
 
 // Create an Advertiser
-router.post("/create-advertiser", AdvertiserController.createAdvertiser);
+router.post("/create-advertiser", (req, res) => {
+  upload.single("upFile")(req, res, function (err) {
+    if (err instanceof multer.MulterError) {
+      // A Multer error occurred when uploading.
+      console.error("Multer Error:", err);
+      return res.status(400).json({ error: err.message });
+    } else if (err) {
+      // An unknown error occurred when uploading.
+      console.error("Unknown Error:", err);
+      return res.status(400).json({ error: err.message });
+    }
+
+    // Everything went fine. Proceed with the controller function.
+    AdvertiserController.createAdvertiser(req, res);
+  });
+});
+
 
 // Get Advertiser by ID
 router.get(

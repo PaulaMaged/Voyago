@@ -1,0 +1,172 @@
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  
+  .filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .search-input,
+  .price-input,
+  .sort-select {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .search-input {
+    flex-grow: 1;
+  }
+  
+  .price-input {
+    width: 100px;
+  }
+  
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+  }
+  
+  .product-card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  .product-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+  }
+  
+  .product-details {
+    padding: 15px;
+  }
+  
+  .product-name {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  .product-description,
+  .product-price,
+  .product-seller,
+  .product-rating,
+  .product-reviews,
+  .product-order-date {
+    margin-bottom: 5px;
+  }
+  
+  .user-review {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    padding: 10px;
+    margin-top: 10px;
+  }
+  
+  .user-review p {
+    margin: 5px 0;
+  }
+  
+  .rate-button,
+  .update-review-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  
+  .rate-button:hover,
+  .update-review-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .modal {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+  }
+  
+  .rating-input {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+  
+  .star {
+    cursor: pointer;
+    color: #ccc;
+  }
+  
+  .star.filled {
+    color: gold;
+  }
+  
+  .review-input {
+    width: 100%;
+    height: 100px;
+    margin-bottom: 10px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  
+  .submit-button,
+  .cancel-button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .submit-button {
+    background-color: #28a745;
+    color: white;
+  }
+  
+  .cancel-button {
+    background-color: #dc3545;
+    color: white;
+  }
+  
+  .loading,
+  .error,
+  .no-products {
+    text-align: center;
+    margin-top: 20px;
+  }

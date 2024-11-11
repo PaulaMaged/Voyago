@@ -2,12 +2,28 @@ import express from "express";
 const router = express.Router();
 import SellerController from "../controllers/SellerController.js";
 import upload from "../middlewares/uploadMiddleware.js";
+import multer from "multer";
 // ==============================================
 //                Seller Routes
 // ==============================================
 
 // Create a Seller
-router.post("/create-seller", upload.single('upFile'), SellerController.createSeller);
+router.post("/create-seller", (req, res) => {
+  upload.single("upFile")(req, res, function (err) {
+    if (err instanceof multer.MulterError) {
+      // A Multer error occurred when uploading.
+      console.error("Multer Error:", err);
+      return res.status(400).json({ error: err.message });
+    } else if (err) {
+      // An unknown error occurred when uploading.
+      console.error("Unknown Error:", err);
+      return res.status(400).json({ error: err.message });
+    }
+
+    // Everything went fine. Proceed with your controller logic.
+    SellerController.createSeller(req, res);
+  });
+});
 
 // Get Seller
 router.get("/get-seller/:sellerId", SellerController.getSeller);

@@ -1,6 +1,7 @@
 // Import the Product model to interact with the product collection in the database
-import Product from "../models/Product";
-
+import mongoose from "mongoose"
+import Product from "../models/Product.js";
+import Order from "../models/Order.js";
 /**
  * Retrieves sales and quantity data for all products in the database.
  *
@@ -347,6 +348,46 @@ const getOrderById = async (req, res) => {
   }
 };
 
+const getAllOrdersForTourist = async (req, res) => {
+  try {
+    const touristId = req.params.touristId;
+    
+    // Validate if touristId is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(touristId)) {
+      return res.status(400).json({ message: "Invalid tourist ID" });
+    }
+
+    // Fetch orders for the tourist and populate all relevant fields
+    const orders = await Order.find({ tourist: touristId })
+      .populate({
+        path: 'product', // Populate the 'product' field
+        populate: [
+          { 
+            path: 'reviews', // Populate the 'reviews' field inside the product
+            populate: { 
+              path: 'reviewer' // Optionally populate the reviewer (Tourist) for each review
+            }
+          },
+          { 
+            path: 'seller', // Populate the 'seller' field inside the product
+            // No need to specify fields here, it will include everything from Seller schema
+          }
+        ]
+      })
+      .populate('arrival_location'); // Populate the 'arrival_location' field in the order
+
+    // If no orders are found
+    if (!orders || orders.length === 0) {
+      return res.status(404).json({ message: "No orders found for this tourist" });
+    }
+
+    res.json(orders); // Return the populated orders
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
 const getAllOrders = async (req, res) => {
   try {
     const orders = await Order.find().populate("products").populate("customer");
@@ -396,6 +437,7 @@ export default {
   deleteProductById,
   createOrder,
   getOrderById,
+  getAllOrdersForTourist,
   getAllOrders,
   updateOrderById,
   deleteOrderById,

@@ -1,14 +1,30 @@
 import express from "express";
 import TourGuideController from "../controllers/TourGuideController.js";
 import ItineraryController from "../controllers/ItineraryController.js";
-
+import upload from "../middlewares/uploadMiddleware.js";
+import multer from "multer";
 const router = express.Router();
 
 // *********************************************
 // *************** ITINERARY ENDPOINTS *********
 // *********************************************
 // Create an Itinerary
-router.post("/create-itinerary", TourGuideController.createItinerary);
+router.post("/create-tourguide", (req, res) => {
+  upload.single("upFile")(req, res, function (err) {
+    if (err instanceof multer.MulterError) {
+      // A Multer error occurred when uploading.
+      console.error("Multer Error:", err);
+      return res.status(400).json({ error: err.message });
+    } else if (err) {
+      // An unknown error occurred when uploading.
+      console.error("Unknown Error:", err);
+      return res.status(400).json({ error: err.message });
+    }
+
+    // Everything went fine. Proceed with the controller function.
+    TourGuideController.createTourGuide(req, res);
+  });
+});
 
 // Read Itinerary (By ID)
 router.get("/get-itinerary/:itineraryId", TourGuideController.getItinerary);

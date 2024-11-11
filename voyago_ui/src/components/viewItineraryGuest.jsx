@@ -113,6 +113,32 @@ const ViewItineraryGuest = () => {
     setFilteredItineraries(filtered);
   };
 
+  const handleBookItinerary = async (itineraryId) => {
+    const touristId = localStorage.getItem("roleId");
+
+    const data = {
+      plans: [
+        {
+          type: "Itinerary",
+          itineraryId: itineraryId,
+        },
+      ],
+    };
+
+    console.log(data);
+    try {
+      const response = await axios.post(
+        `http://localhost:8000/api/tourist/tourist-pay/${touristId}`,
+        data
+      );
+      console.log(response.data);
+      // Handle successful booking
+    } catch (error) {
+      console.error("Error booking itinerary:", error);
+      // Handle booking error
+    }
+  };
+
   const getAllTags = () => {
     const tagSet = new Set();
     itineraries.forEach((itinerary) => {
@@ -299,6 +325,12 @@ const ViewItineraryGuest = () => {
               </p>
             )}
             <ActivitiesSection activities={itinerary.activities} />
+            <button
+              id="bookItin"
+              onClick={() => handleBookItinerary(itinerary._id)}
+            >
+              Book Itinerary
+            </button>
             <button
               onClick={() => {
                 handleFeedbackItinerary(itinerary);

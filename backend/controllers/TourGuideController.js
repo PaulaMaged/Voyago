@@ -6,10 +6,31 @@ import TourGuideReview from "../models/TourGuideReview.js";
 //create Tour Guide
 const createTourGuide = async (req, res) => {
   try {
-    const newTourGuide = new TourGuide(req.body);
+    // Log the received data for debugging
+    console.log("Received body:", req.body);
+    console.log("Received file:", req.file);
+
+    // Extract tour guide data from the request body
+    const tourGuideData = {
+      user: req.body.user,
+      dob: req.body.dob,
+      phone_number: req.body.phone_number,
+      years_of_experience: req.body.years_of_experience,
+      previous_work: req.body.previous_work,
+      // Add the file path if a file was uploaded
+      document_path: req.file ? req.file.path : null,
+    };
+
+    // Create a new TourGuide instance
+    const newTourGuide = new TourGuide(tourGuideData);
+
+    // Save the tour guide to the database
     const savedTourGuide = await newTourGuide.save();
+
+    // Respond with the saved tour guide data
     res.status(201).json(savedTourGuide);
   } catch (error) {
+    console.error("Error in createTourGuide:", error);
     res.status(500).json({ error: error.message });
   }
 };

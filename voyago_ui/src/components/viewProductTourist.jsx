@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './viewProductTourist.css';
 
-const ViewProductTourist = () => {
+export default function ViewProductTourist() {
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [minPrice, setMinPrice] = useState('');
@@ -19,10 +19,12 @@ const ViewProductTourist = () => {
     try {
       setLoading(true);
       const response = await axios.get('http://localhost:8000/api/seller/get-all-products');
-      const productsWithRatings = response.data.map(product => ({
-        ...product,
-        rating: calculateAverageRating(product.reviews)
-      }));
+      const productsWithRatings = response.data
+        .filter(product => !product.archived) // Filter out archived products
+        .map(product => ({
+          ...product,
+          rating: calculateAverageRating(product.reviews)
+        }));
       setProducts(productsWithRatings);
       setLoading(false);
     } catch (error) {
@@ -136,6 +138,4 @@ const ViewProductTourist = () => {
       )}
     </div>
   );
-};
-
-export default ViewProductTourist;
+}

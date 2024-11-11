@@ -1,6 +1,6 @@
 import Product from "../models/Product.js";
 import Seller from "../models/Seller.js";
-
+import multer from "multer";
 /**
  * Creates a new seller in the database.
  *
@@ -12,16 +12,33 @@ import Seller from "../models/Seller.js";
  */
 
 const createSeller = async (req, res) => {
-  const seller = req.body;
   try {
-    const newSeller = new Seller(seller);
+    // Log the received data for debugging
+    console.log("Received body:", req.body);
+    console.log("Received file:", req.file);
+
+    // Extract seller data from the request body
+    const sellerData = {
+      user: req.body.user,
+      store_name: req.body.store_name,
+      description: req.body.description,
+      // Add the file path if a file was uploaded
+      document_path: req.file ? req.file.path : null,
+    };
+
+    // Create a new Seller instance
+    const newSeller = new Seller(sellerData);
+
+    // Save the seller to the database
     const savedSeller = await newSeller.save();
+
+    // Respond with the saved seller data
     res.status(201).json(savedSeller);
   } catch (error) {
+    console.error("Error in createSeller:", error);
     res.status(500).json({ error: error.message });
   }
 };
-
 /**
  * Retrieves all sellers
  *
