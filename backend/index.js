@@ -30,7 +30,7 @@ mongo_conn().catch((err) => console.log("Error Connecting to database ", err));
 
 
 
-// //Amadeus Token
+// // //Amadeus Token
 
 // // Amadeus Token Management
 // const AMADEUS_API_KEY = process.env.AMADEUS_API_KEY;
@@ -171,6 +171,41 @@ mongo_conn().catch((err) => console.log("Error Connecting to database ", err));
 //   }
 // });
 
+
+// app.post('/api/book-flight', ensureAmadeusToken, async (req, res) => {
+//   const { flightDetails, travelers } = req.body;
+
+//   if (!flightDetails || !travelers) {
+//     return res.status(400).json({ error: 'Flight details and traveler information are required' });
+//   }
+
+//   try {
+//     // Create the booking
+//     const bookingResponse = await axios.post(
+//       'https://test.api.amadeus.com/v1/booking/flight-orders',
+//       {
+//         data: {
+//           type: 'flight-order',
+//           flightOffers: [flightDetails],
+//           travelers: travelers,
+//         },
+//       },
+//       {
+//         headers: {
+//           Authorization: `Bearer ${amadeusToken}`,
+//           'Content-Type': 'application/json',
+//         },
+//       }
+//     );
+
+//     res.json(bookingResponse.data);
+//   } catch (error) {
+//     console.error('Error booking flight:', error.response ? error.response.data : error.message);
+//     res.status(error.response ? error.response.status : 500).json(
+//       error.response ? error.response.data : { message: error.message }
+//     );
+//   }
+// });
 // Routes
 app.use("/api/advertiser", AdvertiserRoutes);
 app.use("/api/tourist", TouristRoutes);

@@ -24,6 +24,7 @@ import NavigationPage from "./components/TouristNavigationPage";
 import CreateReview from "./components/CreateReview";
 import HotelSearch from "./components/ThirdParty/HotelSearching";
 import FlightSearch from "./components/ThirdParty/FlightSearch";
+import FlightBooking from "./components/ThirdParty/FlightBooking";
 
 function App() {
   return (
@@ -49,6 +50,7 @@ function App() {
           <Route path="/addAdmin" element={<AddAdmin />}></Route>
           <Route path="/hotelBooking" element={<HotelSearch />}></Route>
           <Route path="/FlightSearch" element={<FlightSearch />}></Route>
+          <Route path="/FlightBooking" element={<FlightBooking />}></Route>
 
           <Route
             path="/ViewAdvertiserProfile"
