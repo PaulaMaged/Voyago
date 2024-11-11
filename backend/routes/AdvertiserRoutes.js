@@ -2,6 +2,7 @@ import express from "express";
 const router = express.Router();
 import AdvertiserController from "../controllers/AdvertiserController.js";
 import multer from "multer";
+import upload from "../middlewares/uploadMiddleware.js";
 // ================================================ //
 //                  Advertiser Routes             //
 // ================================================ //
@@ -20,7 +21,7 @@ router.post("/create-advertiser", (req, res) => {
     }
 
     // Everything went fine. Proceed with the controller function.
-    createAdvertiser(req, res);
+    AdvertiserController.createAdvertiser(req, res);
   });
 });
 
