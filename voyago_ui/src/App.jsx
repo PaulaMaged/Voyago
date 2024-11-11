@@ -21,6 +21,7 @@ import ViewProductTourist from "./components/viewProductTourist";
 import EditProduct from "./components/editProduct";
 import CrudCategory from "./components/Admin_Dashboard/manageActCategories";
 import NavigationPage from "./components/TouristNavigationPage";
+import CreateReview from "./components/CreateReview";
 
 function App() {
   return (
@@ -32,7 +33,7 @@ function App() {
           <Route path="/signUp" element={<SignUpAll />}></Route>
           <Route path="/login" element={<Login />}></Route>
           {/* <Route path="/Change" element={<ChangePassword />}></Route> */}
-          <Route path = "/nav" element = {<NavigationPage/>}></Route>
+          <Route path="/nav" element={<NavigationPage />}></Route>
           <Route
             path="/Tourist_Dashboard"
             element={<TouristDashboard />}
@@ -80,6 +81,7 @@ function App() {
           ></Route>
           <Route path="/editProduct" element={<EditProduct />}></Route>
           <Route path="/crudCategory" element={<CrudCategory />}></Route>
+          <Route path="createReview" element={<CreateReview />} />
         </Routes>
       </BrowserRouter>
     </>
