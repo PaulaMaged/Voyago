@@ -1,12 +1,42 @@
 import React, { useState, useEffect } from "react";
 import useFetch from "../hooks/useFetch";
-
+import axios from "axios";
 export default function ViewActivityGuest() {
   const [searchTerm, setSearchTerm] = useState("");
   const [budget, setBudget] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [sortOrder, setSortOrder] = useState("");
+
+  const handleBookActivity = async (activityId) => {
+    try {
+      // Get the tourist ID from local storage
+      const touristId = localStorage.getItem("roleId");
+      if (!touristId) {
+        alert("Tourist ID not found. Please log in again.");
+        return;
+      }
+  
+      // Prepare the request payload
+      const requestBody = {
+        activityId,
+        touristId,
+      };
+  
+      // Send the POST request to book the activity
+      const response = await axios.post("http://localhost:8000/api/activity-booking/book", requestBody);
+  
+      // Handle successful booking response
+      if (response.status === 201) {
+        alert("Activity booked successfully!");
+      } else {
+        alert("Failed to book the activity. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error booking activity:", error);
+      alert("An error occurred while booking the activity. Please try again later.");
+    }
+  };
 
   const { error: activitiesError, data: activities } = useFetch(
     "http://localhost:8000/api/advertiser/get-all-activities"
@@ -163,6 +193,7 @@ export default function ViewActivityGuest() {
                       </span>
                     ))}
                   </div>
+                  <button id="book-activity" onClick={() => handleBookActivity(activity._id)} ></button>
                 </div>
               )}
             </div>
