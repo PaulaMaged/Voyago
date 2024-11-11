@@ -150,81 +150,87 @@ export default function ViewActivityGuest() {
 
       <div style={styles.activityGrid}>
         {!activitiesError && filteredActivities.length > 0 ? (
-          filteredActivities.map((activity) => (
-            <div key={activity._id} style={styles.card}>
-              <h2 style={styles.cardTitle}>{activity.title}</h2>
-              <p style={styles.cardDescription}>{activity.description}</p>
-              <p>
-                <strong>Date:</strong>{" "}
-                {new Date(activity.start_time).toLocaleDateString()}
-              </p>
-              <p>
-                <strong>Time:</strong>{" "}
-                {new Date(activity.start_time).toLocaleTimeString()}
-              </p>
-              <p>
-                <strong>Duration:</strong> {activity.duration} minutes
-              </p>
-              <p>
-                <strong>Price:</strong> ${activity.price.toFixed(2)}
-              </p>
-              <p>
-                <strong>Category:</strong> {activity.category?.category}
-              </p>
-              {activity.discount > 0 && (
-                <p>
-                  <strong>Discount:</strong> {activity.discount}%
-                </p>
-              )}
-              <p>
-                <strong>Booking Open:</strong>{" "}
-                {activity.booking_open ? "Yes" : "No"}
-              </p>
-              {activity.location && (
-                <div>
-                  <strong>Location:</strong>
-                  <p>Latitude: {activity.location.latitude.toFixed(6)}</p>
-                  <p>Longitude: {activity.location.longitude.toFixed(6)}</p>
-                </div>
-              )}
-              {activity.advertiser && (
-                <div>
-                  <p>
-                    <strong>Company:</strong> {activity.advertiser.company_name}
-                  </p>
-                  <p>
-                    <strong>Hotline:</strong> {activity.advertiser.contact_info}
-                  </p>
-                </div>
-              )}
-              {activity.tags && activity.tags.length > 0 && (
-                <div>
-                  <strong>Tags:</strong>
-                  <div style={styles.tagContainer}>
-                    {activity.tags.map((tag) => (
-                      <span key={tag._id} style={styles.tag}>
-                        {tag.tag_name}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-              <button
-                id="book-activity"
-                onClick={() => handleBookActivity(activity._id)}
-              >
-                Book activity
-              </button>
+          filteredActivities.map((activity) => {
+            if (activity.flag_inapproperiate == true) return null;
 
-              <button
-                onClick={() => {
-                  handleFeedback(activity);
-                }}
-              >
-                Feedback
-              </button>
-            </div>
-          ))
+            return (
+              <div key={activity._id} style={styles.card}>
+                <h2 style={styles.cardTitle}>{activity.title}</h2>
+                <p style={styles.cardDescription}>{activity.description}</p>
+                <p>
+                  <strong>Date:</strong>{" "}
+                  {new Date(activity.start_time).toLocaleDateString()}
+                </p>
+                <p>
+                  <strong>Time:</strong>{" "}
+                  {new Date(activity.start_time).toLocaleTimeString()}
+                </p>
+                <p>
+                  <strong>Duration:</strong> {activity.duration} minutes
+                </p>
+                <p>
+                  <strong>Price:</strong> ${activity.price.toFixed(2)}
+                </p>
+                <p>
+                  <strong>Category:</strong> {activity.category?.category}
+                </p>
+                {activity.discount > 0 && (
+                  <p>
+                    <strong>Discount:</strong> {activity.discount}%
+                  </p>
+                )}
+                <p>
+                  <strong>Booking Open:</strong>{" "}
+                  {activity.booking_open ? "Yes" : "No"}
+                </p>
+                {activity.location && (
+                  <div>
+                    <strong>Location:</strong>
+                    <p>Latitude: {activity.location.latitude.toFixed(6)}</p>
+                    <p>Longitude: {activity.location.longitude.toFixed(6)}</p>
+                  </div>
+                )}
+                {activity.advertiser && (
+                  <div>
+                    <p>
+                      <strong>Company:</strong>{" "}
+                      {activity.advertiser.company_name}
+                    </p>
+                    <p>
+                      <strong>Hotline:</strong>{" "}
+                      {activity.advertiser.contact_info}
+                    </p>
+                  </div>
+                )}
+                {activity.tags && activity.tags.length > 0 && (
+                  <div>
+                    <strong>Tags:</strong>
+                    <div style={styles.tagContainer}>
+                      {activity.tags.map((tag) => (
+                        <span key={tag._id} style={styles.tag}>
+                          {tag.tag_name}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <button
+                  id="book-activity"
+                  onClick={() => handleBookActivity(activity._id)}
+                >
+                  Book activity
+                </button>
+
+                <button
+                  onClick={() => {
+                    handleFeedback(activity);
+                  }}
+                >
+                  Feedback
+                </button>
+              </div>
+            );
+          })
         ) : (
           <p style={styles.noActivities}>No upcoming activities available.</p>
         )}
