@@ -66,7 +66,7 @@ router.post(
   TouristController.rateItinerary
 );
 router.post(
-  "/tourist-rate-tourguide/:touristId",
+  "/tourist-rate-tourGuide/:touristId",
   TouristController.rateTourGuide
 );
 

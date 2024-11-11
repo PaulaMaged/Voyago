@@ -1,21 +1,24 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
-import './viewItinerary.css';
+import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import check from "../helpers/checks";
+import axios from "axios";
+import "./viewItinerary.css";
 
 const ViewItineraryGuest = () => {
   const [itineraries, setItineraries] = useState([]);
   const [filteredItineraries, setFilteredItineraries] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTag, setSelectedTag] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [selectedLanguage, setSelectedLanguage] = useState('');
-  const [minPrice, setMinPrice] = useState('');
-  const [maxPrice, setMaxPrice] = useState('');
-  const [selectedDate, setSelectedDate] = useState('');
-  const [sortCriteria, setSortCriteria] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedTag, setSelectedTag] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedLanguage, setSelectedLanguage] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [selectedDate, setSelectedDate] = useState("");
+  const [sortCriteria, setSortCriteria] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchItineraries();
@@ -26,51 +29,84 @@ const ViewItineraryGuest = () => {
     if (itineraries.length > 0) {
       applyFilters();
     }
-  }, [searchTerm, selectedTag, selectedCategory, selectedLanguage, minPrice, maxPrice, selectedDate, sortCriteria, itineraries]);
+  }, [
+    searchTerm,
+    selectedTag,
+    selectedCategory,
+    selectedLanguage,
+    minPrice,
+    maxPrice,
+    selectedDate,
+    sortCriteria,
+    itineraries,
+  ]);
 
   const fetchItineraries = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get('http://localhost:8000/api/tour-guide/get-all-itineraries');
+      const response = await axios.get(
+        "http://localhost:8000/api/tour-guide/get-all-itineraries"
+      );
       setItineraries(response.data);
       setFilteredItineraries(response.data);
       setIsLoading(false);
     } catch (error) {
-      console.error('Error fetching itineraries:', error);
-      setError('Failed to fetch itineraries. Please try again later.');
+      console.error("Error fetching itineraries:", error);
+      setError("Failed to fetch itineraries. Please try again later.");
       setIsLoading(false);
     }
   };
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/admin/get-all-activity-categories');
+      const response = await axios.get(
+        "http://localhost:8000/api/admin/get-all-activity-categories"
+      );
       setCategories(response.data);
     } catch (error) {
-      console.error('Error fetching categories:', error);
+      console.error("Error fetching categories:", error);
     }
   };
 
   const applyFilters = () => {
-    let filtered = itineraries.filter(itinerary => {
-      const matchesSearch = itinerary.name.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesTag = !selectedTag || itinerary.activities.some(activity => 
-        activity.tags.some(tag => tag._id === selectedTag)
-      );
-      const matchesCategory = !selectedCategory || itinerary.activities.some(activity => 
-        activity.category && activity.category._id === selectedCategory
-      );
-      const matchesLanguage = !selectedLanguage || itinerary.language === selectedLanguage;
-      const matchesPrice = (!minPrice || itinerary.price >= parseFloat(minPrice)) &&
-                           (!maxPrice || itinerary.price <= parseFloat(maxPrice));
-      const matchesDate = !selectedDate || new Date(itinerary.start_date).toISOString().split('T')[0] === selectedDate;
+    let filtered = itineraries.filter((itinerary) => {
+      const matchesSearch = itinerary.name
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+      const matchesTag =
+        !selectedTag ||
+        itinerary.activities.some((activity) =>
+          activity.tags.some((tag) => tag._id === selectedTag)
+        );
+      const matchesCategory =
+        !selectedCategory ||
+        itinerary.activities.some(
+          (activity) =>
+            activity.category && activity.category._id === selectedCategory
+        );
+      const matchesLanguage =
+        !selectedLanguage || itinerary.language === selectedLanguage;
+      const matchesPrice =
+        (!minPrice || itinerary.price >= parseFloat(minPrice)) &&
+        (!maxPrice || itinerary.price <= parseFloat(maxPrice));
+      const matchesDate =
+        !selectedDate ||
+        new Date(itinerary.start_date).toISOString().split("T")[0] ===
+          selectedDate;
 
-      return matchesSearch && matchesTag && matchesCategory && matchesLanguage && matchesPrice && matchesDate;
+      return (
+        matchesSearch &&
+        matchesTag &&
+        matchesCategory &&
+        matchesLanguage &&
+        matchesPrice &&
+        matchesDate
+      );
     });
 
-    if (sortCriteria === 'price_asc') {
+    if (sortCriteria === "price_asc") {
       filtered.sort((a, b) => a.price - b.price);
-    } else if (sortCriteria === 'price_desc') {
+    } else if (sortCriteria === "price_desc") {
       filtered.sort((a, b) => b.price - a.price);
     }
 
@@ -78,30 +114,47 @@ const ViewItineraryGuest = () => {
   };
 
   const handleBookItinerary = async (itineraryId) => {
+    const touristId = localStorage.getItem("roleId");
+
+    const data = {
+      plans: [
+        {
+          type: "Itinerary",
+          itineraryId: itineraryId,
+        },
+      ],
+    };
+
+    console.log(data);
     try {
-      const response = await axios.post(`http://localhost:8000/api/tour-guide/book-itinerary/${itineraryId}`);
+      const response = await axios.post(
+        `http://localhost:8000/api/tourist/tourist-pay/${touristId}`,
+        data
+      );
       console.log(response.data);
       // Handle successful booking
     } catch (error) {
-      console.error('Error booking itinerary:', error);
+      console.error("Error booking itinerary:", error);
       // Handle booking error
     }
   };
 
   const getAllTags = () => {
     const tagSet = new Set();
-    itineraries.forEach(itinerary => {
-      itinerary.activities.forEach(activity => {
+    itineraries.forEach((itinerary) => {
+      itinerary.activities.forEach((activity) => {
         if (activity.tags) {
-          activity.tags.forEach(tag => tagSet.add(JSON.stringify(tag)));
+          activity.tags.forEach((tag) => tagSet.add(JSON.stringify(tag)));
         }
       });
     });
-    return Array.from(tagSet).map(tag => JSON.parse(tag));
+    return Array.from(tagSet).map((tag) => JSON.parse(tag));
   };
 
   const getAllLanguages = () => {
-    return Array.from(new Set(itineraries.map(itinerary => itinerary.language)));
+    return Array.from(
+      new Set(itineraries.map((itinerary) => itinerary.language))
+    );
   };
 
   if (isLoading) {
@@ -111,6 +164,32 @@ const ViewItineraryGuest = () => {
   if (error) {
     return <div>{error}</div>;
   }
+
+  const handleFeedbackItinerary = async (itinerary) => {
+    const isBooked = await check.isBooked(itinerary, "itinerary");
+    const isCompleted = await check.isCompleted(itinerary, "itinerary");
+
+    if (isBooked && isCompleted) {
+      navigate("/createReview", { state: { itinerary: itinerary } });
+    } else if (!isBooked) {
+      alert("You haven't booked this itinerary yet");
+    } else if (!isCompleted) {
+      alert("The itinerary isn't over yet, come back afterwards");
+    }
+  };
+
+  const handleFeedbackTourGuide = async (itinerary) => {
+    const isBooked = await check.isBooked(itinerary, "itinerary");
+    const isCompleted = await check.isCompleted(itinerary, "itinerary");
+
+    if (isBooked && isCompleted) {
+      navigate("/createReview", { state: { tourGuide: itinerary.tour_guide } });
+    } else if (!isBooked) {
+      alert("You haven't booked this itinerary yet");
+    } else if (!isCompleted) {
+      alert("The itinerary isn't over yet, come back afterwards");
+    }
+  };
 
   return (
     <div className="itinerary-viewer">
@@ -125,24 +204,42 @@ const ViewItineraryGuest = () => {
           className="filter-input"
         />
 
-        <select value={selectedTag} onChange={(e) => setSelectedTag(e.target.value)} className="filter-select">
+        <select
+          value={selectedTag}
+          onChange={(e) => setSelectedTag(e.target.value)}
+          className="filter-select"
+        >
           <option value="">All Tags</option>
           {getAllTags().map((tag) => (
-            <option key={tag._id} value={tag._id}>{tag.tag_name}</option>
+            <option key={tag._id} value={tag._id}>
+              {tag.tag_name}
+            </option>
           ))}
         </select>
 
-        <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} className="filter-select">
+        <select
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+          className="filter-select"
+        >
           <option value="">All Categories</option>
           {categories.map((category) => (
-            <option key={category._id} value={category._id}>{category.category}</option>
+            <option key={category._id} value={category._id}>
+              {category.category}
+            </option>
           ))}
         </select>
 
-        <select value={selectedLanguage} onChange={(e) => setSelectedLanguage(e.target.value)} className="filter-select">
+        <select
+          value={selectedLanguage}
+          onChange={(e) => setSelectedLanguage(e.target.value)}
+          className="filter-select"
+        >
           <option value="">All Languages</option>
           {getAllLanguages().map((language) => (
-            <option key={language} value={language}>{language}</option>
+            <option key={language} value={language}>
+              {language}
+            </option>
           ))}
         </select>
 
@@ -169,7 +266,11 @@ const ViewItineraryGuest = () => {
           className="filter-input"
         />
 
-        <select value={sortCriteria} onChange={(e) => setSortCriteria(e.target.value)} className="filter-select">
+        <select
+          value={sortCriteria}
+          onChange={(e) => setSortCriteria(e.target.value)}
+          className="filter-select"
+        >
           <option value="">Sort By</option>
           <option value="price_asc">Price: Low to High</option>
           <option value="price_desc">Price: High to Low</option>
@@ -180,22 +281,70 @@ const ViewItineraryGuest = () => {
         {filteredItineraries.map((itinerary) => (
           <div key={itinerary._id} className="itinerary-card">
             <h2>{itinerary.name}</h2>
-            <p><strong>Description:</strong> {itinerary.description}</p>
-            <p><strong>Tour Guide:</strong> {itinerary.tour_guide.user ? itinerary.tour_guide.user.username : 'N/A'}</p>
-            <p><strong>Language:</strong> {itinerary.language}</p>
-            <p><strong>Price:</strong> ${itinerary.price}</p>
-            <p><strong>Start Date:</strong> {new Date(itinerary.start_date).toLocaleDateString()}</p>
-            <p><strong>Start Time:</strong> {itinerary.start_time}</p>
-            <p><strong>Accessibility:</strong> {itinerary.accessibility ? 'Yes' : 'No'}</p>
-            <p><strong>Active:</strong> {itinerary.active ? 'Yes' : 'No'}</p>
+            <p>
+              <strong>Description:</strong> {itinerary.description}
+            </p>
+            <p>
+              <strong>Tour Guide:</strong>{" "}
+              {itinerary.tour_guide.user
+                ? itinerary.tour_guide.user.username
+                : "N/A"}
+            </p>
+            <p>
+              <strong>Language:</strong> {itinerary.language}
+            </p>
+            <p>
+              <strong>Price:</strong> ${itinerary.price}
+            </p>
+            <p>
+              <strong>Start Date:</strong>{" "}
+              {new Date(itinerary.start_date).toLocaleDateString()}
+            </p>
+            <p>
+              <strong>Start Time:</strong> {itinerary.start_time}
+            </p>
+            <p>
+              <strong>Accessibility:</strong>{" "}
+              {itinerary.accessibility ? "Yes" : "No"}
+            </p>
+            <p>
+              <strong>Active:</strong> {itinerary.active ? "Yes" : "No"}
+            </p>
             {itinerary.pick_up && (
-              <p><strong>Pick-up Location:</strong> Latitude: {itinerary.pick_up.latitude}, Longitude: {itinerary.pick_up.longitude}</p>
+              <p>
+                <strong>Pick-up Location:</strong> Latitude:{" "}
+                {itinerary.pick_up.latitude}, Longitude:{" "}
+                {itinerary.pick_up.longitude}
+              </p>
             )}
             {itinerary.drop_off && (
-              <p><strong>Drop-off Location:</strong> Latitude: {itinerary.drop_off.latitude}, Longitude: {itinerary.drop_off.longitude}</p>
+              <p>
+                <strong>Drop-off Location:</strong> Latitude:{" "}
+                {itinerary.drop_off.latitude}, Longitude:{" "}
+                {itinerary.drop_off.longitude}
+              </p>
             )}
             <ActivitiesSection activities={itinerary.activities} />
-            <button id="bookItin" onClick={() => handleBookItinerary(itinerary._id)}>Book Itinerary</button>
+            <button
+              id="bookItin"
+              onClick={() => handleBookItinerary(itinerary._id)}
+            >
+              Book Itinerary
+            </button>
+            <button
+              onClick={() => {
+                handleFeedbackItinerary(itinerary);
+              }}
+            >
+              Itinerary Feedback
+            </button>
+            <button
+              onClick={() => {
+                handleFeedbackTourGuide(itinerary);
+              }}
+            >
+              Tour Guide Feedback
+            </button>
           </div>
         ))}
       </div>
@@ -235,7 +384,9 @@ const ActivitiesSection = ({ activities }) => {
         >
           &lt; Previous
         </button>
-        <span>{currentActivityIndex + 1} / {activities.length}</span>
+        <span>
+          {currentActivityIndex + 1} / {activities.length}
+        </span>
         <button
           onClick={nextActivity}
           disabled={currentActivityIndex === activities.length - 1}
@@ -245,12 +396,23 @@ const ActivitiesSection = ({ activities }) => {
         </button>
       </div>
       <div className="activity-item">
-        <p><strong>Title:</strong> {currentActivity.title}</p>
-        <p><strong>Description:</strong> {currentActivity.description}</p>
-        <p><strong>Start Time:</strong> {new Date(currentActivity.start_time).toLocaleString()}</p>
-        <p><strong>Duration:</strong> {currentActivity.duration} minutes</p>
+        <p>
+          <strong>Title:</strong> {currentActivity.title}
+        </p>
+        <p>
+          <strong>Description:</strong> {currentActivity.description}
+        </p>
+        <p>
+          <strong>Start Time:</strong>{" "}
+          {new Date(currentActivity.start_time).toLocaleString()}
+        </p>
+        <p>
+          <strong>Duration:</strong> {currentActivity.duration} minutes
+        </p>
         {currentActivity.category && (
-          <p><strong>Category:</strong> {currentActivity.category.category}</p>
+          <p>
+            <strong>Category:</strong> {currentActivity.category.category}
+          </p>
         )}
         {currentActivity.tags && currentActivity.tags.length > 0 && (
           <div>

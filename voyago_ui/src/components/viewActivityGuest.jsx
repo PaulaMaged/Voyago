@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import useFetch from "../hooks/useFetch";
+import { useNavigate } from "react-router-dom";
+import check from "../helpers/checks";
 import axios from "axios";
 export default function ViewActivityGuest() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -7,25 +9,26 @@ export default function ViewActivityGuest() {
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [sortOrder, setSortOrder] = useState("");
+  const navigate = useNavigate();
 
   const handleBookActivity = async (activityId) => {
+    const touristId = localStorage.getItem("roleId");
+
+    const data = {
+      plans: [
+        {
+          type: "Activity",
+          activityId: activityId,
+        },
+      ],
+    };
+
+    console.log(data);
     try {
-      // Get the tourist ID from local storage
-      const touristId = localStorage.getItem("roleId");
-      if (!touristId) {
-        alert("Tourist ID not found. Please log in again.");
-        return;
-      }
-  
-      // Prepare the request payload
-      const requestBody = {
-        activityId,
-        touristId,
-      };
-  
-      // Send the POST request to book the activity
-      const response = await axios.post("http://localhost:8000/api/activity-booking/book", requestBody);
-  
+      const response = await axios.post(
+        `http://localhost:8000/api/tourist/tourist-pay/${touristId}`,
+        data
+      );
       // Handle successful booking response
       if (response.status === 201) {
         alert("Activity booked successfully!");
@@ -34,7 +37,9 @@ export default function ViewActivityGuest() {
       }
     } catch (error) {
       console.error("Error booking activity:", error);
-      alert("An error occurred while booking the activity. Please try again later.");
+      alert(
+        "An error occurred while booking the activity. Please try again later."
+      );
     }
   };
 
@@ -42,13 +47,9 @@ export default function ViewActivityGuest() {
     "http://localhost:8000/api/advertiser/get-all-activities"
   );
 
-  console.log(activitiesError);
-
   const { error: categoriesError, data: categories } = useFetch(
     "http://localhost:8000/api/admin/get-all-activity-categories"
   );
-
-  console.log(categoriesError);
 
   const filteredActivities = activities
     .filter((activity) => {
@@ -81,6 +82,19 @@ export default function ViewActivityGuest() {
       if (sortOrder === "desc") return b.price - a.price;
       return 0;
     });
+
+  const handleFeedback = async (activity) => {
+    const isBooked = await check.isBooked(activity, "activity");
+    const isCompleted = await check.isCompleted(activity, "activity");
+
+    if (isBooked && isCompleted) {
+      navigate("/createReview", { state: { activity: activity } });
+    } else if (!isBooked) {
+      alert("You haven't booked this activity yet");
+    } else if (!isCompleted) {
+      alert("The activity isn't over yet, come back afterwards");
+    }
+  };
 
   return (
     <div style={styles.container}>
@@ -193,9 +207,22 @@ export default function ViewActivityGuest() {
                       </span>
                     ))}
                   </div>
-                  <button id="book-activity" onClick={() => handleBookActivity(activity._id)} ></button>
                 </div>
               )}
+              <button
+                id="book-activity"
+                onClick={() => handleBookActivity(activity._id)}
+              >
+                Book activity
+              </button>
+
+              <button
+                onClick={() => {
+                  handleFeedback(activity);
+                }}
+              >
+                Feedback
+              </button>
             </div>
           ))
         ) : (
