@@ -25,11 +25,14 @@ export default function ViewActivityAdv() {
     booking_open: true,
   });
 
+  const id ="";
+
   // Fetching activities and categories
   useEffect(() => {
+    id=localStorage.getItem("roleId")
     async function fetchActivities() {
       const response = await axios.get(
-        "http://localhost:8000/api/advertiser/get-all-activities"
+        "http://localhost:8000/api/get-advertiser-activities/${id}"
       );
       setActivities(response.data);
     }
@@ -314,7 +317,7 @@ export default function ViewActivityAdv() {
                 <strong>Price:</strong> ${activity.price.toFixed(2)}
               </p>
               <p>
-                <strong>Category:</strong> {activity.category.category}
+                <strong>Category:</strong> {activity.category?.category}
               </p>
               <button
                 onClick={() => handleEditActivity(activity)}
