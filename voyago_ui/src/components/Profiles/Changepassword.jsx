@@ -2,89 +2,96 @@ import "./Changepassword.css";
 import axios from "axios";
 import { useState } from "react";
 
-function Changepassword() {
-  const [isChanged, setIsChanged] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [isCurrentPasswordValid, setIsCurrentPasswordValid] = useState(true);
-  const [passwordLengthError, setPasswordLengthError] = useState(false);
-  const userString = localStorage.getItem("user");
-  let id = null;
-  
-  if (userString) {
-    try {
-      const user = JSON.parse(userString);
-      id = user._id;
-    } catch (error) {
-      console.error("Error parsing user data from localStorage:", error);
-    }
+const handleSubmit = async (e, setIsChanged, setConfirmCurrentPassword) => {
+  e.preventDefault();
+  const currentPassword = e.target["current-password"].value;
+  const newPassword = e.target["new-password"].value;
+  const confirmPassword = e.target["confirm-password"].value;
+  if (newPassword !== confirmPassword) {
+    alert("Passwords do not match");
+    return;
   } else {
-    console.warn("No user data found in localStorage.");
-  }
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+    const current_actuall_password = await getcurrentpassword();
+    if (currentPassword === current_actuall_password) {
+      try {
+        const response = await axios.put(
+          `http://localhost:8000/api/user/change-password/${"672e356f3b83a1422019ef48"}`,
+          {
+            currentPassword: currentPassword,
+            newPassword: newPassword,
+          }
+        );
+        if (response.status === 200) {
+          alert("Password changed successfully");
 
-    // Check if new password is at least 8 characters long
-    if (newPassword.length < 8) {
-      setPasswordLengthError(true);
-      return;
-    } else {
-      setPasswordLengthError(false);
-    }
-
-    // Check if new password and confirm password match
-    if (newPassword !== confirmPassword) {
-      alert("Passwords do not match");
-      return;
-    }
-
-    try {
-      const response = await axios.put(
-        `http://localhost:8000/api/user/change-password/${id}`,
-        {
-          currentPassword: currentPassword,
-          newPassword: newPassword,
+          setIsChanged(true);
+        } else {
+          alert("there was an error connection to the server");
         }
-      );
-
-      if (response.status === 200) {
-        alert("Password changed successfully");
-        setIsChanged(true);
-      } else {
-        alert("There was an error connecting to the server");
+      } catch (error) {
+        console.error("Error changing password:", error);
       }
-    } catch (error) {
-      console.error("Error changing password:", error);
-      if (error.response && error.response.status === 401) {
-        // Current password is incorrect
-        setIsCurrentPasswordValid(false);
-        setTimeout(() => {
-          setIsCurrentPasswordValid(true);
-        }, 2500);
-      } else {
-        alert("An error occurred while changing the password.");
-      }
+    } else {
+      setConfirmCurrentPassword(false);
+      setTimeout(() => {
+        setConfirmCurrentPassword(true);
+      }, 2500);
     }
-  };
+    console.log(
+      current_actuall_password,
+      currentPassword,
+      newPassword,
+      confirmPassword
+    );
+  }
+};
 
+const getcurrentpassword = async () => {
+  try {
+    const response = await axios.get(
+      `http://localhost:8000/api/user/get-user-password/${"672e356f3b83a1422019ef48"}`
+    );
+    if (response.status === 200) {
+      return response.data.password;
+    } else {
+      return response.data.password;
+    }
+  } catch (error) {
+    console.error("Error changing password:", error);
+  }
+};
+
+const setchange = setTimeout((setConfirmCurrentPassword) => {
+  setConfirmCurrentPassword(true);
+}, 2500);
+
+function Changepassword() {
+  const [ischanged, setIsChanged] = useState(false);
+  const [current_password, setCurrentPassword] = useState("");
+  const [new_password, setNewPassword] = useState("");
+  const [confirm_current_password, setConfirmCurrentPassword] = useState(true);
   return (
     <div className="changepassword-container">
-      {!isChanged ? (
+      {!ischanged ? (
         <>
           <h2>Change Password</h2>
-          <form className="changepassword-form" onSubmit={handleSubmit}>
+          <form
+            className="changepassword-form"
+            onSubmit={async (e) => {
+              await handleSubmit(e, setIsChanged, setConfirmCurrentPassword);
+            }}
+          >
             <div className="form-group">
               <label htmlFor="current-password">Current Password</label>
               <input
-                type="password"
+                type="text"
                 id="current-password"
                 name="current-password"
-                value={currentPassword}
+                value={current_password}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 required
               />
-              {!isCurrentPasswordValid && (
+              {!confirm_current_password && (
                 <div style={{ color: "red" }}>
                   This is not your current password!
                 </div>
@@ -93,14 +100,14 @@ function Changepassword() {
             <div className="form-group">
               <label htmlFor="new-password">New Password</label>
               <input
-                type="password"
+                type="text"
                 id="new-password"
                 name="new-password"
-                value={newPassword}
+                value={new_password}
                 onChange={(e) => setNewPassword(e.target.value)}
                 required
               />
-              {passwordLengthError && (
+              {!(new_password.length == 0) && new_password.length < 8 && (
                 <div style={{ color: "red" }}>
                   Password must be at least 8 characters long
                 </div>
@@ -109,11 +116,9 @@ function Changepassword() {
             <div className="form-group">
               <label htmlFor="confirm-password">Confirm New Password</label>
               <input
-                type="password"
+                type="text"
                 id="confirm-password"
                 name="confirm-password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
                 required
               />
             </div>
@@ -121,7 +126,7 @@ function Changepassword() {
           </form>
         </>
       ) : (
-        <div>Your password has been changed!</div>
+        <div>Your Password has been changed!</div>
       )}
     </div>
   );
