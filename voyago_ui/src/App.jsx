@@ -22,6 +22,7 @@ import EditProduct from "./components/editProduct";
 import CrudCategory from "./components/Admin_Dashboard/manageActCategories";
 import NavigationPage from "./components/TouristNavigationPage";
 import HotelSearch from "./components/ThirdParty/HotelSearching";
+import FlightSearch from "./components/ThirdParty/FlightSearch";
 
 function App() {
   return (
@@ -46,6 +47,7 @@ function App() {
 
           <Route path="/addAdmin" element={<AddAdmin />}></Route>
           <Route path="/hotelBooking" element={<HotelSearch />}></Route>
+          <Route path="/FlightSearch" element={<FlightSearch />}></Route>
 
           <Route
             path="/ViewAdvertiserProfile"

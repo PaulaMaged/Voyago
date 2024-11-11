@@ -132,6 +132,44 @@ app.post('/api/book-hotel', async (req, res) => {
   }
 });
 
+app.get('/api/search-flights', ensureAmadeusToken, async (req, res) => {
+  const { origin, departureDate, oneWay, duration, nonStop, maxPrice } = req.query;
+
+  if (!origin) {
+    return res.status(400).json({ error: 'Origin IATA code is required' });
+  }
+
+  try {
+    const flightsResponse = await axios.get(
+      'https://test.api.amadeus.com/v1/shopping/flight-destinations',
+      {
+        headers: {
+          Authorization: `Bearer ${amadeusToken}`,
+        },
+        params: {
+          origin,
+          departureDate,
+          oneWay,
+          duration,
+          nonStop,
+          maxPrice,
+        },
+      }
+    );
+
+    res.json(flightsResponse.data);
+  } catch (error) {
+    console.error(
+      'Error fetching flights:',
+      error.response ? error.response.data : error.message
+    );
+    res.status(500).json({
+      message: 'Error fetching flight data',
+      error: error.response ? error.response.data : error.message,
+    });
+  }
+});
+
 // Routes
 app.use("/api/advertiser", AdvertiserRoutes);
 app.use("/api/tourist", TouristRoutes);
