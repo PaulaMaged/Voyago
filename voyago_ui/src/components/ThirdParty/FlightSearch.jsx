@@ -38,12 +38,19 @@ const FlightSearch = () => {
       });
       setFlights(response.data.data || []);
     } catch (err) {
-      console.error('Error fetching flights:', err);
-      setError(
-        err.response && err.response.data && err.response.data.error
-          ? err.response.data.error
-          : 'Failed to fetch flights. Please try again.'
-      );
+        console.error('Error fetching flights:', err);
+        let errorMessage = 'Failed to fetch flights. Please try again.';
+        if (err.response && err.response.data) {
+          if (err.response.data.error) {
+            errorMessage = err.response.data.error;
+          } else if (err.response.data.errors && err.response.data.errors.length > 0) {
+            // Extract the first error message from the errors array
+            const apiError = err.response.data.errors[0];
+            errorMessage = apiError.detail || apiError.title || errorMessage;
+          }
+        }
+        setError(errorMessage);
+      ;
     } finally {
       setLoading(false);
     }

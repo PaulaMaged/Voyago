@@ -39,6 +39,7 @@ const login = async (email, password) => {
         if (roleData[roleKey]) {
           roleId = roleData[roleKey]._id;
           roleName = role;
+          console.log(`Role found: ${roleName}, ID: ${roleId}`);
           break;
         }
       }
