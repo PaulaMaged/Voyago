@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import useFetch from "../hooks/useFetch";
+import { useNavigate } from "react-router-dom";
+import check from "../helpers/checks";
 
 export default function ViewActivityGuest() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -7,18 +9,15 @@ export default function ViewActivityGuest() {
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [sortOrder, setSortOrder] = useState("");
+  const navigate = useNavigate();
 
   const { error: activitiesError, data: activities } = useFetch(
     "http://localhost:8000/api/advertiser/get-all-activities"
   );
 
-  console.log(activitiesError);
-
   const { error: categoriesError, data: categories } = useFetch(
     "http://localhost:8000/api/admin/get-all-activity-categories"
   );
-
-  console.log(categoriesError);
 
   const filteredActivities = activities
     .filter((activity) => {
@@ -51,6 +50,19 @@ export default function ViewActivityGuest() {
       if (sortOrder === "desc") return b.price - a.price;
       return 0;
     });
+
+  const handleFeedback = async (activity) => {
+    const isBooked = await check.isBooked(activity, "activity");
+    const isCompleted = await check.isCompleted(activity, "activity");
+
+    if (isBooked && isCompleted) {
+      navigate("/createReview", { state: { activity: activity } });
+    } else if (!isBooked) {
+      alert("You haven't booked this activity yet");
+    } else if (!isCompleted) {
+      alert("The activity isn't over yet, come back afterwards");
+    }
+  };
 
   return (
     <div style={styles.container}>
@@ -165,6 +177,13 @@ export default function ViewActivityGuest() {
                   </div>
                 </div>
               )}
+              <button
+                onClick={() => {
+                  handleFeedback(activity);
+                }}
+              >
+                Feedback
+              </button>
             </div>
           ))
         ) : (
