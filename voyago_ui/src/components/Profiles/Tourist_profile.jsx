@@ -1,17 +1,19 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import PropTypes from "prop-types";
 import "./Profile.css";
 import axios from "axios";
 
-function Tourist_profile() {
+function Tourist_profile({ userId, touristId }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:8000/api/tourist/get-tourist/${"672e1322ee2a6ba6b26f1c2a"}`
+          `http://localhost:8000/api/tourist/get-tourist/${touristId}`
         );
         if (response.status === 200) {
           const data = response.data;
           setProfileData(data);
+          console.log(response.data);
           setError(false);
           setPending(false);
         } else {
@@ -30,11 +32,19 @@ function Tourist_profile() {
     e.preventDefault();
     setIsEditing(false);
     try {
+      const response2 = await axios.put(
+        `http://localhost:8000/api/user/update-user/${userId}`,
+        {
+          email: profileData.user.email,
+        }
+      );
+
+      if (response2.status !== 200) {
+        return alert("Email already exists");
+      }
       const response = await axios.put(
         `http://localhost:8000/api/tourist/update-tourist/${profileData._id}`,
         {
-          email: profileData.user.email,
-          password: profileData.user.password,
           phone_number: profileData.phone_number,
           nationality: profileData.nationality,
           is_student: profileData.is_student,
@@ -64,10 +74,10 @@ function Tourist_profile() {
       } else {
         throw new Error("Failed to send Request");
       }
-    }catch(e){
-
+    } catch (e) {
+      console.log(e.error.message);
     }
-  }  
+  };
 
   const [profileData, setProfileData] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -95,21 +105,6 @@ function Tourist_profile() {
                     setProfileData({
                       ...profileData,
                       user: { ...profileData.user, email: e.target.value },
-                    })
-                  }
-                  className="profile-input"
-                />
-
-                <label htmlFor="password">Password:</label>
-                <input
-                  id="password"
-                  type="password"
-                  required
-                  value={profileData.user.password}
-                  onChange={(e) =>
-                    setProfileData({
-                      ...profileData,
-                      user: { ...profileData.user, password: e.target.value },
                     })
                   }
                   className="profile-input"
@@ -169,10 +164,10 @@ function Tourist_profile() {
               <h1>Profile</h1>
               <p>Username: {profileData.user.username}</p>
               <p>Email: {profileData.user.email}</p>
-              <p>Password: {profileData.user.password}</p>
+
               <p>Mobile Number: {profileData.phone_number}</p>
               <p>Nationality: {profileData.nationality}</p>
-              <p>Date of Birth: {profileData.user.DOB}</p>
+              <p>Date of Birth: {profileData.DOB}</p>
               <p>Is Student: {profileData.is_student ? "Yes" : "No"}</p>
               <p>Wallet: {profileData.wallet}</p>
               <button
@@ -184,10 +179,15 @@ function Tourist_profile() {
             </div>
           ))}
       </div>
-      <button className="profile-button" id="deletionReq" onClick={deletionReq}>Delete Account</button>
-
+      <button className="profile-button" id="deletionReq" onClick={deletionReq}>
+        Delete Account
+      </button>
     </div>
   );
 }
+Tourist_profile.propTypes = {
+  userId: PropTypes.string.isRequired,
+  touristId: PropTypes.string.isRequired,
+};
 
 export default Tourist_profile;

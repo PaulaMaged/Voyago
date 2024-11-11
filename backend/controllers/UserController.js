@@ -9,6 +9,7 @@ import Tourist from "../models/Tourist.js";
 import bcrypt from "bcrypt";
 import createToken from "../Data/cookiesArr.js";
 import { get } from "http";
+import { match } from "assert";
 
 const createUser = async (req, res) => {
   try {
@@ -20,6 +21,7 @@ const createUser = async (req, res) => {
     } else if (existingUsername) {
       return res.status(400).json({ message: "Email already in use" });
     }
+
     const salt = await bcrypt.genSalt();
     const userRole = payload.role || "user";
     const hashedPassword = await bcrypt.hash(payload.password, salt);
@@ -35,15 +37,21 @@ const createUser = async (req, res) => {
 const getUserPassword = async (req, res) => {
   try {
     // Retrieve the user with the provided ID from the database
+    const { currentPassword } = req.query;
     const user = await User.findById(req.params.userId);
-
-    // If the user does not exist, return a 404 error response
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
+    console.log(currentPassword);
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    console.log(isMatch);
+
+    // If the user does not exist, return a 404 error response
+
     // Return a 200 success response with the user's password
-    res.status(200).json({ password: user.password });
+    if (isMatch) res.status(200).json({ password: user.password });
+    else res.status(400).json({ message: "Current password is incorrect" });
   } catch (error) {
     // Catch any errors that occur during the process and return a 400 error response with the error message
     res.status(400).json({ message: error.message });
@@ -54,11 +62,10 @@ const getUserPassword = async (req, res) => {
 const changePassword = async (req, res) => {
   try {
     // Extract user ID, current password, and new password from the request body
-    const { userId } = req.params;
-    const { currentPassword, newPassword } = req.body;
 
+    const { currentPassword, newPassword } = req.body;
     // Retrieve the user with the provided ID from the database
-    const user = await User.findById(userId);
+    const user = await User.findById(req.params.userId);
 
     // If the user does not exist, return a 404 error response
     if (!user) {
@@ -66,25 +73,26 @@ const changePassword = async (req, res) => {
     }
 
     // Check the format of the new password for security
-    if (newPassword.length < 8) {
+    if (newPassword.length < 7) {
       return res
         .status(400)
         .json({ message: "New password must be at least 8 characters long" });
     }
 
     // Compare the provided current password with the user's actual password using bcrypt's compare method
-    const isMatch = currentPassword === user.password;
 
     // If the passwords do not match, return a 400 error response
-    if (!isMatch) {
-      return res.status(400).json({ message: "Current password is incorrect" });
-    }
 
     // Update the user's password with the new one
-    user.password = newPassword;
+    const salt = await bcrypt.genSalt();
+
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    user.password = hashedPassword;
 
     // Save the changes to the user object in the database
     await user.save();
+    console.log(newPassword);
+    console.log(user);
 
     // Return a 200 success response with a message confirming the password change
     res.status(200).json({ message: "Password changed successfully" });
@@ -188,9 +196,12 @@ const updateUser = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Do not allow email changes
-    if (payload.email) {
-      return res.status(400).json({ message: "Email cannot be changed" });
+    // Check if the new email already exists in the database
+    if (payload.email && payload.email !== user.email) {
+      const existingUser = await User.findOne({ email: payload.email });
+      if (existingUser) {
+        return res.status(400).json({ message: "Email already in use" });
+      }
     }
 
     user.set({ ...payload });
@@ -213,9 +224,10 @@ const updateUser = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { username, password } = req.body;
     // Retrieve the user with the provided email from the database
-    const user = await User.findOne({ email });
+    console.log(username);
+    const user = await User.findOne({ username });
     // If the user does not exist, return a 404 error response
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -226,7 +238,7 @@ const login = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
-    const username = user.username;
+
     const role = user.role;
     // Generate a JSON Web Token (JWT) for the authenticated user
     const token = createToken({ username, role });
@@ -266,14 +278,12 @@ const login = async (req, res) => {
 
 const logout = async (req, res) => {
   try {
-        res.clearCookie('jwt', { httpOnly: true });
-        res.status(200).json({ message: "User logged out successfully" });
-    } catch (error) {
-        res.status(400).json({ error: error.message })
-    }
-}
-
-
+    res.clearCookie("jwt", { httpOnly: true });
+    res.status(200).json({ message: "User logged out successfully" });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
 
 export default {
   changePassword,
@@ -285,5 +295,5 @@ export default {
   getUser,
   login,
   getUserPassword,
-  logout
+  logout,
 };

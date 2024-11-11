@@ -47,7 +47,6 @@ router.delete(
 // *************** TOUR GUIDE ENDPOINTS ********
 // *********************************************
 // Create Tour Guide
-router.post("/create-tourguide", TourGuideController.createTourGuide);
 
 // Get Tour Guide Profile
 router.get(

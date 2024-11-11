@@ -1,7 +1,8 @@
 import axios from "axios";
 import { useState } from "react";
+import PropTypes from "prop-types";
 
-export default function ComplaintForm() {
+export default function ComplaintForm({ userId, touristId }) {
   const [formData, setFormData] = useState({
     title: "",
     category: "",
@@ -21,7 +22,7 @@ export default function ComplaintForm() {
 
     try {
       const response = await axios.post(
-        `http://localhost:8000/api/tourist/create-user-complaint/${"672e1234ee2a6ba6b26f1c1c"}`,
+        `http://localhost:8000/api/tourist/create-user-complaint/${userId}`,
         {
           title: formData.title,
           category: formData.category,
@@ -154,3 +155,8 @@ export default function ComplaintForm() {
     </div>
   );
 }
+
+ComplaintForm.propTypes = {
+  userId: PropTypes.string.isRequired,
+  touristId: PropTypes.string.isRequired,
+};

@@ -86,6 +86,13 @@ function SignUp() {
       return;
     }
 
+    const data_for_tourist = {
+      user: user_Id,
+      DOB: dob,
+      phone_number: mobile,
+      nationality: nationality,
+      is_student: isStudent,
+    };
     // Create FormData object
     const formData = new FormData();
     formData.append("user", user_Id);
@@ -116,7 +123,11 @@ function SignUp() {
     if (document) {
       formData.append("upFile", document); // Field name should match the backend
       console.log("File appended to FormData:", document);
-    } else {
+    } else if (
+      role === "TOUR_GUIDE" ||
+      role === "ADVERTISER" ||
+      role === "SELLER"
+    ) {
       alert("Please upload a document.");
       return;
     }
@@ -143,7 +154,16 @@ function SignUp() {
       try {
         console.log("Submitting to URL:", url);
         console.log("Role:", role);
-        const response = await axios.post(url, formData);
+        let response = "";
+        if (role === "TOURIST") {
+          const response2 = await axios.post(url, data_for_tourist);
+          response = response2;
+        } else {
+          const response2 = await axios.post(url, formData);
+          response = response2;
+        }
+        console.log(response.status);
+
         if (response.status === 201 || response.status === 200) {
           alert("Registration successful");
           setDone(true);

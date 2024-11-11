@@ -25,11 +25,11 @@ export default function ViewActivityAdv() {
     booking_open: true,
   });
 
-  const advid ="";
+  let advid = "";
 
   // Fetching activities and categories
   useEffect(() => {
-    advid=localStorage.getItem("roleId")
+    advid = localStorage.getItem("roleId");
     async function fetchActivities() {
       const response = await axios.get(
         "http://localhost:8000/api/get-advertiser-activities/${advid}"
@@ -93,18 +93,18 @@ export default function ViewActivityAdv() {
     try {
       // Retrieve advertiserId from localStorage
       const advertiserId = localStorage.getItem("roleId");
-      
+
       // Ensure the newActivity includes the advertiserId
       const activityWithAdvertiserId = {
         ...newActivity,
         advertiser: advertiserId,
       };
-  
+
       const response = await axios.post(
         "http://localhost:8000/api/advertiser/create-activity",
         activityWithAdvertiserId
       );
-  
+
       setActivities([...activities, response.data]);
       setNewActivity({
         title: "",

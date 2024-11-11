@@ -2,11 +2,17 @@ import axios from "axios";
 import { useState } from "react";
 
 import { useEffect } from "react";
+import PropTypes from "prop-types";
 
-const get_my_complaints = async (setLoading, setMockComplaints, setError) => {
+const get_my_complaints = async (
+  setLoading,
+  setMockComplaints,
+  setError,
+  userId
+) => {
   try {
     const response = await axios.get(
-      "http://localhost:8000/api/tourist/get-all-user-complaints/672e1234ee2a6ba6b26f1c1c"
+      `http://localhost:8000/api/tourist/get-all-user-complaints/${userId}`
     );
     if (response.data) {
       console.log(response.data);
@@ -23,13 +29,13 @@ const get_my_complaints = async (setLoading, setMockComplaints, setError) => {
   }
 };
 
-export default function ViewComplaints() {
+export default function ViewComplaints({ userId, touristId }) {
   const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [isloading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [mockComplaints, setMockComplaints] = useState([]);
   useEffect(() => {
-    get_my_complaints(setLoading, setMockComplaints, setError);
+    get_my_complaints(setLoading, setMockComplaints, setError, userId);
   }, []);
 
   const formatDate = (dateString) => {
@@ -199,3 +205,8 @@ export default function ViewComplaints() {
     </div>
   );
 }
+
+ViewComplaints.propTypes = {
+  userId: PropTypes.string.isRequired,
+  touristId: PropTypes.string.isRequired,
+};
