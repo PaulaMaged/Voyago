@@ -1,9 +1,11 @@
+// SignUp.js
+
 import { useState } from "react";
 import axios from "axios";
 import "./signUp.css";
 
 function SignUp() {
-  const [done, Setdone] = useState(false);
+  const [done, setDone] = useState(false);
   const [step, setStep] = useState(1);
   const [role, setRole] = useState("TOURIST");
   const [username, setUsername] = useState("");
@@ -20,9 +22,13 @@ function SignUp() {
   const [description, setDescription] = useState("");
   const [nationality, setNationality] = useState("");
   const [isStudent, setIsStudent] = useState(false);
-  const [user_Id, SetUserId] = useState(null);
+  const [user_Id, setUserId] = useState(null);
+  const [document, setDocument] = useState(null); // New state for the uploaded file
 
-  const handleUploading = (e) => {};
+  const handleUploading = (e) => {
+    setDocument(e.target.files[0]); // Store the selected file in state
+    console.log("Selected file:", e.target.files[0]);
+  };
 
   const handleNext = (e) => {
     e.preventDefault();
@@ -33,7 +39,7 @@ function SignUp() {
       role: role.toUpperCase(),
     };
     const register_user = async () => {
-      console.log(step1Data);
+      console.log("Step 1 Data:", step1Data);
       try {
         const response = await axios.post(
           "http://localhost:8000/api/user/create-user",
@@ -41,7 +47,7 @@ function SignUp() {
         );
         if (response.status === 201) {
           setStep(2);
-          SetUserId(response.data._id);
+          setUserId(response.data._id);
         } else {
           throw new Error("Registration failed");
         }
@@ -74,36 +80,47 @@ function SignUp() {
       setMobile("");
       return;
     }
-    if ((role == "ADVERTISER") & !mobilePattern.test(hotline)) {
+    if (role === "ADVERTISER" && !mobilePattern.test(hotline)) {
       alert("Please enter a valid hotline number.");
       setHotline("");
       return;
     }
 
-    // Handle form submission logic here
+    // Create FormData object
+    const formData = new FormData();
+    formData.append("user", user_Id);
+    if (role === "TOURIST" || role === "TOUR_GUIDE") {
+      formData.append("dob", dob);
+      formData.append("phone_number", mobile);
+    }
+    if (role === "TOURIST") {
+      formData.append("nationality", nationality);
+      formData.append("is_student", isStudent);
+    }
+    if (role === "TOUR_GUIDE") {
+      formData.append("years_of_experience", yearsOfExperience);
+      formData.append("previous_work", previousWork);
+    }
+    if (role === "ADVERTISER") {
+      formData.append("URL_Website", website);
+      formData.append("company_hotline", hotline);
+      formData.append("company_name", companyName);
+      formData.append("contact_info", companyInfo);
+    }
+    if (role === "SELLER") {
+      formData.append("store_name", companyName);
+      formData.append("description", description);
+    }
 
-    const step2Data = {
-      user: user_Id,
-      dob: role === "TOURIST" || role === "TOUR_GUIDE" ? dob : undefined,
-      phone_number:
-        role === "TOURIST" || role === "TOUR_GUIDE" || role === "ADVERTISER"
-          ? mobile
-          : undefined,
+    // Append the file
+    if (document) {
+      formData.append("upFile", document); // Field name should match the backend
+      console.log("File appended to FormData:", document);
+    } else {
+      alert("Please upload a document.");
+      return;
+    }
 
-      nationality: role === "TOURIST" ? nationality : undefined,
-      is_student: role === "TOURIST" ? isStudent : undefined,
-      years_of_experience:
-        role === "TOUR_GUIDE" ? yearsOfExperience : undefined,
-      previous_work: role === "TOUR_GUIDE" ? previousWork : undefined,
-      URL_Website: role === "ADVERTISER" ? website : undefined,
-      company_hotline: role === "ADVERTISER" ? hotline : undefined,
-      company_name:
-        role === "ADVERTISER" || role === "SELLER" ? companyName : undefined,
-      store_name: role === "SELLER" ? companyName : undefined,
-      contact_info: role === "ADVERTISER" ? companyInfo : undefined,
-      description: role === "SELLER" ? description : undefined,
-    };
-    console.log({ step2Data });
     let url = "";
     switch (role) {
       case "TOURIST":
@@ -121,14 +138,15 @@ function SignUp() {
       default:
         url = "http://localhost:8000/api/user/register";
     }
+
     const registerUser = async () => {
       try {
-        console.log(url);
-        console.log(role);
-        const response = await axios.post(url, step2Data);
+        console.log("Submitting to URL:", url);
+        console.log("Role:", role);
+        const response = await axios.post(url, formData);
         if (response.status === 201 || response.status === 200) {
           alert("Registration successful");
-          Setdone(true);
+          setDone(true);
           setTimeout(() => {
             window.location.href = "http://localhost:5173/";
           }, 3000);
@@ -136,11 +154,12 @@ function SignUp() {
           throw new Error("Registration failed");
         }
       } catch (err) {
-        console.error(err);
+        console.error("Error during registration:", err);
+        alert("An error occurred during registration.");
       }
     };
 
-    registerUser(url);
+    registerUser();
   };
 
   return (
@@ -148,11 +167,8 @@ function SignUp() {
       {done && (
         <div>
           <h1>
-            Registration has been Successful!, Please wait until we Review your
-            Application
-            {/* {setTimeout(() => {
-              window.location.href = "http://localhost:5173/";
-            }, 3000)} */}
+            Registration has been successful! Please wait until we review your
+            application.
           </h1>
         </div>
       )}
@@ -166,7 +182,7 @@ function SignUp() {
           >
             <option value="TOURIST">Tourist</option>
             <option value="ADVERTISER">Advertiser</option>
-            <option value="TOUR_GUIDE">TourGuide</option>
+            <option value="TOUR_GUIDE">Tour Guide</option>
             <option value="SELLER">Seller</option>
           </select>
 
@@ -202,7 +218,7 @@ function SignUp() {
       )}
 
       {step === 2 && !done && role === "TOURIST" && (
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} encType="multipart/form-data">
           <label htmlFor="dob">Date of Birth:</label>
           <input
             type="date"
@@ -244,7 +260,7 @@ function SignUp() {
       )}
 
       {step === 2 && !done && role === "TOUR_GUIDE" && (
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} encType="multipart/form-data">
           <label htmlFor="dob">Date of Birth:</label>
           <input
             type="date"
@@ -276,7 +292,7 @@ function SignUp() {
             required
           />
 
-          <label htmlFor="previousWork">Previous Work (if exists):</label>
+          <label htmlFor="previousWork">Previous Work (if any):</label>
           <input
             type="text"
             id="previousWork"
@@ -285,17 +301,17 @@ function SignUp() {
           />
 
           <p>
-            Please upload a doucment which includes Your ID and certificates
-            registery card
+            Please upload a document that includes your ID and certificates or
+            registry card.
           </p>
 
           <label>Upload Document:</label>
           <input
             type="file"
             id="document"
-            name="upFile"
+            name="upFile" // Name should match the backend field
             required
-            onChange={(e) => handleUploading(e)}
+            onChange={handleUploading}
           />
 
           <button type="submit">Submit</button>
@@ -303,7 +319,7 @@ function SignUp() {
       )}
 
       {step === 2 && !done && role === "ADVERTISER" && (
-        <form onSubmit={handleSubmit} enctype="multipart/form-data">
+        <form onSubmit={handleSubmit} encType="multipart/form-data">
           <label htmlFor="website">Link to my website:</label>
           <input
             type="url"
@@ -313,7 +329,7 @@ function SignUp() {
             required
           />
 
-          <label htmlFor="hotline">Company_Hotline:</label>
+          <label htmlFor="hotline">Company Hotline:</label>
           <input
             type="tel"
             id="hotline"
@@ -341,17 +357,17 @@ function SignUp() {
             required
           />
           <p>
-            Please upload a doucment which includes the ID and taxation
-            registery card
+            Please upload a document that includes the ID and taxation registry
+            card.
           </p>
 
           <label>Upload Document:</label>
           <input
             type="file"
             id="document"
-            name="upFile"
+            name="upFile" // Name should match the backend field
             required
-            onChange={(e) => handleUploading(e)}
+            onChange={handleUploading}
           />
 
           <button type="submit">Submit</button>
@@ -359,8 +375,8 @@ function SignUp() {
       )}
 
       {step === 2 && !done && role === "SELLER" && (
-        <form onSubmit={handleSubmit} enctype="multipart/form-data">
-          <label htmlFor="companyName">store Name:</label>
+        <form onSubmit={handleSubmit} encType="multipart/form-data">
+          <label htmlFor="companyName">Store Name:</label>
           <input
             type="text"
             id="companyName"
@@ -376,17 +392,17 @@ function SignUp() {
             required
           />
           <p>
-            Please upload a doucment which includes Your ID and taxation
-            registery card registery card
+            Please upload a document that includes your ID and taxation registry
+            card.
           </p>
 
           <label>Upload Document:</label>
           <input
             type="file"
             id="document"
-            name="upFile"
+            name="upFile" // Name should match the backend field
             required
-            onChange={(e) => handleUploading(e)}
+            onChange={handleUploading}
           />
           <button type="submit">Submit</button>
         </form>
