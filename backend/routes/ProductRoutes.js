@@ -1,8 +1,8 @@
-import ProductController from "../controllers/ProductController";
-import upload from "../middlewares/uploadMiddleware";
+import ProductController from "../controllers/ProductController.js";
+import upload from "../middlewares/uploadMiddleware.js";
 import Router from "express";
 
-const router = Router();
+const router = Router.Router();
 
 // ====================================
 // Product Archive and Unarchive Router
@@ -73,6 +73,7 @@ router.get("/retrieve-all-orders", ProductController.getAllOrders);
 
 // Retrieve an order by ID
 router.get("/retrieve-order-by-id/:id", ProductController.getOrderById);
+router.get('/retrieve-all-orders-by-touristid/:touristId', ProductController.getAllOrdersForTourist);
 
 // Update an order by ID
 router.put("/update-order-by-id/:id", ProductController.updateOrderById);

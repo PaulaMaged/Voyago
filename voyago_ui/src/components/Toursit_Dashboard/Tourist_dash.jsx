@@ -7,6 +7,8 @@ import ViewActivityGuest from "../viewActivityGuest";
 import ViewItineraryGuest from "../viewItineraryGuest";
 import ViewLandmarks from "../viewLandmarks";
 import ViewProductTourist from "../viewProductTourist";
+import ViewPurchasedProducts from "../viewPurchasedProducts";
+
 
 
 // Placeholder components for each section
@@ -36,6 +38,8 @@ export default function TouristDashboard() {
         return <ViewLandmarks />;  
       case "products":
         return <ViewProductTourist />;  
+      case "purchasedProducts":
+        return <ViewPurchasedProducts />;  
       default:
         return <Profile />;
     }
@@ -67,6 +71,9 @@ export default function TouristDashboard() {
           </button>
           <button onClick={() => setActiveSection("products")}>
             View Products
+          </button>
+          <button onClick={() => setActiveSection("purchasedProducts")}>
+            View Purchased Products
           </button>
         </nav>
       </aside>

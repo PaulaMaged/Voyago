@@ -599,12 +599,7 @@ const rateProduct = async (req, res) => {
 
     // Save the new review
     const savedReview = await newReview.save();
-    await Product.findByIdAndUpdate(
-      productId,
-      { $push: { reviews: savedReview._id } },
-      { new: true } // Returns the updated document
-    );
-
+   
     // Update the product to include the new review
     await Product.findByIdAndUpdate(
       productId,
