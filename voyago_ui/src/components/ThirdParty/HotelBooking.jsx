@@ -1,86 +1,93 @@
-// src/HotelBooking.js
+// HotelSearch.jsx
 import React, { useState } from 'react';
 import axios from 'axios';
+import HotelBooking from './HotelBooking';
 
-const HotelBooking = ({ hotel }) => {
-  const [userDetails, setUserDetails] = useState({
-    name: '',
-    email: '',
-    phone: '',
-  });
-  const [bookingStatus, setBookingStatus] = useState(null);
+const HotelSearch = () => {
+  const [cityCode, setCityCode] = useState('');
+  const [hotels, setHotels] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const handleBooking = async (e) => {
+  const handleSearch = async (e) => {
     e.preventDefault();
-
-    // Basic validation
-    if (!userDetails.name || !userDetails.email || !userDetails.phone) {
-      setError('Please fill in all user details.');
+    if (!cityCode) {
+      setError('Please enter a city code.');
       return;
     }
+    setLoading(true);
+    setError(null);
+    setHotels([]); // Clear previous results
 
     try {
-      const response = await axios.post('http://localhost:5000/api/book-hotel', {
-        hotelId: hotel.hotel.hotelId,
-        userDetails,
-      });
-
-      setBookingStatus(response.data.message);
-      setError(null);
+      const response = await axios.get(
+        `http://localhost:8000/api/search-hotels?cityCode=${cityCode}`
+      );
+      setHotels(response.data.data || []);
     } catch (err) {
-      console.error(err);
-      setError('Failed to book hotel. Please try again.');
+      console.error('Error fetching hotels:', err);
+      setError(
+        err.response && err.response.data && err.response.data.error
+          ? err.response.data.error
+          : 'Failed to fetch hotels. Please try again.'
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div style={styles.container}>
-      <h3>Book: {hotel.hotel.name}</h3>
-      <form onSubmit={handleBooking} style={styles.form}>
-        <h4>User Details</h4>
+      <h2>Search Hotels</h2>
+      <form onSubmit={handleSearch} style={styles.form}>
         <input
           type="text"
-          placeholder="Name"
-          value={userDetails.name}
-          onChange={(e) => setUserDetails({ ...userDetails, name: e.target.value })}
+          placeholder="City Code (e.g., PAR)"
+          value={cityCode}
+          onChange={(e) => setCityCode(e.target.value.toUpperCase())}
           required
           style={styles.input}
         />
-        <input
-          type="email"
-          placeholder="Email"
-          value={userDetails.email}
-          onChange={(e) => setUserDetails({ ...userDetails, email: e.target.value })}
-          required
-          style={styles.input}
-        />
-        <input
-          type="tel"
-          placeholder="Phone"
-          value={userDetails.phone}
-          onChange={(e) => setUserDetails({ ...userDetails, phone: e.target.value })}
-          required
-          style={styles.input}
-        />
-
         <button type="submit" style={styles.button}>
-          Confirm Booking
+          Search
         </button>
       </form>
 
-      {bookingStatus && <div style={styles.success}>{bookingStatus}</div>}
+      {loading && <div>Loading...</div>}
       {error && <div style={styles.error}>{error}</div>}
+
+      <div style={styles.results}>
+        {hotels.length > 0 ? (
+          hotels.map((hotel) => (
+            <div key={hotel.hotelId} style={styles.hotelCard}>
+              <h3>{hotel.name}</h3>
+              <p>
+                {hotel.address?.lines
+                  ? hotel.address.lines.join(', ')
+                  : hotel.address
+                  ? `${hotel.address.cityName}, ${hotel.address.countryCode}`
+                  : 'Address not available'}
+              </p>
+              {/* Include the HotelBooking component and pass the hotel as a prop */}
+              <HotelBooking hotel={hotel} />
+            </div>
+          ))
+        ) : (
+          !loading &&
+          !error && <p>No hotels found. Please try a different search.</p>
+        )}
+      </div>
     </div>
   );
 };
 
 const styles = {
   container: {
-    border: '1px solid #28a745',
-    padding: '15px',
+    maxWidth: '800px',
+    margin: '20px auto',
+    padding: '20px',
+    border: '1px solid #ddd',
     borderRadius: '8px',
-    marginTop: '20px',
   },
   form: {
     display: 'flex',
@@ -88,25 +95,30 @@ const styles = {
     gap: '10px',
   },
   input: {
-    padding: '8px',
-    fontSize: '14px',
+    padding: '10px',
+    fontSize: '16px',
   },
   button: {
     padding: '10px',
-    backgroundColor: '#28a745',
+    backgroundColor: '#0071c2',
     color: '#fff',
     border: 'none',
     cursor: 'pointer',
     fontSize: '16px',
   },
-  success: {
-    marginTop: '10px',
-    color: 'green',
-  },
   error: {
     marginTop: '10px',
     color: 'red',
   },
+  results: {
+    marginTop: '20px',
+  },
+  hotelCard: {
+    border: '1px solid #ccc',
+    padding: '15px',
+    borderRadius: '8px',
+    marginBottom: '15px',
+  },
 };
 
-export default HotelBooking;
+export default HotelSearch;

@@ -13,7 +13,6 @@ import ActivityReview from "../models/ActivityReview.js";
 import TourGuide from "../models/TourGuide.js"; // Added
 import Product from "../models/Product.js"; // Added
 import Complain from "../models/Complaint.js";
-import ActivityBooking from "../models/ActivityBooking.js";
 /**
  * Create a new tourist.
  * @param {Object} req - Express request object.
