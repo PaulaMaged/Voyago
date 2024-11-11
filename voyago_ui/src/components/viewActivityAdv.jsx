@@ -25,14 +25,14 @@ export default function ViewActivityAdv() {
     booking_open: true,
   });
 
-  const id ="";
+  const advid ="";
 
   // Fetching activities and categories
   useEffect(() => {
-    id=localStorage.getItem("roleId")
+    advid=localStorage.getItem("roleId")
     async function fetchActivities() {
       const response = await axios.get(
-        "http://localhost:8000/api/get-advertiser-activities/${id}"
+        "http://localhost:8000/api/get-advertiser-activities/${advid}"
       );
       setActivities(response.data);
     }
@@ -91,10 +91,20 @@ export default function ViewActivityAdv() {
   // Handle Create Activity
   const handleCreateActivity = async () => {
     try {
+      // Retrieve advertiserId from localStorage
+      const advertiserId = localStorage.getItem("roleId");
+      
+      // Ensure the newActivity includes the advertiserId
+      const activityWithAdvertiserId = {
+        ...newActivity,
+        advertiser: advertiserId,
+      };
+  
       const response = await axios.post(
         "http://localhost:8000/api/advertiser/create-activity",
-        newActivity
+        activityWithAdvertiserId
       );
+  
       setActivities([...activities, response.data]);
       setNewActivity({
         title: "",
@@ -109,7 +119,6 @@ export default function ViewActivityAdv() {
         booking_open: true,
       });
     } catch (error) {
-      console.error("Error creating activity:", error);
       console.error("Error creating activity:", error);
     }
   };
