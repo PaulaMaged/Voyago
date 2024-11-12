@@ -15,8 +15,11 @@ import ViewActivityAdv from "./components/viewActivityAdv";
 
 import ViewActivityGuest from "./components/viewActivityGuest";
 import ViewItineraryGuest from "./components/viewItineraryGuest";
+import ViewItineraryGuide from "./components/ViewItineraryGuide";
+
 import ViewLandmarks from "./components/viewLandmarks";
 import ViewProductAdmin from "./components/viewProductAdmin";
+import ViewProductSeller from "./components/viewProductSeller";
 import ViewProductTourist from "./components/viewProductTourist";
 import EditProduct from "./components/editProduct";
 import CrudCategory from "./components/Admin_Dashboard/manageActCategories";
@@ -76,10 +79,18 @@ function App() {
             path="/viewItineraryGuest"
             element={<ViewItineraryGuest />}
           ></Route>
+          <Route
+            path="/viewItineraryGuide"
+            element={<ViewItineraryGuide />}
+          ></Route>
           <Route path="/viewLandmarks" element={<ViewLandmarks />}></Route>
           <Route
             path="/viewProductAdmin"
             element={<ViewProductAdmin />}
+          ></Route>
+          <Route
+            path="/viewProductSeller"
+            element={<ViewProductSeller />}
           ></Route>
           <Route
             path="/viewProductTourist"

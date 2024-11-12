@@ -32,6 +32,8 @@ router.get("/get-all-users", UserController.getAllUsers);
 // Get User Route
 router.get("/get-user/:userId", UserController.getUser);
 
+//Get new users
+router.get("/get-new-users", UserController.getNewUsers);
 
 router.post("/login", UserController.login);
 // ================================= {{

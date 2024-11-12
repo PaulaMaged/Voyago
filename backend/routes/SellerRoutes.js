@@ -52,6 +52,7 @@ router.post("/create-product", SellerController.createProduct);
 
 // Get All Products
 router.get("/get-all-products", SellerController.getAllProducts);
+router.get("/get-all-seller-products/:sellerId",SellerController.getAllProductsBySeller);
 
 // Get Product by ID
 router.get("/get-product/:productId", SellerController.getProduct);

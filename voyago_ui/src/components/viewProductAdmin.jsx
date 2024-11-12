@@ -58,6 +58,17 @@ const ViewProductAdmin = () => {
     }
   };
 
+  const deleteProduct = async (productId) => {
+    try {
+      await axios.delete(
+        `http://localhost:8000/api/seller/delete-product/${productId}`
+      );
+      fetchProducts(); // Refresh the product list after deletion
+    } catch (error) {
+      console.error("Error deleting product:", error);
+    }
+  };
+
   const filteredProducts = products
     .filter((product) =>
       product.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -221,6 +232,26 @@ const ViewProductAdmin = () => {
                 style={{ marginLeft: "10px" }}
               >
                 {product.archived ? "Unarchive" : "Archive"}
+              </button>
+              <button
+                onClick={() => deleteProduct(product._id)}
+                style={{
+                  marginLeft: "10px",
+                  backgroundColor: "red",
+                  color: "white",
+                }}
+              >
+                Delete
+              </button>
+              <button
+                onClick={() => deleteProduct(product._id)}
+                style={{
+                  marginLeft: "10px",
+                  backgroundColor: "red",
+                  color: "white",
+                }}
+              >
+                Delete
               </button>
             </div>
           ))}

@@ -11,6 +11,7 @@ export default function ViewPurchasedProducts() {
   const [sortRating, setSortRating] = useState("none");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -23,7 +24,7 @@ export default function ViewPurchasedProducts() {
   const fetchPurchasedProducts = async () => {
     try {
       setLoading(true);
-      const touristId = "672e1322ee2a6ba6b26f1c2a"; // Example tourist ID
+      let touristId = localStorage.getItem("roleId"); // Example tourist ID localStorage.getItem("roleId")
       if (!touristId) {
         throw new Error("Tourist ID not found");
       }
@@ -81,16 +82,17 @@ export default function ViewPurchasedProducts() {
 
   const handleRateProduct = async (productId) => {
     try {
-      const touristId = "672e1322ee2a6ba6b26f1c2a"; // Example tourist ID
+      let touristId = localStorage.getItem("roleId"); // Example tourist ID localStorage.getItem("roleId")
+
       if (!touristId) {
         throw new Error("Tourist ID not found");
       }
 
       const response = await axios.post(
-        `http://localhost:8000/api/tourist/rate-product/${touristId}`, // Tourist ID in the URL
+        `http://localhost:8000/api/tourist/tourist-rate-product/${touristId}`,
         {
           product: productId,
-          rating,
+          rating: rating,
           comment: review,
         },
         {
@@ -100,19 +102,27 @@ export default function ViewPurchasedProducts() {
         }
       );
 
-      // Check if the response is successful
       if (response.status === 200) {
         await fetchPurchasedProducts();
         setRating(0);
         setReview("");
         setSelectedProduct(null);
         setIsModalOpen(false);
+        setErrorMessage(""); // Clear any existing error message
       } else {
         throw new Error("Failed to submit rating and review");
       }
     } catch (error) {
-      console.error("Error rating product:", error);
-      setError("Failed to rate product. Please try again later.");
+      if (error.response && error.response.status === 400) {
+        // If the error is a 400 Bad Request, display the error message from the server
+        setErrorMessage(error.response.data.message);
+      } else {
+        // Handle any other errors
+        console.error("Error rating product:", error);
+        setErrorMessage(
+          "An unexpected error occurred. Please try again later."
+        );
+      }
     }
   };
 
@@ -251,6 +261,12 @@ export default function ViewPurchasedProducts() {
               {selectedProduct.userReview ? "Update" : "Add"} Review for{" "}
               {selectedProduct.name}
             </h2>
+
+            {/* Display error message */}
+            {errorMessage && (
+              <div className="error-message">{errorMessage}</div>
+            )}
+
             <div className="rating-input">
               {[1, 2, 3, 4, 5].map((star) => (
                 <span

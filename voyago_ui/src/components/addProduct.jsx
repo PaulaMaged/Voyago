@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const AddProduct = ({ fetchProducts }) => {
@@ -8,10 +8,21 @@ const AddProduct = ({ fetchProducts }) => {
     price: '',
     available_quantity: '',
     archived: false,
+    seller: '', // Initially empty, will be set in useEffect
   });
-  const [file, setFile] = useState(null);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+
+  // Retrieve seller ID from localStorage or default to a static value
+  let sellerId = localStorage.getItem('roleId');  // Ideally this should be fetched from localStorage
+
+  useEffect(() => {
+    // Set seller ID in the productData state only once
+    setProductData(prevData => ({
+      ...prevData,
+      seller: sellerId, // Ensure seller ID is added initially
+    }));
+  }, [sellerId]); // Empty dependency array ensures it runs only once
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -29,28 +40,19 @@ const AddProduct = ({ fetchProducts }) => {
     }));
   };
 
-  const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
-  };
-
   const createProduct = async (e) => {
     e.preventDefault();
     setError(null);
     setSuccess(false);
-    try {
-      const formData = new FormData();
-      Object.keys(productData).forEach(key => {
-        formData.append(key, productData[key]);
-      });
-      if (file) {
-        formData.append('picture', file);
-      }
 
-      const response = await axios.post('http://localhost:8000/api/seller/create-product', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+    // Check if all required fields are filled
+    if (!productData.name || !productData.price || !productData.available_quantity) {
+      setError('Please fill in all required fields.');
+      return;
+    }
+
+    try {
+      const response = await axios.post('http://localhost:8000/api/seller/create-product', productData);
 
       if (response.status === 201) {
         fetchProducts();
@@ -61,8 +63,8 @@ const AddProduct = ({ fetchProducts }) => {
           price: '',
           available_quantity: '',
           archived: false,
+          seller: '', // Clear the seller field after the product is added
         });
-        setFile(null);
       } else {
         setError('Failed to add product. Please try again.');
       }
@@ -127,15 +129,6 @@ const AddProduct = ({ fetchProducts }) => {
             name="archived"
             checked={productData.archived}
             onChange={handleCheckboxChange}
-          />
-        </label>
-        <label>
-          Product Image:
-          <input
-            type="file"
-            name="picture"
-            onChange={handleFileChange}
-            accept="image/*"
           />
         </label>
         <button type="submit">Add Product</button>

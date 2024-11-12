@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import useFetch from "../hooks/useFetch";
 import currencyConversions from "../helpers/currencyConversions";
 import axios from "axios";
 
@@ -12,6 +11,7 @@ export default function ViewActivityAdv() {
 
   const [activities, setActivities] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [tags, setTags] = useState([]);
   const [editingActivity, setEditingActivity] = useState(null);
   const [newActivity, setNewActivity] = useState({
     title: "",
@@ -21,32 +21,54 @@ export default function ViewActivityAdv() {
     price: 0,
     category: "",
     discount: 0,
-    location: "",
     tags: [],
     booking_open: true,
   });
 
-  let advid = "";
-
-  // Fetching activities and categories
+  // Fetching activities, categories, and tags
   useEffect(() => {
-    advid = localStorage.getItem("roleId");
+    let advid = localStorage.getItem("roleId");
+
     async function fetchActivities() {
-      const response = await axios.get(
-        "http://localhost:8000/api/get-advertiser-activities/${advid}"
-      );
-      setActivities(response.data);
+      try {
+        const response = await axios.get(
+          `http://localhost:8000/api/advertiser/get-advertiser-activities/${advid}`
+        );
+        setActivities(response.data);
+      } catch (error) {
+        console.error("Error fetching activities:", error);
+      }
     }
 
     async function fetchCategories() {
-      const response = await axios.get(
-        "http://localhost:8000/api/admin/get-all-activity-categories"
-      );
-      setCategories(response.data);
+      try {
+        const response = await axios.get(
+          "http://localhost:8000/api/admin/get-all-activity-categories"
+        );
+        setCategories(response.data);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
     }
 
-    fetchActivities();
-    fetchCategories();
+    async function fetchTags() {
+      try {
+        const response = await axios.get(
+          "http://localhost:8000/api/tourism-governor/get-all-tags"
+        );
+        setTags(response.data);
+      } catch (error) {
+        console.error("Error fetching tags:", error);
+      }
+    }
+
+    if (advid) {
+      fetchActivities();
+      fetchCategories();
+      fetchTags();
+    } else {
+      console.error("Advertiser ID not found in localStorage");
+    }
   }, []);
 
   // Filter and Sort Logic
@@ -92,21 +114,30 @@ export default function ViewActivityAdv() {
     }));
   };
 
+  // Handle Tag Selection
+  const handleTagChange = (e) => {
+    const selectedOptions = Array.from(
+      e.target.selectedOptions,
+      (option) => option.value
+    );
+    setNewActivity((prev) => ({
+      ...prev,
+      tags: selectedOptions,
+    }));
+  };
+
   // Handle Create Activity
   const handleCreateActivity = async () => {
     try {
-      // Retrieve advertiserId from localStorage
       const advertiserId = localStorage.getItem("roleId");
-
-      // Ensure the newActivity includes the advertiserId
-      const activityWithAdvertiserId = {
+      const activityData = {
         ...newActivity,
         advertiser: advertiserId,
       };
 
       const response = await axios.post(
         "http://localhost:8000/api/advertiser/create-activity",
-        activityWithAdvertiserId
+        activityData
       );
 
       setActivities([...activities, response.data]);
@@ -118,7 +149,6 @@ export default function ViewActivityAdv() {
         price: 0,
         category: "",
         discount: 0,
-        location: "",
         tags: [],
         booking_open: true,
       });
@@ -132,15 +162,18 @@ export default function ViewActivityAdv() {
     setEditingActivity(activity);
     setNewActivity({
       ...activity,
+      tags: activity.tags.map((tag) => tag._id),
     });
   };
 
   // Handle Update Activity
   const handleUpdateActivity = async () => {
     try {
+      const activityData = { ...newActivity };
+
       const response = await axios.put(
         `http://localhost:8000/api/advertiser/update-activity/${editingActivity._id}`,
-        newActivity
+        activityData
       );
       setActivities(
         activities.map((activity) =>
@@ -156,12 +189,10 @@ export default function ViewActivityAdv() {
         price: 0,
         category: "",
         discount: 0,
-        location: "",
         tags: [],
         booking_open: true,
       });
     } catch (error) {
-      console.error("Error updating activity:", error);
       console.error("Error updating activity:", error);
     }
   };
@@ -174,7 +205,6 @@ export default function ViewActivityAdv() {
       );
       setActivities(activities.filter((activity) => activity._id !== id));
     } catch (error) {
-      console.error("Error deleting activity:", error);
       console.error("Error deleting activity:", error);
     }
   };
@@ -283,19 +313,24 @@ export default function ViewActivityAdv() {
             </option>
           ))}
         </select>
+        <select
+          name="tags"
+          value={newActivity.tags}
+          onChange={handleTagChange}
+          style={styles.select}
+        >
+          <option value="">Select Tag</option>
+          {tags.map((tag) => (
+            <option key={tag._id} value={tag._id}>
+              {tag.tag_name}
+            </option>
+          ))}
+        </select>
         <input
           type="number"
           name="discount"
           placeholder="Discount (%)"
           value={newActivity.discount}
-          onChange={handleInputChange}
-          style={styles.input}
-        />
-        <input
-          type="text"
-          name="location"
-          placeholder="Location"
-          value={newActivity.location}
           onChange={handleInputChange}
           style={styles.input}
         />
@@ -334,6 +369,10 @@ export default function ViewActivityAdv() {
               </p>
               <p>
                 <strong>Category:</strong> {activity.category?.category}
+              </p>
+              <p>
+                <strong>Tags:</strong>{" "}
+                {activity.tags.map((tag) => tag.tag_name).join(", ")}
               </p>
               <button
                 onClick={() => handleEditActivity(activity)}

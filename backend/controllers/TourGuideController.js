@@ -172,7 +172,29 @@ const updateItinerary = async (req, res) => {
       req.params.itineraryId,
       { $set: req.body },
       { new: true }
-    );
+    ).populate({
+      path: "activities",
+      populate: [
+        {
+          path: "tags",
+          model: "Tag",
+        },
+        {
+          path: "category",
+          model: "ActivityCategory",
+        },
+      ],
+    })
+    .populate({
+      path: "tour_guide",
+      populate: {
+        path: "user",
+        model: "User",
+        select: "username", // Assuming you want to include the username
+      },
+    })
+    .populate("pick_up")
+    .populate("drop_off");
     if (!updatedItinerary)
       return res.status(404).json({ message: "Itinerary not found" });
     res.status(200).json(updatedItinerary);
@@ -209,7 +231,29 @@ const getTourGuideItineraries = async (req, res) => {
   try {
     const itineraries = await Itinerary.find({
       tour_guide: req.params.tourGuideId,
-    });
+    }).populate({
+      path: "activities",
+      populate: [
+        {
+          path: "tags",
+          model: "Tag",
+        },
+        {
+          path: "category",
+          model: "ActivityCategory",
+        },
+      ],
+    })
+    .populate({
+      path: "tour_guide",
+      populate: {
+        path: "user",
+        model: "User",
+        select: "username", // Assuming you want to include the username
+      },
+    })
+    .populate("pick_up")
+    .populate("drop_off");
     res.status(200).json(itineraries);
   } catch (error) {
     res.status(500).json({ error: error.message });

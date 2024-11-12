@@ -120,7 +120,10 @@ const updateActivity = async (req, res) => {
       req.params.activityId,
       { $set: req.body },
       { new: true }
-    );
+    ).populate("advertiser")
+    .populate("category")
+    .populate("location")
+    .populate("tags");
     if (!updatedActivity)
       return res.status(404).json({ message: "Activity not found" });
     res.status(200).json(updatedActivity);
@@ -166,7 +169,10 @@ const getAdvertiserActivities = async (req, res) => {
   try {
     const activities = await Activity.find({
       advertiser: req.params.advertiserId,
-    });
+    }).populate("advertiser")
+    .populate("category")
+    .populate("location")
+    .populate("tags");
     res.status(200).json(activities);
   } catch (error) {
     res.status(500).json({ error: error.message });
