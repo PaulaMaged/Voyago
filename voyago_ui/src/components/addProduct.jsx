@@ -1,21 +1,33 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import currencyConversions from "../helpers/currencyConversions";
 
 const AddProduct = ({ fetchProducts }) => {
   const [productData, setProductData] = useState({
-    name: '',
-    description: '',
-    price: '',
-    available_quantity: '',
+    name: "",
+    description: "",
+    price: "",
+    available_quantity: "",
     archived: false,
+    seller: "", // Initially empty, will be set in useEffect
   });
-  const [file, setFile] = useState(null);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
 
+  // Retrieve seller ID from localStorage or default to a static value
+  let sellerId = localStorage.getItem("roleId"); // Ideally this should be fetched from localStorage
+
+  useEffect(() => {
+    // Set seller ID in the productData state only once
+    setProductData((prevData) => ({
+      ...prevData,
+      seller: sellerId, // Ensure seller ID is added initially
+    }));
+  }, [sellerId]); // Empty dependency array ensures it runs only once
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setProductData(prevData => ({
+    setProductData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
@@ -23,60 +35,59 @@ const AddProduct = ({ fetchProducts }) => {
 
   const handleCheckboxChange = (e) => {
     const { name, checked } = e.target;
-    setProductData(prevData => ({
+    setProductData((prevData) => ({
       ...prevData,
       [name]: checked,
     }));
-  };
-
-  const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
   };
 
   const createProduct = async (e) => {
     e.preventDefault();
     setError(null);
     setSuccess(false);
-    try {
-      const formData = new FormData();
-      Object.keys(productData).forEach(key => {
-        formData.append(key, productData[key]);
-      });
-      if (file) {
-        formData.append('picture', file);
-      }
 
-      const response = await axios.post('http://localhost:8000/api/seller/create-product', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+    // Check if all required fields are filled
+    if (
+      !productData.name ||
+      !productData.price ||
+      !productData.available_quantity
+    ) {
+      setError("Please fill in all required fields.");
+      return;
+    }
+
+    try {
+      productData.price = currencyConversions.convertToDB(productData.price);
+      const response = await axios.post(
+        "http://localhost:8000/api/seller/create-product",
+        productData
+      );
 
       if (response.status === 201) {
         fetchProducts();
         setSuccess(true);
         setProductData({
-          name: '',
-          description: '',
-          price: '',
-          available_quantity: '',
+          name: "",
+          description: "",
+          price: "",
+          available_quantity: "",
           archived: false,
+          seller: "", // Clear the seller field after the product is added
         });
-        setFile(null);
       } else {
-        setError('Failed to add product. Please try again.');
+        setError("Failed to add product. Please try again.");
       }
     } catch (error) {
-      console.error('Error adding product:', error);
-      setError('An error occurred while adding the product. Please try again.');
+      console.error("Error adding product:", error);
+      setError("An error occurred while adding the product. Please try again.");
     }
   };
 
   return (
     <div>
       <h2>Add New Product</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {success && <p style={{ color: 'green' }}>Product added successfully!</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
+      {success && <p style={{ color: "green" }}>Product added successfully!</p>}
       <form onSubmit={createProduct}>
         <label>
           Name:
@@ -127,15 +138,6 @@ const AddProduct = ({ fetchProducts }) => {
             name="archived"
             checked={productData.archived}
             onChange={handleCheckboxChange}
-          />
-        </label>
-        <label>
-          Product Image:
-          <input
-            type="file"
-            name="picture"
-            onChange={handleFileChange}
-            accept="image/*"
           />
         </label>
         <button type="submit">Add Product</button>

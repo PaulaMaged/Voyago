@@ -55,12 +55,17 @@ const NavigationPage = () => {
           </li>
           <li style={styles.li}>
             <NavLink to="/viewActivityGuest" style={styles.link}>
-              View Activity Guest
+              View Activity 
             </NavLink>
           </li>
           <li style={styles.li}>
             <NavLink to="/viewItineraryGuest" style={styles.link}>
-              View Itinerary Guest
+              View Itinerary 
+            </NavLink>
+          </li>
+          <li style={styles.li}>
+            <NavLink to="/viewLandmarks" style={styles.link}>
+              View Landmarks 
             </NavLink>
           </li>
           <li style={styles.li}>

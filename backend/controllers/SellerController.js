@@ -1,5 +1,6 @@
 import Product from "../models/Product.js";
 import Seller from "../models/Seller.js";
+import mongoose from "mongoose";
 import multer from "multer";
 /**
  * Creates a new seller in the database.
@@ -129,12 +130,38 @@ const deleteSeller = async (req, res) => {
 };
 
 const createProduct = async (req, res) => {
-  const product = req.body;
+  const { seller, name, description, price, available_quantity, picture, archived } = req.body;
+
+  // Ensure all required fields are provided
+  if (!seller || !name || !price || !available_quantity) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
   try {
-    const newProduct = new Product(product);
+    // Ensure the seller exists
+    const sellerExists = await Seller.findById(seller);
+    if (!sellerExists) {
+      return res.status(400).json({ error: "Seller not found" });
+    }
+
+    // Create the new product
+    const newProduct = new Product({
+      seller,
+      name,
+      description: description || "",  // Default to an empty string if not provided
+      price,
+      available_quantity,
+      picture: picture || "",  // Default to an empty string if not provided
+      archived: archived || false,  // Default to false if not provided
+    });
+
+    // Save the product to the database
     const savedProduct = await newProduct.save();
+
+    // Return the saved product
     res.status(201).json(savedProduct);
   } catch (error) {
+    console.error("Error creating product:", error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -173,6 +200,44 @@ const getAllProducts = async (req, res) => {
   }
 };
 
+
+const getAllProductsBySeller = async (req, res) => {
+  try {
+    const { sellerId } = req.params; // Get sellerId from the URL parameters
+
+    // Check if sellerId is provided and valid
+    if (!mongoose.Types.ObjectId.isValid(sellerId)) {
+      return res.status(400).json({ error: "Invalid seller ID" });
+    }
+
+    // Fetch all products for the specific seller
+    const products = await Product.find({ seller: sellerId })
+      .populate({
+        path: "seller",
+        select: "store_name", // Only include the 'store_name' field from the 'Seller' schema
+      })
+      .populate({
+        path: "reviews",
+        populate: {
+          path: "reviewer",
+          populate: {
+            path: "user",
+            select: "username", // Include only the 'username' field from the 'User' schema
+          },
+        },
+      });
+
+    if (!products || products.length === 0) {
+      return res.status(404).json({ message: "No products found for this seller." });
+    }
+
+    res.json(products); // Return the products
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
 const updateProduct = async (req, res) => {
   try {
     const updatedProduct = await Product.findByIdAndUpdate(
@@ -204,6 +269,7 @@ const deleteProduct = async (req, res) => {
 export default {
   createProduct,
   getAllProducts,
+  getAllProductsBySeller,
   getProduct,
   deleteProduct,
   updateProduct,

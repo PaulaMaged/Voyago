@@ -1,12 +1,13 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect, useCallback } from "react";
+import axios from "axios";
+import currencyConversions from "../helpers/currencyConversions";
 
 const EditProduct = ({ product, fetchProducts, onCancel }) => {
   const [productData, setProductData] = useState({
-    name: '',
-    description: '',
-    price: '',
-    available_quantity: '',
+    name: "",
+    description: "",
+    price: "",
+    available_quantity: "",
     archived: false,
   });
   const [file, setFile] = useState(null);
@@ -21,9 +22,14 @@ const EditProduct = ({ product, fetchProducts, onCancel }) => {
 
   const handleChange = useCallback((e) => {
     const { name, value, type, checked } = e.target;
-    setProductData(prevData => ({
+    setProductData((prevData) => ({
       ...prevData,
-      [name]: type === 'checkbox' ? checked : type === 'number' ? Number(value) : value,
+      [name]:
+        type === "checkbox"
+          ? checked
+          : type === "number"
+          ? Number(value)
+          : value,
     }));
   }, []);
 
@@ -34,23 +40,26 @@ const EditProduct = ({ product, fetchProducts, onCancel }) => {
   const updateProductFields = async () => {
     try {
       const updates = {};
-      Object.keys(productData).forEach(key => {
+      Object.keys(productData).forEach((key) => {
         if (productData[key] !== product[key]) {
           updates[key] = productData[key];
         }
       });
 
       if (Object.keys(updates).length > 0) {
+        if (updates.price)
+          updates.price = currencyConversions.convertToDB(updates.price);
+
         const response = await axios.put(
           `http://localhost:8000/api/seller/update-product/${product._id}`,
           updates
         );
-        console.log('Product fields updated:', response.data);
+        console.log("Product fields updated:", response.data);
         return response.data;
       }
       return product;
     } catch (error) {
-      console.error('Error updating product fields:', error);
+      console.error("Error updating product fields:", error);
       throw error;
     }
   };
@@ -59,7 +68,7 @@ const EditProduct = ({ product, fetchProducts, onCancel }) => {
     if (!file) return null;
 
     const formData = new FormData();
-    formData.append('picture', file);
+    formData.append("picture", file);
 
     try {
       const response = await axios.put(
@@ -67,14 +76,14 @@ const EditProduct = ({ product, fetchProducts, onCancel }) => {
         formData,
         {
           headers: {
-            'Content-Type': 'multipart/form-data',
+            "Content-Type": "multipart/form-data",
           },
         }
       );
-      console.log('Product picture updated:', response.data);
+      console.log("Product picture updated:", response.data);
       return response.data;
     } catch (error) {
-      console.error('Error updating product picture:', error);
+      console.error("Error updating product picture:", error);
       throw error;
     }
   };
@@ -94,7 +103,9 @@ const EditProduct = ({ product, fetchProducts, onCancel }) => {
       fetchProducts();
       onCancel();
     } catch (error) {
-      setError('An error occurred while updating the product. Please try again.');
+      setError(
+        "An error occurred while updating the product. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -172,9 +183,14 @@ const EditProduct = ({ product, fetchProducts, onCancel }) => {
         </div>
         <div className="form-actions">
           <button type="submit" className="btn-update" disabled={isSubmitting}>
-            {isSubmitting ? 'Updating...' : 'Update Product'}
+            {isSubmitting ? "Updating..." : "Update Product"}
           </button>
-          <button type="button" onClick={onCancel} className="btn-cancel" disabled={isSubmitting}>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="btn-cancel"
+            disabled={isSubmitting}
+          >
             Cancel
           </button>
         </div>

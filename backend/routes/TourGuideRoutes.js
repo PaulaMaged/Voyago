@@ -26,7 +26,9 @@ router.post("/create-tourguide", (req, res) => {
   });
 });
 
+
 router.post("/create-itinerary", TourGuideController.createItinerary);
+
 
 // Read Itinerary (By ID)
 router.get("/get-itinerary/:itineraryId", TourGuideController.getItinerary);
