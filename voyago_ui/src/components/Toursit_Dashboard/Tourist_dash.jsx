@@ -8,6 +8,7 @@ import ViewItineraryGuest from "../viewItineraryGuest";
 import ViewLandmarks from "../viewLandmarks";
 import ViewProductTourist from "../viewProductTourist";
 import ViewPurchasedProducts from "../viewPurchasedProducts";
+import LoyaltySystem from "./Loyalty_points";
 
 export default function TouristDashboard() {
   const [activeSection, setActiveSection] = useState("profile");
@@ -48,6 +49,8 @@ export default function TouristDashboard() {
         return <ViewProductTourist userId={userId} touristId={touristId} />;
       case "purchasedProducts":
         return <ViewPurchasedProducts userId={userId} touristId={touristId} />;
+      case "loyalty":
+        return <LoyaltySystem userId={userId} touristId={touristId} />;
       default:
         return <Profile userId={userId} touristId={touristId} />;
     }
@@ -82,6 +85,9 @@ export default function TouristDashboard() {
           </button>
           <button onClick={() => setActiveSection("purchasedProducts")}>
             View Purchased Products
+          </button>
+          <button onClick={() => setActiveSection("loyalty")}>
+            Loyalty system
           </button>
         </nav>
       </aside>

@@ -44,6 +44,7 @@ export default function ViewAllUsers() {
     if (window.confirm("Are you sure you want to delete this user?")) {
       setUsers(users.filter((user) => user._id !== userId));
     }
+    //hena we will call the delete user functions
   };
 
   const filteredUsers = users.filter((user) => {

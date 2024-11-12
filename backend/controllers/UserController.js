@@ -161,7 +161,7 @@ const deleteUser = async (req, res) => {
     // Catch any errors that occur during the process and return a 400 error response with the error message
     res.status(400).json({ message: error.message });
   }
-};
+}; //el klam dah eye klam , m7tag efham el booked scheams wa el 7agt el taniya
 
 const getUser = async (req, res) => {
   try {
@@ -246,12 +246,10 @@ const login = async (req, res) => {
       user.is_new === false &&
       user.terms_and_conditions === false
     ) {
-      return res
-        .status(201)
-        .json({
-          message: "Please accept the terms and conditions",
-          userId: user._id,
-        });
+      return res.status(201).json({
+        message: "Please accept the terms and conditions",
+        userId: user._id,
+      });
     }
     const token = createToken({ username, role });
 
