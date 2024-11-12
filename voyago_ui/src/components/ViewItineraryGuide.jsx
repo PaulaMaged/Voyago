@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import "./ViewItineraryGuide.css";
+import "./viewItineraryGuide.css";
 
 const ViewItineraryGuide = () => {
   const [itineraries, setItineraries] = useState([]);
