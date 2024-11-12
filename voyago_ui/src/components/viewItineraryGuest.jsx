@@ -280,7 +280,11 @@ const ViewItineraryGuest = () => {
 
       <div className="itinerary-list">
         {filteredItineraries.map((itinerary) => {
-          if (itinerary.flag_inapproperiate == true) return null;
+          if (
+            itinerary.flag_inapproperiate == true ||
+            itinerary.active == false
+          )
+            return null;
           return (
             <div key={itinerary._id} className="itinerary-card">
               <button
@@ -297,7 +301,7 @@ const ViewItineraryGuest = () => {
               </p>
               <p>
                 <strong>Tour Guide:</strong>{" "}
-                {itinerary.tour_guide.user
+                {itinerary.tour_guide?.user
                   ? itinerary.tour_guide.user.username
                   : "N/A"}
               </p>

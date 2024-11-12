@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import currencyConversions from "../helpers/currencyConversions";
 import axios from "axios";
 
 function ItineraryComponent() {
@@ -32,7 +33,9 @@ function ItineraryComponent() {
   const filterItineraries = () => {
     return itineraries.filter((itinerary) => {
       const withinBudget =
-        !filter.budget || itinerary.price <= parseFloat(filter.budget);
+        !filter.budget ||
+        currencyConversions.convertFromDB(itinerary.price) <=
+          parseFloat(filter.budget);
       const matchesDate =
         !filter.date ||
         itinerary.available_dates.some(
@@ -42,13 +45,13 @@ function ItineraryComponent() {
         );
       const matchesLanguage =
         !filter.language ||
-        itinerary.language.toLowerCase().includes(filter.language.toLowerCase());
+        itinerary.language
+          .toLowerCase()
+          .includes(filter.language.toLowerCase());
       const matchesPreference =
         !filter.preferences.length ||
         filter.preferences.some((pref) =>
-          itinerary.preference
-            ?.toLowerCase()
-            .includes(pref.toLowerCase())
+          itinerary.preference?.toLowerCase().includes(pref.toLowerCase())
         ); // Assuming each itinerary has a 'preference' field
 
       return (
@@ -76,7 +79,7 @@ function ItineraryComponent() {
       name: formData.get("name"),
       description: formData.get("description"),
       language: formData.get("language"),
-      price: parseFloat(formData.get("price")),
+      price: currencyConversions.convertToDB(parseFloat(formData.get("price"))),
       activities: formData
         .get("activities")
         .split(",")
@@ -156,7 +159,12 @@ function ItineraryComponent() {
         <form onSubmit={createItinerary} style={styles.form}>
           <label style={styles.label}>
             Tour Guide ID:
-            <input type="text" name="tour_guide" required style={styles.input} />
+            <input
+              type="text"
+              name="tour_guide"
+              required
+              style={styles.input}
+            />
           </label>
           <label style={styles.label}>
             Name:
@@ -172,7 +180,12 @@ function ItineraryComponent() {
           </label>
           <label style={styles.label}>
             Price:
-            <input type="number" step="0.01" name="price" style={styles.input} />
+            <input
+              type="number"
+              step="0.01"
+              name="price"
+              style={styles.input}
+            />
           </label>
           <label style={styles.label}>
             Activities (comma-separated IDs):
@@ -188,7 +201,11 @@ function ItineraryComponent() {
           </label>
           <label style={styles.checkboxLabel}>
             Accessibility:
-            <input type="checkbox" name="accessibility" style={styles.checkbox} />
+            <input
+              type="checkbox"
+              name="accessibility"
+              style={styles.checkbox}
+            />
           </label>
           <label style={styles.label}>
             Pick-up Location ID:
@@ -243,9 +260,7 @@ function ItineraryComponent() {
             <input
               type="number"
               value={filter.budget}
-              onChange={(e) =>
-                setFilter({ ...filter, budget: e.target.value })
-              }
+              onChange={(e) => setFilter({ ...filter, budget: e.target.value })}
               style={styles.input}
             />
           </label>
@@ -322,7 +337,10 @@ function ItineraryComponent() {
                 <strong>Language:</strong> {itinerary.language}
               </p>
               <p>
-                <strong>Price:</strong> ${itinerary.price.toFixed(2)}
+                <strong>Price:</strong>{" "}
+                {currencyConversions.convertFromDB(activity.price).toFixed(2) +
+                  " " +
+                  localStorage.getItem("currency")}
               </p>
               <p>
                 <strong>Available Dates:</strong>{" "}
