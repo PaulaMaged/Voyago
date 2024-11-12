@@ -231,23 +231,27 @@ export default function ManageComplaints() {
         button:hover {
           background-color: #2980b9;
         }
-        .modal {
+       .modal {
           position: fixed;
           top: 0;
-          left: 0;
-          width: 100%;
+        
+          left:-200;
+          width: 3000px;
           height: 100%;
           background-color: rgba(0, 0, 0, 0.5);
           display: flex;
           justify-content: center;
           align-items: center;
+          z-index: 1000;
         }
         .modal-content {
           background-color: white;
           padding: 20px;
           border-radius: 4px;
           max-width: 500px;
-          width: 100%;
+          width: 90%;
+          position: relative;
+          margin: auto;
         }
         textarea {
           width: 100%;

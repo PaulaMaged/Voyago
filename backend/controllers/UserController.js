@@ -133,7 +133,7 @@ const createDeletionRequest = async (req, res) => {
 
 const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find();
+    const users = await User.find({ is_accepted: true });
     res.status(200).json(users);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -241,9 +241,20 @@ const login = async (req, res) => {
 
     const role = user.role;
     // Generate a JSON Web Token (JWT) for the authenticated user
+    if (
+      user.is_accepted === true &&
+      user.is_new === false &&
+      user.terms_and_conditions === false
+    ) {
+      return res
+        .status(201)
+        .json({
+          message: "Please accept the terms and conditions",
+          userId: user._id,
+        });
+    }
     const token = createToken({ username, role });
-    // Return a 200 success response with the JWT and user object
-    // Check the user's role and retrieve additional data based on the role
+
     switch (role) {
       case "TOURIST":
         const tourist = await Tourist.findOne({ user: user._id });
@@ -285,7 +296,17 @@ const logout = async (req, res) => {
   }
 };
 
+const getNewUsers = async (req, res) => {
+  try {
+    const users = await User.find({ is_accepted: false, is_new: true });
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 export default {
+  getNewUsers,
   changePassword,
   createDeletionRequest,
   createUser,
