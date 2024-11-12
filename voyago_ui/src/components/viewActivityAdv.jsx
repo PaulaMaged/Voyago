@@ -135,6 +135,7 @@ export default function ViewActivityAdv() {
         advertiser: advertiserId,
       };
 
+      activityData.price = currencyConversions.convertToDB(activityData.price);
       const response = await axios.post(
         "http://localhost:8000/api/advertiser/create-activity",
         activityData

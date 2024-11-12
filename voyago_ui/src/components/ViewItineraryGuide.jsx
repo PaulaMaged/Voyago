@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import currencyConversions from "../helpers/currencyConversions";
 import "./ViewItineraryGuide.css";
 
 const ViewItineraryGuide = () => {
@@ -57,7 +58,7 @@ const ViewItineraryGuide = () => {
   const fetchItineraries = async () => {
     try {
       setIsLoading(true);
-      const tourGuideId = localStorage.getItem('roleId'); // Replace with actual tour guide ID
+      const tourGuideId = localStorage.getItem("roleId"); // Replace with actual tour guide ID
       const response = await axios.get(
         `http://localhost:8000/api/tour-guide/get-tourguide-itineraries/${tourGuideId}`
       );
@@ -123,8 +124,12 @@ const ViewItineraryGuide = () => {
       const matchesLanguage =
         !selectedLanguage || itinerary.language === selectedLanguage;
       const matchesPrice =
-        (!minPrice || itinerary.price >= parseFloat(minPrice)) &&
-        (!maxPrice || itinerary.price <= parseFloat(maxPrice));
+        (!minPrice ||
+          currencyConversions.convertFromDB(itinerary.price) >=
+            parseFloat(minPrice)) &&
+        (!maxPrice ||
+          currencyConversions.convertFromDB(itinerary.price) <=
+            parseFloat(maxPrice));
       const matchesDate =
         !selectedDate ||
         new Date(itinerary.start_date).toISOString().split("T")[0] ===
@@ -151,7 +156,7 @@ const ViewItineraryGuide = () => {
 
   const handleCreateItinerary = async () => {
     try {
-      const tourGuideId = localStorage.getItem('roleId'); // Replace with actual tour guide ID
+      const tourGuideId = localStorage.getItem("roleId"); // Replace with actual tour guide ID
       const response = await axios.post(
         "http://localhost:8000/api/tour-guide/create-itinerary",
         { ...newItinerary, tour_guide: tourGuideId }
@@ -179,12 +184,12 @@ const ViewItineraryGuide = () => {
       name: itinerary.name,
       description: itinerary.description,
       language: itinerary.language,
-      price: itinerary.price,
+      price: currencyConversions.convertToDB(itinerary.price),
       start_date: new Date(itinerary.start_date).toISOString().split("T")[0],
       start_time: itinerary.start_time,
       accessibility: itinerary.accessibility,
       active: itinerary.active,
-      activities: itinerary.activities.map(activity => activity._id),
+      activities: itinerary.activities.map((activity) => activity._id),
     });
   };
 
@@ -238,10 +243,13 @@ const ViewItineraryGuide = () => {
   };
 
   const handleActivitySelection = (e) => {
-    const selectedActivityIds = Array.from(e.target.selectedOptions, option => option.value);
-    setNewItinerary(prev => ({
+    const selectedActivityIds = Array.from(
+      e.target.selectedOptions,
+      (option) => option.value
+    );
+    setNewItinerary((prev) => ({
       ...prev,
-      activities: selectedActivityIds
+      activities: selectedActivityIds,
     }));
   };
 
@@ -417,7 +425,11 @@ const ViewItineraryGuide = () => {
             </option>
           ))}
         </select>
-        <button onClick={editingItinerary ? handleUpdateItinerary : handleCreateItinerary}>
+        <button
+          onClick={
+            editingItinerary ? handleUpdateItinerary : handleCreateItinerary
+          }
+        >
           {editingItinerary ? "Update Itinerary" : "Create Itinerary"}
         </button>
         {editingItinerary && (
@@ -429,26 +441,51 @@ const ViewItineraryGuide = () => {
         {filteredItineraries.map((itinerary) => (
           <div key={itinerary._id} className="itinerary-guide-card">
             <h2>{itinerary.name}</h2>
-            <p><strong>Description:</strong> {itinerary.description}</p>
-            <p><strong>Language:</strong> {itinerary.language}</p>
-            <p><strong>Price:</strong> ${itinerary.price}</p>
-            <p><strong>Start Date:</strong> {new Date(itinerary.start_date).toLocaleDateString()}</p>
-            <p><strong>Start Time:</strong> {itinerary.start_time}</p>
-            <p><strong>Accessibility:</strong> {itinerary.accessibility ? "Yes" : "No"}</p>
-            <p><strong>Active:</strong> {itinerary.active ? "Yes" : "No"}</p>
+            <p>
+              <strong>Description:</strong> {itinerary.description}
+            </p>
+            <p>
+              <strong>Language:</strong> {itinerary.language}
+            </p>
+            <p>
+              <strong>Price:</strong>{" "}
+              {currencyConversions.convertFromDB(itinerary.price).toFixed(2) +
+                " " +
+                localStorage.getItem("currency")}
+            </p>
+            <p>
+              <strong>Start Date:</strong>{" "}
+              {new Date(itinerary.start_date).toLocaleDateString()}
+            </p>
+            <p>
+              <strong>Start Time:</strong> {itinerary.start_time}
+            </p>
+            <p>
+              <strong>Accessibility:</strong>{" "}
+              {itinerary.accessibility ? "Yes" : "No"}
+            </p>
+            <p>
+              <strong>Active:</strong> {itinerary.active ? "Yes" : "No"}
+            </p>
             {itinerary.pick_up && (
               <p>
-                <strong>Pick-up Location:</strong> Latitude: {itinerary.pick_up.latitude}, Longitude: {itinerary.pick_up.longitude}
+                <strong>Pick-up Location:</strong> Latitude:{" "}
+                {itinerary.pick_up.latitude}, Longitude:{" "}
+                {itinerary.pick_up.longitude}
               </p>
             )}
             {itinerary.drop_off && (
               <p>
-                <strong>Drop-off Location:</strong> Latitude: {itinerary.drop_off.latitude}, Longitude: {itinerary.drop_off.longitude}
+                <strong>Drop-off Location:</strong> Latitude:{" "}
+                {itinerary.drop_off.latitude}, Longitude:{" "}
+                {itinerary.drop_off.longitude}
               </p>
             )}
             <ActivitiesSection activities={itinerary.activities} />
             <button onClick={() => handleEditItinerary(itinerary)}>Edit</button>
-            <button onClick={() => handleDeleteItinerary(itinerary._id)}>Delete</button>
+            <button onClick={() => handleDeleteItinerary(itinerary._id)}>
+              Delete
+            </button>
           </div>
         ))}
       </div>

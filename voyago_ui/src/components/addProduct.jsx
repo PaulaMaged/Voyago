@@ -1,24 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import currencyConversions from "../helpers/currencyConversions";
 
 const AddProduct = ({ fetchProducts }) => {
   const [productData, setProductData] = useState({
-    name: '',
-    description: '',
-    price: '',
-    available_quantity: '',
+    name: "",
+    description: "",
+    price: "",
+    available_quantity: "",
     archived: false,
-    seller: '', // Initially empty, will be set in useEffect
+    seller: "", // Initially empty, will be set in useEffect
   });
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
 
   // Retrieve seller ID from localStorage or default to a static value
-  let sellerId = localStorage.getItem('roleId');  // Ideally this should be fetched from localStorage
+  let sellerId = localStorage.getItem("roleId"); // Ideally this should be fetched from localStorage
 
   useEffect(() => {
     // Set seller ID in the productData state only once
-    setProductData(prevData => ({
+    setProductData((prevData) => ({
       ...prevData,
       seller: sellerId, // Ensure seller ID is added initially
     }));
@@ -26,7 +27,7 @@ const AddProduct = ({ fetchProducts }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setProductData(prevData => ({
+    setProductData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
@@ -34,7 +35,7 @@ const AddProduct = ({ fetchProducts }) => {
 
   const handleCheckboxChange = (e) => {
     const { name, checked } = e.target;
-    setProductData(prevData => ({
+    setProductData((prevData) => ({
       ...prevData,
       [name]: checked,
     }));
@@ -46,39 +47,47 @@ const AddProduct = ({ fetchProducts }) => {
     setSuccess(false);
 
     // Check if all required fields are filled
-    if (!productData.name || !productData.price || !productData.available_quantity) {
-      setError('Please fill in all required fields.');
+    if (
+      !productData.name ||
+      !productData.price ||
+      !productData.available_quantity
+    ) {
+      setError("Please fill in all required fields.");
       return;
     }
 
     try {
-      const response = await axios.post('http://localhost:8000/api/seller/create-product', productData);
+      productData.price = currencyConversions.convertToDB(productData.price);
+      const response = await axios.post(
+        "http://localhost:8000/api/seller/create-product",
+        productData
+      );
 
       if (response.status === 201) {
         fetchProducts();
         setSuccess(true);
         setProductData({
-          name: '',
-          description: '',
-          price: '',
-          available_quantity: '',
+          name: "",
+          description: "",
+          price: "",
+          available_quantity: "",
           archived: false,
-          seller: '', // Clear the seller field after the product is added
+          seller: "", // Clear the seller field after the product is added
         });
       } else {
-        setError('Failed to add product. Please try again.');
+        setError("Failed to add product. Please try again.");
       }
     } catch (error) {
-      console.error('Error adding product:', error);
-      setError('An error occurred while adding the product. Please try again.');
+      console.error("Error adding product:", error);
+      setError("An error occurred while adding the product. Please try again.");
     }
   };
 
   return (
     <div>
       <h2>Add New Product</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {success && <p style={{ color: 'green' }}>Product added successfully!</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
+      {success && <p style={{ color: "green" }}>Product added successfully!</p>}
       <form onSubmit={createProduct}>
         <label>
           Name:
