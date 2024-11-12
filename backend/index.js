@@ -10,11 +10,9 @@ import SellerRoutes from "./routes/SellerRoutes.js";
 import AdminRoutes from "./routes/AdminRoutes.js";
 import UserRoutes from "./routes/UserRoutes.js";
 import ProductRoutes from "./routes/ProductRoutes.js";
-import cookieParser from 'cookie-parser';
-import axios from 'axios'
+import cookieParser from "cookie-parser";
+import axios from "axios";
 import cors from "cors";
-
-
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -27,18 +25,15 @@ app.use(cookieParser());
 // Database connection
 mongo_conn().catch((err) => console.log("Error Connecting to database ", err));
 
+// //Amadeus Token
 
+// Amadeus Token Management
+const AMADEUS_API_KEY = process.env.AMADEUS_API_KEY;
+const AMADEUS_API_SECRET = process.env.AMADEUS_API_SECRET;
+let amadeusToken = "";
+let tokenExpiration = null;
 
-
-// // //Amadeus Token
-
-// // Amadeus Token Management
-// const AMADEUS_API_KEY = process.env.AMADEUS_API_KEY;
-// const AMADEUS_API_SECRET = process.env.AMADEUS_API_SECRET;
-// let amadeusToken = '';
-// let tokenExpiration = null;
-
-// // Function to obtain access token
+// Function to obtain access token
 // const getAmadeusToken = async () => {
 //   try {
 //     const params = new URLSearchParams();
@@ -171,7 +166,6 @@ mongo_conn().catch((err) => console.log("Error Connecting to database ", err));
 //   }
 // });
 
-
 // app.post('/api/book-flight', ensureAmadeusToken, async (req, res) => {
 //   const { flightDetails, travelers } = req.body;
 
@@ -210,7 +204,7 @@ mongo_conn().catch((err) => console.log("Error Connecting to database ", err));
 app.use("/api/advertiser", AdvertiserRoutes);
 app.use("/api/tourist", TouristRoutes);
 app.use("/api/public", PublicRoutes);
-app.use("/api/product",ProductRoutes);
+app.use("/api/product", ProductRoutes);
 app.use("/api/tour-guide", TourGuideRoutes);
 app.use("/api/admin", AdminRoutes);
 app.use("/api/user", UserRoutes);

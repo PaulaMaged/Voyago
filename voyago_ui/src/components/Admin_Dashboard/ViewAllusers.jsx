@@ -44,6 +44,13 @@ export default function ViewAllUsers() {
     if (window.confirm("Are you sure you want to delete this user?")) {
       setUsers(users.filter((user) => user._id !== userId));
     }
+    try {
+      const response = axios.delete(
+        `http://localhost:8000/api/user/delete-user/${userId}`
+      );
+    } catch (error) {
+      console.error("Error deleting user: ", error);
+    }
   };
 
   const filteredUsers = users.filter((user) => {

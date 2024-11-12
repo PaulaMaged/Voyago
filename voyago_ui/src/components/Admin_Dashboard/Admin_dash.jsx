@@ -7,7 +7,7 @@ import ManageComplaints from "./ManageComplaints";
 import ManageActCategories from "./manageActCategories";
 import ManageTags from "./manageTags";
 import ViewActivitiesAdmin from "./ViewActivitiesAdmin";
-import ViewItinerariesAdmin from "./viewItinerariesAdmin";
+import ViewItinerariesAdmin from "./ViewItinerariesAdmin";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("addUser");

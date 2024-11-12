@@ -63,19 +63,26 @@ function Tourist_profile({ userId, touristId }) {
     }
   };
 
-  const deletionReq = async () => {
+  const request_to_delete = async () => {
     try {
-      const id = localStorage.getItem("roleId");
-      const response = await axios.get(
-        `http://localhost:8000/api/user/create-delete-request/${id}`
+      const response = await axios.put(
+        `http://localhost:8000/api/user/update-user/${userId}`,
+        {
+          requested_to_be_deleted: true,
+        }
       );
       if (response.status === 200) {
-        alert("Deletion Request has been Sent!");
-      } else {
-        throw new Error("Failed to send Request");
+        alert(
+          "Request to delete account sent successfully please check your inbox for updates!"
+        );
+        setTimeout(() => {
+          window.location.href = "http://localhost:5173/";
+        }, 1500);
+
+        //i want to logout the user after sending the request
       }
-    } catch (e) {
-      console.log(e.error.message);
+    } catch (error) {
+      console.log(error.message);
     }
   };
 
@@ -206,8 +213,15 @@ function Tourist_profile({ userId, touristId }) {
             </div>
           ))}
       </div>
-      <button className="profile-button" id="deletionReq" onClick={deletionReq}>
-        Delete Account
+      <br></br>
+      <br></br>
+      <button
+        style={{ backgroundColor: "red" }}
+        className="profile-button"
+        id="deletionReq"
+        onClick={request_to_delete}
+      >
+        Request to delete acount
       </button>
     </div>
   );

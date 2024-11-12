@@ -152,11 +152,23 @@ const deleteUser = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+    // Delete any related schemas that reference this user
+    await Promise.all([
+      Tourist.findOneAndDelete({ user: user._id }),
+      TourGuide.findOneAndDelete({ user: user._id }),
+      Advertiser.findOneAndDelete({ user: user._id }),
+      TourGovernor.findOneAndDelete({ user: user._id }),
+      Seller.findOneAndDelete({ user: user._id }),
+      Admin.findOneAndDelete({ user: user._id }),
+    ]);
+
     // Delete the user from the database
     await User.findByIdAndDelete(user._id);
 
     // Return a 200 success response with a message confirming the deletion
-    res.status(200).json({ message: "User deleted successfully" });
+    res
+      .status(200)
+      .json({ message: "User and related data deleted successfully" });
   } catch (error) {
     // Catch any errors that occur during the process and return a 400 error response with the error message
     res.status(400).json({ message: error.message });
@@ -246,12 +258,10 @@ const login = async (req, res) => {
       user.is_new === false &&
       user.terms_and_conditions === false
     ) {
-      return res
-        .status(201)
-        .json({
-          message: "Please accept the terms and conditions",
-          userId: user._id,
-        });
+      return res.status(201).json({
+        message: "Please accept the terms and conditions",
+        userId: user._id,
+      });
     }
     const token = createToken({ username, role });
 
