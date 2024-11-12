@@ -25,6 +25,8 @@ const touristSchema = new mongoose.Schema({
   ],
   phone_number: { type: String },
   nationality: { type: String },
+  DOB: { type: String },
+
   is_student: { type: Boolean, default: false },
 });
 

@@ -1,54 +1,23 @@
 import React, { useState, useEffect } from "react";
-import useFetch from "../hooks/useFetch";
-import { useNavigate } from "react-router-dom";
-import check from "../helpers/checks";
+import useFetch from "../../hooks/useFetch";
 import axios from "axios";
-export default function ViewActivityGuest() {
+
+export default function ViewActivitiesAdmin() {
   const [searchTerm, setSearchTerm] = useState("");
   const [budget, setBudget] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [sortOrder, setSortOrder] = useState("");
-  const navigate = useNavigate();
-
-  const handleBookActivity = async (activityId) => {
-    const touristId = localStorage.getItem("roleId");
-
-    const data = {
-      plans: [
-        {
-          type: "Activity",
-          activityId: activityId,
-        },
-      ],
-    };
-
-    console.log(data);
-    try {
-      const response = await axios.post(
-        `http://localhost:8000/api/tourist/tourist-pay/${touristId}`,
-        data
-      );
-      // Handle successful booking response
-      if (response.status === 201) {
-        alert("Activity booked successfully!");
-      } else {
-        alert("Failed to book the activity. Please try again.");
-      }
-    } catch (error) {
-      console.error("Error booking activity:", error);
-      alert(
-        "An error occurred while booking the activity. Please try again later."
-      );
-    }
-  };
+  const [toggle, setToggle] = useState(false);
 
   const { error: activitiesError, data: activities } = useFetch(
-    "http://localhost:8000/api/advertiser/get-all-activities"
+    "http://localhost:8000/api/advertiser/get-all-activities",
+    [toggle]
   );
 
   const { error: categoriesError, data: categories } = useFetch(
-    "http://localhost:8000/api/admin/get-all-activity-categories"
+    "http://localhost:8000/api/admin/get-all-activity-categories",
+    [toggle]
   );
 
   const filteredActivities = activities
@@ -83,16 +52,21 @@ export default function ViewActivityGuest() {
       return 0;
     });
 
-  const handleFeedback = async (activity) => {
-    const isBooked = await check.isBooked(activity, "activity");
-    const isCompleted = await check.isCompleted(activity, "activity");
-
-    if (isBooked && isCompleted) {
-      navigate("/createReview", { state: { activity: activity } });
-    } else if (!isBooked) {
-      alert("You haven't booked this activity yet");
-    } else if (!isCompleted) {
-      alert("The activity isn't over yet, come back afterwards");
+  const handleFlag = async (activity) => {
+    const data = {
+      flag_inapproperiate: !activity.flag_inapproperiate,
+    };
+    try {
+      const response = await axios.put(
+        `http://localhost:8000/api/admin/flag-inapproperiate-activity/${activity._id}`,
+        data
+      );
+      console.log(response);
+      alert("Successfully changed flag status");
+      setToggle((prev) => !prev);
+    } catch (error) {
+      console.log(error);
+      alert("Failed to change flag status");
     }
   };
 
@@ -150,87 +124,77 @@ export default function ViewActivityGuest() {
 
       <div style={styles.activityGrid}>
         {!activitiesError && filteredActivities.length > 0 ? (
-          filteredActivities.map((activity) => {
-            if (activity.flag_inapproperiate == true) return null;
-
-            return (
-              <div key={activity._id} style={styles.card}>
-                <h2 style={styles.cardTitle}>{activity.title}</h2>
-                <p style={styles.cardDescription}>{activity.description}</p>
+          filteredActivities.map((activity) => (
+            <div key={activity._id} style={styles.card}>
+              <h2 style={styles.cardTitle}>{activity.title}</h2>
+              <p style={styles.cardDescription}>{activity.description}</p>
+              <p>
+                <strong>Date:</strong>{" "}
+                {new Date(activity.start_time).toLocaleDateString()}
+              </p>
+              <p>
+                <strong>Time:</strong>{" "}
+                {new Date(activity.start_time).toLocaleTimeString()}
+              </p>
+              <p>
+                <strong>Duration:</strong> {activity.duration} minutes
+              </p>
+              <p>
+                <strong>Price:</strong> ${activity.price.toFixed(2)}
+              </p>
+              <p>
+                <strong>Category:</strong> {activity.category?.category}
+              </p>
+              {activity.discount > 0 && (
                 <p>
-                  <strong>Date:</strong>{" "}
-                  {new Date(activity.start_time).toLocaleDateString()}
+                  <strong>Discount:</strong> {activity.discount}%
                 </p>
-                <p>
-                  <strong>Time:</strong>{" "}
-                  {new Date(activity.start_time).toLocaleTimeString()}
-                </p>
-                <p>
-                  <strong>Duration:</strong> {activity.duration} minutes
-                </p>
-                <p>
-                  <strong>Price:</strong> ${activity.price.toFixed(2)}
-                </p>
-                <p>
-                  <strong>Category:</strong> {activity.category?.category}
-                </p>
-                {activity.discount > 0 && (
+              )}
+              <p>
+                <strong>Booking Open:</strong>{" "}
+                {activity.booking_open ? "Yes" : "No"}
+              </p>
+              {activity.location && (
+                <div>
+                  <strong>Location:</strong>
+                  <p>Latitude: {activity.location.latitude.toFixed(6)}</p>
+                  <p>Longitude: {activity.location.longitude.toFixed(6)}</p>
+                </div>
+              )}
+              {activity.advertiser && (
+                <div>
                   <p>
-                    <strong>Discount:</strong> {activity.discount}%
+                    <strong>Company:</strong> {activity.advertiser.company_name}
                   </p>
-                )}
-                <p>
-                  <strong>Booking Open:</strong>{" "}
-                  {activity.booking_open ? "Yes" : "No"}
-                </p>
-                {activity.location && (
-                  <div>
-                    <strong>Location:</strong>
-                    <p>Latitude: {activity.location.latitude.toFixed(6)}</p>
-                    <p>Longitude: {activity.location.longitude.toFixed(6)}</p>
+                  <p>
+                    <strong>Hotline:</strong> {activity.advertiser.contact_info}
+                  </p>
+                </div>
+              )}
+              {activity.tags && activity.tags.length > 0 && (
+                <div>
+                  <strong>Tags:</strong>
+                  <div style={styles.tagContainer}>
+                    {activity.tags.map((tag) => (
+                      <span key={tag._id} style={styles.tag}>
+                        {tag.tag_name}
+                      </span>
+                    ))}
                   </div>
-                )}
-                {activity.advertiser && (
-                  <div>
-                    <p>
-                      <strong>Company:</strong>{" "}
-                      {activity.advertiser.company_name}
-                    </p>
-                    <p>
-                      <strong>Hotline:</strong>{" "}
-                      {activity.advertiser.contact_info}
-                    </p>
-                  </div>
-                )}
-                {activity.tags && activity.tags.length > 0 && (
-                  <div>
-                    <strong>Tags:</strong>
-                    <div style={styles.tagContainer}>
-                      {activity.tags.map((tag) => (
-                        <span key={tag._id} style={styles.tag}>
-                          {tag.tag_name}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                <button
-                  id="book-activity"
-                  onClick={() => handleBookActivity(activity._id)}
-                >
-                  Book activity
-                </button>
-
-                <button
-                  onClick={() => {
-                    handleFeedback(activity);
-                  }}
-                >
-                  Feedback
-                </button>
+                </div>
+              )}
+              <div className="flag">
+                flag status: {activity.flag_inapproperiate.toString()}
               </div>
-            );
-          })
+              <button
+                onClick={() => {
+                  handleFlag(activity);
+                }}
+              >
+                Flag/Unflag Activity
+              </button>
+            </div>
+          ))
         ) : (
           <p style={styles.noActivities}>No upcoming activities available.</p>
         )}

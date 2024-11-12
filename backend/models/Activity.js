@@ -36,6 +36,7 @@ const activitySchema = new mongoose.Schema({
   },
   tags: [{ type: mongoose.Schema.Types.ObjectId, ref: "Tag" }],
   booking_open: { type: Boolean, default: true },
+  flag_inapproperiate: { type: Boolean, default: false },
 });
 
 const Activity = mongoose.model("Activity", activitySchema);

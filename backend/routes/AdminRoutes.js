@@ -156,5 +156,19 @@ router.delete(
   AdminController.deleteActivityCategory
 );
 
+// =====================================
+// Flagging innaproperiate events Routes
+// =====================================
+
+router.put(
+  "/flag-inapproperiate-activity/:activityId",
+  AdminController.setInapproperiateFlagActivity
+);
+
+router.put(
+  "/flag-inapproperiate-itinerary/:itineraryId",
+  AdminController.setInapproperiateFlagItinerary
+);
+
 // Export the router
 export default router;

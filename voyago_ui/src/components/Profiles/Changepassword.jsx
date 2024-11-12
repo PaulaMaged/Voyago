@@ -1,8 +1,14 @@
 import "./Changepassword.css";
 import axios from "axios";
 import { useState } from "react";
+import PropTypes from "prop-types";
 
-const handleSubmit = async (e, setIsChanged, setConfirmCurrentPassword) => {
+const handleSubmit = async (
+  e,
+  setIsChanged,
+  setConfirmCurrentPassword,
+  userId
+) => {
   e.preventDefault();
   const currentPassword = e.target["current-password"].value;
   const newPassword = e.target["new-password"].value;
@@ -11,11 +17,13 @@ const handleSubmit = async (e, setIsChanged, setConfirmCurrentPassword) => {
     alert("Passwords do not match");
     return;
   } else {
-    const current_actuall_password = await getcurrentpassword();
-    if (currentPassword === current_actuall_password) {
+    const flag = await getcurrentpassword(userId, currentPassword);
+    // Assuming you have a function to dehash the password
+    console.log(flag);
+    if (flag) {
       try {
         const response = await axios.put(
-          `http://localhost:8000/api/user/change-password/${"672e356f3b83a1422019ef48"}`,
+          `http://localhost:8000/api/user/change-password/${userId}`,
           {
             currentPassword: currentPassword,
             newPassword: newPassword,
@@ -37,24 +45,24 @@ const handleSubmit = async (e, setIsChanged, setConfirmCurrentPassword) => {
         setConfirmCurrentPassword(true);
       }, 2500);
     }
-    console.log(
-      current_actuall_password,
-      currentPassword,
-      newPassword,
-      confirmPassword
-    );
+    console.log(currentPassword, newPassword, confirmPassword);
   }
 };
 
-const getcurrentpassword = async () => {
+const getcurrentpassword = async (userId, currentPassword) => {
   try {
     const response = await axios.get(
-      `http://localhost:8000/api/user/get-user-password/${"672e356f3b83a1422019ef48"}`
+      `http://localhost:8000/api/user/get-user-password/${userId}`,
+      {
+        params: {
+          currentPassword: currentPassword,
+        },
+      }
     );
     if (response.status === 200) {
-      return response.data.password;
+      return true;
     } else {
-      return response.data.password;
+      return false;
     }
   } catch (error) {
     console.error("Error changing password:", error);
@@ -65,7 +73,7 @@ const setchange = setTimeout((setConfirmCurrentPassword) => {
   setConfirmCurrentPassword(true);
 }, 2500);
 
-function Changepassword() {
+function Changepassword({ userId, touristId }) {
   const [ischanged, setIsChanged] = useState(false);
   const [current_password, setCurrentPassword] = useState("");
   const [new_password, setNewPassword] = useState("");
@@ -78,7 +86,12 @@ function Changepassword() {
           <form
             className="changepassword-form"
             onSubmit={async (e) => {
-              await handleSubmit(e, setIsChanged, setConfirmCurrentPassword);
+              await handleSubmit(
+                e,
+                setIsChanged,
+                setConfirmCurrentPassword,
+                userId
+              );
             }}
           >
             <div className="form-group">
@@ -131,5 +144,9 @@ function Changepassword() {
     </div>
   );
 }
+Changepassword.propTypes = {
+  userId: PropTypes.string.isRequired,
+  touristId: PropTypes.string.isRequired,
+};
 
 export default Changepassword;

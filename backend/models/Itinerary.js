@@ -17,6 +17,7 @@ const itinerarySchema = new mongoose.Schema({
   drop_off: { type: mongoose.Schema.Types.ObjectId, ref: "Location" },
   start_date: { type: Date, required: true },
   start_time: { type: String, required: true },
+  flag_inapproperiate: { type: Boolean, default: false },
 });
 
 const Itinerary = mongoose.model("Itinerary", itinerarySchema);

@@ -1,28 +1,45 @@
 import { useState } from "react";
+import axios from "axios";
 
-const mockDocuments = [
-  { id: 1, name: "John Doe", type: "Tour Guide", documents: ["License", "ID"] },
-  {
-    id: 2,
-    name: "Jane Smith",
-    type: "Advertiser",
-    documents: ["Business Permit", "Ad Samples"],
-  },
-  {
-    id: 3,
-    name: "Bob Johnson",
-    type: "Seller",
-    documents: ["Product Catalog", "Tax Certificate"],
-  },
-];
+const get_new_users = async (setDocuments) => {
+  try {
+    const response = await axios.get(
+      "http://localhost:8000/api/user/get-new-users"
+    );
+    if (response.status === 200) {
+      setDocuments(response.data);
+    } else {
+      console.error("Error getting new users:", response.data);
+      alert(
+        "An error occurred while getting new users. Please try again later."
+      );
+    }
+  } catch (error) {
+    console.error("Error getting new users:", error);
+    alert("An error occurred while getting new users. Please try again later.");
+  }
+};
 
 export default function ViewDocuments() {
-  const [documents, setDocuments] = useState(mockDocuments);
+  const [documents, setDocuments] = useState([]);
+  get_new_users(setDocuments);
 
   const handleDocumentAction = (id, action) => {
     // Logic to accept or reject documents
-    setDocuments(documents.filter((doc) => doc.id !== id));
-    alert(`Application ${action}`);
+    console.log(id);
+    if (action === "accepted") {
+      axios.put(`http://localhost:8000/api/user/update-user/${id}`, {
+        is_accepted: true,
+        is_new: false,
+      });
+    } else {
+      axios.put(`http://localhost:8000/api/user/update-user/${id}`, {
+        is_accepted: false,
+        is_new: false,
+      });
+    }
+
+    alert(`Application has been ${action}`);
   };
 
   const handleDocumentDownload = (id) => {
@@ -37,28 +54,30 @@ export default function ViewDocuments() {
       <table>
         <thead>
           <tr>
-            <th>Name</th>
+            <th>Username</th>
+            <th>Email</th>
             <th>Type</th>
             <th>Documents</th>
             <th>Action</th>
-            <th>Download</th>
+            <th>Download PDF</th>
           </tr>
         </thead>
         <tbody>
           {documents.map((doc) => (
-            <tr key={doc.id}>
-              <td>{doc.name}</td>
-              <td>{doc.type}</td>
-              <td>{doc.documents.join(", ")}</td>
+            <tr key={doc._id}>
+              <td>{doc.username}</td>
+              <td>{doc.email}</td>
+              <td>{doc.role}</td>
+              <td>{doc.is_accepted ? "Accepted" : "Pending"}</td>
               <td>
                 <button
-                  onClick={() => handleDocumentAction(doc.id, "accepted")}
+                  onClick={() => handleDocumentAction(doc._id, "accepted")}
                   className="accept"
                 >
                   Accept
                 </button>
                 <button
-                  onClick={() => handleDocumentAction(doc.id, "rejected")}
+                  onClick={() => handleDocumentAction(doc._id, "rejected")}
                   className="reject"
                 >
                   Reject
@@ -66,7 +85,7 @@ export default function ViewDocuments() {
               </td>
               <td>
                 <button
-                  onClick={() => handleDocumentDownload(doc.id)}
+                  onClick={() => handleDocumentDownload(doc._id)}
                   className="download"
                 >
                   Download PDF

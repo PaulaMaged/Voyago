@@ -26,7 +26,7 @@ export default function ViewActivityAdv() {
 
   // Fetching activities, categories, and tags
   useEffect(() => {
-    const advid = localStorage.getItem('roleId');
+    let advid = localStorage.getItem('roleId');
 
     async function fetchActivities() {
       try {
@@ -127,7 +127,6 @@ export default function ViewActivityAdv() {
         ...newActivity,
         advertiser: advertiserId,
       };
-
 
       const response = await axios.post(
         "http://localhost:8000/api/advertiser/create-activity",

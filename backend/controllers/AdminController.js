@@ -5,6 +5,11 @@ import ActivityComplaint from "../models/ActivityComplaint.js";
 import ItineraryComplaint from "../models/ItineraryComplaint.js";
 import ReplyActivityComplaint from "../models/ReplyActivityComplaint.js";
 import ReplyItineraryComplaint from "../models/ReplyItineraryComplaint.js";
+import Activity from "../models/Activity.js";
+import ActivityBooking from "../models/ActivityBooking.js";
+import Tourist from "../models/Tourist.js";
+import Itinerary from "../models/Itinerary.js";
+import ItineraryBooking from "../models/ItineraryBooking.js";
 
 //create Activity Category
 const createActivityCategory = async (req, res) => {
@@ -508,6 +513,82 @@ const getAdminByUserId = async (req, res) => {
   }
 };
 
+const setInapproperiateFlagActivity = async (req, res) => {
+  try {
+    const { activityId } = req.params;
+
+    const activity = await Activity.findByIdAndUpdate(activityId, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!activity) {
+      return res.status(404).json({ message: "activity not found" });
+    }
+
+    if (req.body.flag_inapproperiate == false)
+      return res.status(200).json(activity);
+
+    //cancel bookings for all tourists and refund amount
+    const bookings = await ActivityBooking.find({ activity: activityId });
+    for (const booking of bookings) {
+      await Tourist.findByIdAndUpdate(booking.tourist, {
+        $inc: { wallet: activity.price },
+      });
+    }
+
+    await ActivityBooking.deleteMany({ activity: activityId });
+
+    return res.status(200).json({
+      message:
+        "successfully refunded all tourists and cancelled all bookings relevant to this activity",
+    });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(404)
+      .json({ message: `Error while setting inapproperiate flag: ${error}` });
+  }
+};
+
+const setInapproperiateFlagItinerary = async (req, res) => {
+  try {
+    const { itineraryId } = req.params;
+
+    const itinerary = await Itinerary.findByIdAndUpdate(itineraryId, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!itinerary) {
+      return res.status(404).json({ message: "itinerary not found" });
+    }
+
+    if (req.body.flag_inapproperiate == false)
+      return res.status(200).json(itinerary);
+
+    //cancel bookings for all tourists and refund amount
+    const bookings = await ItineraryBooking.find({ itinerary: itineraryId });
+    for (const booking of bookings) {
+      await Tourist.findByIdAndUpdate(booking.tourist, {
+        $inc: { wallet: itinerary.price },
+      });
+    }
+
+    await ItineraryBooking.deleteMany({ itinerary: itineraryId });
+
+    return res.status(200).json({
+      message:
+        "successfully refunded all tourists and cancelled all bookings relevant to this itinerary",
+    });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(404)
+      .json({ message: `Error while setting inapproperiate flag: ${error}` });
+  }
+};
+
 export default {
   getAdminByUserId,
   getItineraryComplaintsByStatus,
@@ -526,4 +607,6 @@ export default {
   getActivityCategory,
   deleteActivityCategory,
   getAllActivityCategories,
+  setInapproperiateFlagActivity,
+  setInapproperiateFlagItinerary,
 };
