@@ -79,10 +79,24 @@ function Tourist_profile({ userId, touristId }) {
     }
   };
 
+  let currentCurrency = localStorage.getItem("currency");
+  if (!currentCurrency) {
+    currentCurrency = "USD";
+    localStorage.setItem("currency", currentCurrency);
+  }
+
   const [profileData, setProfileData] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isPending, setPending] = useState(true);
   const [error, setError] = useState(null);
+  const [currency, setCurrency] = useState("");
+
+  const handleCurrency = (e) => {
+    const currency = e.target.value;
+    setCurrency(currency);
+    localStorage.setItem("currency", currency);
+    console.log(currency);
+  };
 
   return (
     <div className="profile-container">
@@ -153,7 +167,19 @@ function Tourist_profile({ userId, touristId }) {
                   }
                   className="profile-input"
                 />
-
+                <label>Currency of choice:</label>
+                <select
+                  name="currency"
+                  value={currency}
+                  onChange={handleCurrency}
+                >
+                  <option value="" disabled>
+                    Select currency
+                  </option>
+                  <option value="EGY">EGY</option>
+                  <option value="USD">USD</option>
+                </select>
+                <p></p>
                 <button type="submit" className="profile-button">
                   Update
                 </button>
@@ -170,6 +196,7 @@ function Tourist_profile({ userId, touristId }) {
               <p>Date of Birth: {profileData.DOB}</p>
               <p>Is Student: {profileData.is_student ? "Yes" : "No"}</p>
               <p>Wallet: {profileData.wallet}</p>
+              <p>Currency of choice: {localStorage.getItem("currency")}</p>
               <button
                 onClick={() => setIsEditing(true)}
                 className="profile-button"

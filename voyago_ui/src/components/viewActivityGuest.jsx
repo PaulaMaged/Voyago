@@ -3,6 +3,7 @@ import useFetch from "../hooks/useFetch";
 import { useNavigate } from "react-router-dom";
 import check from "../helpers/checks";
 import axios from "axios";
+import currencyConversions from "../helpers/currencyConversions";
 export default function ViewActivityGuest() {
   const [searchTerm, setSearchTerm] = useState("");
   const [budget, setBudget] = useState("");
@@ -64,7 +65,10 @@ export default function ViewActivityGuest() {
             tag.tag_name.toLowerCase().includes(searchTerm.toLowerCase())
           ));
 
-      const withinBudget = budget ? activity.price <= parseFloat(budget) : true;
+      const withinBudget = budget
+        ? currencyConversions.convertFromDB(activity.price) <=
+          parseFloat(budget)
+        : true;
 
       const matchesCategory = selectedCategory
         ? activity.category && activity.category._id === selectedCategory
@@ -155,6 +159,14 @@ export default function ViewActivityGuest() {
 
             return (
               <div key={activity._id} style={styles.card}>
+                <button
+                  className="copy"
+                  onClick={() =>
+                    navigator.clipboard.writeText(window.location.href)
+                  }
+                >
+                  Copy Link
+                </button>
                 <h2 style={styles.cardTitle}>{activity.title}</h2>
                 <p style={styles.cardDescription}>{activity.description}</p>
                 <p>
@@ -169,7 +181,12 @@ export default function ViewActivityGuest() {
                   <strong>Duration:</strong> {activity.duration} minutes
                 </p>
                 <p>
-                  <strong>Price:</strong> ${activity.price.toFixed(2)}
+                  <strong>Price: </strong>
+                  {currencyConversions
+                    .convertFromDB(activity.price)
+                    .toFixed(2) +
+                    " " +
+                    localStorage.getItem("currency")}
                 </p>
                 <p>
                   <strong>Category:</strong> {activity.category?.category}

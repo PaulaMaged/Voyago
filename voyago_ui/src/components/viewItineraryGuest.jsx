@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import check from "../helpers/checks";
 import axios from "axios";
+import currencyConversions from "../helpers/currencyConversions";
 import "./viewItinerary.css";
 
 const ViewItineraryGuest = () => {
@@ -87,8 +88,8 @@ const ViewItineraryGuest = () => {
       const matchesLanguage =
         !selectedLanguage || itinerary.language === selectedLanguage;
       const matchesPrice =
-        (!minPrice || itinerary.price >= parseFloat(minPrice)) &&
-        (!maxPrice || itinerary.price <= parseFloat(maxPrice));
+        (!minPrice || convertFromDB(itinerary.price) >= parseFloat(minPrice)) &&
+        (!maxPrice || convertFromDB(itinerary.price) <= parseFloat(maxPrice));
       const matchesDate =
         !selectedDate ||
         new Date(itinerary.start_date).toISOString().split("T")[0] ===
@@ -279,10 +280,17 @@ const ViewItineraryGuest = () => {
 
       <div className="itinerary-list">
         {filteredItineraries.map((itinerary) => {
-          console.log(itinerary);
           if (itinerary.flag_inapproperiate == true) return null;
           return (
             <div key={itinerary._id} className="itinerary-card">
+              <button
+                className="copy"
+                onClick={() =>
+                  navigator.clipboard.writeText(window.location.href)
+                }
+              >
+                Copy Link
+              </button>
               <h2>{itinerary.name}</h2>
               <p>
                 <strong>Description:</strong> {itinerary.description}
@@ -297,7 +305,10 @@ const ViewItineraryGuest = () => {
                 <strong>Language:</strong> {itinerary.language}
               </p>
               <p>
-                <strong>Price:</strong> ${itinerary.price}
+                <strong>Price:</strong>
+                {currencyConversions.convertFromDB(itinerary.price).toFixed(2) +
+                  " " +
+                  localStorage.getItem("currency")}
               </p>
               <p>
                 <strong>Start Date:</strong>{" "}

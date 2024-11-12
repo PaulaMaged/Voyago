@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import './viewProductTourist.css';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import currencyConversions from "../helpers/currencyConversions";
+import "./viewProductTourist.css";
 
 export default function ViewProductTourist() {
   const [products, setProducts] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [minPrice, setMinPrice] = useState('');
-  const [maxPrice, setMaxPrice] = useState('');
-  const [sortRating, setSortRating] = useState('none');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [sortRating, setSortRating] = useState("none");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -18,18 +19,20 @@ export default function ViewProductTourist() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:8000/api/seller/get-all-products');
+      const response = await axios.get(
+        "http://localhost:8000/api/seller/get-all-products"
+      );
       const productsWithRatings = response.data
-        .filter(product => !product.archived) // Filter out archived products
-        .map(product => ({
+        .filter((product) => !product.archived) // Filter out archived products
+        .map((product) => ({
           ...product,
-          rating: calculateAverageRating(product.reviews)
+          rating: calculateAverageRating(product.reviews),
         }));
       setProducts(productsWithRatings);
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching products:', error);
-      setError('Failed to fetch products. Please try again later.');
+      console.error("Error fetching products:", error);
+      setError("Failed to fetch products. Please try again later.");
       setLoading(false);
     }
   };
@@ -45,16 +48,18 @@ export default function ViewProductTourist() {
       product.name.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .filter((product) => {
-      const productPrice = parseFloat(product.price);
+      const productPrice = parseFloat(
+        currencyConversions.convertFromDB(product.price)
+      );
       const min = minPrice ? parseFloat(minPrice) : 0;
       const max = maxPrice ? parseFloat(maxPrice) : Infinity;
       return productPrice >= min && productPrice <= max;
     });
 
   const sortedProducts = [...filteredProducts].sort((a, b) => {
-    if (sortRating === 'asc') {
+    if (sortRating === "asc") {
       return a.rating - b.rating;
-    } else if (sortRating === 'desc') {
+    } else if (sortRating === "desc") {
       return b.rating - a.rating;
     }
     return 0;
@@ -105,25 +110,44 @@ export default function ViewProductTourist() {
           {sortedProducts.map((product) => (
             <div key={product._id} className="product-card">
               <img
-                src={product.picture || '/placeholder.svg?height=200&width=200'}
+                src={product.picture || "/placeholder.svg?height=200&width=200"}
                 alt={product.name}
                 className="product-image"
               />
               <div className="product-details">
                 <h2 className="product-name">{product.name}</h2>
                 <p className="product-description">{product.description}</p>
-                <p className="product-price">${product.price.toFixed(2)}</p>
-                <p className="product-availability">Available: {product.available_quantity}</p>
-                <p className="product-seller">Seller: {product.seller.store_name || 'Unknown Seller'}</p>
-                <p className="product-rating">Rating: {product.rating.toFixed(1)} stars</p>
-                <p className="product-reviews">Reviews: {product.reviews.length}</p>
+                <p className="product-price">
+                  {" "}
+                  {currencyConversions.convertFromDB(product.price).toFixed(2) +
+                    " " +
+                    localStorage.getItem("currency")}
+                </p>
+                <p className="product-availability">
+                  Available: {product.available_quantity}
+                </p>
+                <p className="product-seller">
+                  Seller: {product.seller.store_name || "Unknown Seller"}
+                </p>
+                <p className="product-rating">
+                  Rating: {product.rating.toFixed(1)} stars
+                </p>
+                <p className="product-reviews">
+                  Reviews: {product.reviews.length}
+                </p>
                 {product.reviews.length > 0 && (
                   <div className="product-reviews-section">
                     <h3 className="reviews-title">Recent Reviews:</h3>
                     <ul className="reviews-list">
                       {product.reviews.slice(0, 3).map((review) => (
                         <li key={review._id} className="review-item">
-                          <span className="reviewer-name">{review.reviewer && review.reviewer.user ? review.reviewer.user.username : 'Anonymous'}:</span> {review.comment}
+                          <span className="reviewer-name">
+                            {review.reviewer && review.reviewer.user
+                              ? review.reviewer.user.username
+                              : "Anonymous"}
+                            :
+                          </span>{" "}
+                          {review.comment}
                         </li>
                       ))}
                     </ul>
@@ -134,7 +158,9 @@ export default function ViewProductTourist() {
           ))}
         </div>
       ) : (
-        <p className="no-products">No products available within the specified criteria.</p>
+        <p className="no-products">
+          No products available within the specified criteria.
+        </p>
       )}
     </div>
   );

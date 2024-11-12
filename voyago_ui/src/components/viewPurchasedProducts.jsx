@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import './viewPurchasedProducts.css';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import currencyConversions from "../helpers/currencyConversions";
+import "./viewPurchasedProducts.css";
 
 export default function ViewPurchasedProducts() {
   const [purchasedProducts, setPurchasedProducts] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [minPrice, setMinPrice] = useState('');
-  const [maxPrice, setMaxPrice] = useState('');
-  const [sortRating, setSortRating] = useState('none');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [sortRating, setSortRating] = useState("none");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [rating, setRating] = useState(0);
-  const [review, setReview] = useState('');
+  const [review, setReview] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -24,24 +25,28 @@ export default function ViewPurchasedProducts() {
       setLoading(true);
       const touristId = "672e1322ee2a6ba6b26f1c2a"; // Example tourist ID
       if (!touristId) {
-        throw new Error('Tourist ID not found');
+        throw new Error("Tourist ID not found");
       }
-      const response = await axios.get(`http://localhost:8000/api/product/retrieve-all-orders-by-touristid/${touristId}`);
-      
+      const response = await axios.get(
+        `http://localhost:8000/api/product/retrieve-all-orders-by-touristid/${touristId}`
+      );
+
       const orders = response.data; // axios automatically parses JSON
-      const productsWithDetails = orders.map(order => ({
+      const productsWithDetails = orders.map((order) => ({
         ...order.product,
         orderId: order._id,
         orderDate: new Date(order.arrival_date).toLocaleDateString(),
         quantity: order.quantity,
         rating: calculateAverageRating(order.product.reviews),
-        userReview: order.product.reviews.find(review => review.reviewer === touristId),
+        userReview: order.product.reviews.find(
+          (review) => review.reviewer === touristId
+        ),
       }));
       setPurchasedProducts(productsWithDetails);
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching purchased products:', error);
-      setError('Failed to fetch purchased products. Please try again later.');
+      console.error("Error fetching purchased products:", error);
+      setError("Failed to fetch purchased products. Please try again later.");
       setLoading(false);
     }
   };
@@ -57,16 +62,18 @@ export default function ViewPurchasedProducts() {
       product.name.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .filter((product) => {
-      const productPrice = parseFloat(product.price);
+      const productPrice = parseFloat(
+        currencyConversions.convertFromDB(product.price)
+      );
       const min = minPrice ? parseFloat(minPrice) : 0;
       const max = maxPrice ? parseFloat(maxPrice) : Infinity;
       return productPrice >= min && productPrice <= max;
     });
 
   const sortedProducts = [...filteredProducts].sort((a, b) => {
-    if (sortRating === 'asc') {
+    if (sortRating === "asc") {
       return a.rating - b.rating;
-    } else if (sortRating === 'desc') {
+    } else if (sortRating === "desc") {
       return b.rating - a.rating;
     }
     return 0;
@@ -76,11 +83,11 @@ export default function ViewPurchasedProducts() {
     try {
       const touristId = "672e1322ee2a6ba6b26f1c2a"; // Example tourist ID
       if (!touristId) {
-        throw new Error('Tourist ID not found');
+        throw new Error("Tourist ID not found");
       }
 
       const response = await axios.post(
-        `http://localhost:8000/api/tourist/rate-product/${touristId}`,  // Tourist ID in the URL
+        `http://localhost:8000/api/tourist/rate-product/${touristId}`, // Tourist ID in the URL
         {
           product: productId,
           rating,
@@ -88,7 +95,7 @@ export default function ViewPurchasedProducts() {
         },
         {
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         }
       );
@@ -97,15 +104,15 @@ export default function ViewPurchasedProducts() {
       if (response.status === 200) {
         await fetchPurchasedProducts();
         setRating(0);
-        setReview('');
+        setReview("");
         setSelectedProduct(null);
         setIsModalOpen(false);
       } else {
-        throw new Error('Failed to submit rating and review');
+        throw new Error("Failed to submit rating and review");
       }
     } catch (error) {
-      console.error('Error rating product:', error);
-      setError('Failed to rate product. Please try again later.');
+      console.error("Error rating product:", error);
+      setError("Failed to rate product. Please try again later.");
     }
   };
 
@@ -116,7 +123,7 @@ export default function ViewPurchasedProducts() {
       setReview(product.userReview.comment);
     } else {
       setRating(0);
-      setReview('');
+      setReview("");
     }
     setIsModalOpen(true);
   };
@@ -125,10 +132,11 @@ export default function ViewPurchasedProducts() {
     setSelectedProduct(null);
     setIsModalOpen(false);
     setRating(0);
-    setReview('');
+    setReview("");
   };
 
-  if (loading) return <div className="loading">Loading purchased products...</div>;
+  if (loading)
+    return <div className="loading">Loading purchased products...</div>;
   if (error) return <div className="error">{error}</div>;
 
   return (
@@ -173,46 +181,81 @@ export default function ViewPurchasedProducts() {
           {sortedProducts.map((product) => (
             <div key={product._id} className="product-card">
               <img
-                src={product.picture || '/placeholder.svg?height=200&width=200'}
+                src={product.picture || "/placeholder.svg?height=200&width=200"}
                 alt={product.name}
                 className="product-image"
               />
               <div className="product-details">
                 <h2 className="product-name">{product.name}</h2>
                 <p className="product-description">{product.description}</p>
-                <p className="product-price">${product.price.toFixed(2)}</p>
-                <p className="product-seller">Seller: {product.seller.store_name || 'Unknown Seller'}</p>
-                <p className="product-rating">Rating: {product.rating.toFixed(1)} stars</p>
-                <p className="product-reviews">Reviews: {product.reviews ? product.reviews.length : 0}</p>
-                <p className="product-order-date">Arrival Date: {product.orderDate}</p>
+                <p className="product-price">
+                  {" "}
+                  {currencyConversions
+                    .convertFromDB(activity.price)
+                    .toFixed(2) +
+                    " " +
+                    localStorage.getItem("currency")}
+                </p>
+                <p className="product-seller">
+                  Seller: {product.seller.store_name || "Unknown Seller"}
+                </p>
+                <p className="product-rating">
+                  Rating: {product.rating.toFixed(1)} stars
+                </p>
+                <p className="product-reviews">
+                  Reviews: {product.reviews ? product.reviews.length : 0}
+                </p>
+                <p className="product-order-date">
+                  Arrival Date: {product.orderDate}
+                </p>
                 <p className="product-quantity">Quantity: {product.quantity}</p>
                 {product.userReview ? (
                   <div className="user-review">
                     <p>Your review: {product.userReview.rating} stars</p>
                     <p>{product.userReview.comment}</p>
-                    <p>Reviewed on: {new Date(product.userReview.review_date).toLocaleDateString()}</p>
-                    <button className="update-review-button" onClick={() => openModal(product)}>Update Review</button>
+                    <p>
+                      Reviewed on:{" "}
+                      {new Date(
+                        product.userReview.review_date
+                      ).toLocaleDateString()}
+                    </p>
+                    <button
+                      className="update-review-button"
+                      onClick={() => openModal(product)}
+                    >
+                      Update Review
+                    </button>
                   </div>
                 ) : (
-                  <button className="rate-button" onClick={() => openModal(product)}>Rate & Review</button>
+                  <button
+                    className="rate-button"
+                    onClick={() => openModal(product)}
+                  >
+                    Rate & Review
+                  </button>
                 )}
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <p className="no-products">No purchased products found within the specified criteria.</p>
+        <p className="no-products">
+          No purchased products found within the specified criteria.
+        </p>
       )}
 
       {isModalOpen && selectedProduct && (
         <div className="modal-overlay">
           <div className="modal">
-            <h2>{selectedProduct.userReview ? 'Update' : 'Add'} Review for {selectedProduct.name}</h2>
+            <h2>
+              {selectedProduct.userReview ? "Update" : "Add"} Review for{" "}
+              {selectedProduct.name}
+            </h2>
             <div className="rating-input">
               {[1, 2, 3, 4, 5].map((star) => (
                 <span
                   key={star}
-                  className={`star ${star <= rating ? 'filled' : ''}`}
+                  className={`star ${star <= rating ? "filled" : ""}`}
                   onClick={() => setRating(star)}
                 >
                   ★
@@ -226,7 +269,10 @@ export default function ViewPurchasedProducts() {
               className="review-input"
             />
             <div className="modal-buttons">
-              <button onClick={() => handleRateProduct(selectedProduct._id)} className="submit-button">
+              <button
+                onClick={() => handleRateProduct(selectedProduct._id)}
+                className="submit-button"
+              >
                 Submit Review
               </button>
               <button onClick={closeModal} className="cancel-button">

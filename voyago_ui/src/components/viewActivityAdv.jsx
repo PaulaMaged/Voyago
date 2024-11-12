@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import useFetch from "../hooks/useFetch";
+import currencyConversions from "../helpers/currencyConversions";
 import axios from "axios";
 
 export default function ViewActivityAdv() {
@@ -62,7 +63,10 @@ export default function ViewActivityAdv() {
             tag.tag_name.toLowerCase().includes(searchTerm.toLowerCase())
           ));
 
-      const withinBudget = budget ? activity.price <= parseFloat(budget) : true;
+      const withinBudget = budget
+        ? currencyConversions.convertFromDB(activity.price) <=
+          parseFloat(budget)
+        : true;
       const matchesCategory = selectedCategory
         ? activity.category && activity.category._id === selectedCategory
         : true;
@@ -323,7 +327,10 @@ export default function ViewActivityAdv() {
                 <strong>Duration:</strong> {activity.duration} minutes
               </p>
               <p>
-                <strong>Price:</strong> ${activity.price.toFixed(2)}
+                <strong>Price:</strong>
+                {currencyConversions.convertFromDB(activity.price).toFixed(2) +
+                  " " +
+                  localStorage.getItem("currency")}
               </p>
               <p>
                 <strong>Category:</strong> {activity.category?.category}
