@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
-import check from "../helpers/checks";
 import axios from "axios";
-import "./viewItinerary.css";
+import "../viewItinerary.css";
 
-const ViewItineraryGuest = () => {
+const ViewItineraryAdmin = () => {
   const [itineraries, setItineraries] = useState([]);
   const [filteredItineraries, setFilteredItineraries] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -18,12 +16,12 @@ const ViewItineraryGuest = () => {
   const [sortCriteria, setSortCriteria] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
+  const [toggle, setToggle] = useState(false);
 
   useEffect(() => {
     fetchItineraries();
     fetchCategories();
-  }, []);
+  }, [toggle]);
 
   useEffect(() => {
     if (itineraries.length > 0) {
@@ -113,32 +111,6 @@ const ViewItineraryGuest = () => {
     setFilteredItineraries(filtered);
   };
 
-  const handleBookItinerary = async (itineraryId) => {
-    const touristId = localStorage.getItem("roleId");
-
-    const data = {
-      plans: [
-        {
-          type: "Itinerary",
-          itineraryId: itineraryId,
-        },
-      ],
-    };
-
-    console.log(data);
-    try {
-      const response = await axios.post(
-        `http://localhost:8000/api/tourist/tourist-pay/${touristId}`,
-        data
-      );
-      console.log(response.data);
-      // Handle successful booking
-    } catch (error) {
-      console.error("Error booking itinerary:", error);
-      // Handle booking error
-    }
-  };
-
   const getAllTags = () => {
     const tagSet = new Set();
     itineraries.forEach((itinerary) => {
@@ -165,29 +137,21 @@ const ViewItineraryGuest = () => {
     return <div>{error}</div>;
   }
 
-  const handleFeedbackItinerary = async (itinerary) => {
-    const isBooked = await check.isBooked(itinerary, "itinerary");
-    const isCompleted = await check.isCompleted(itinerary, "itinerary");
-
-    if (isBooked && isCompleted) {
-      navigate("/createReview", { state: { itinerary: itinerary } });
-    } else if (!isBooked) {
-      alert("You haven't booked this itinerary yet");
-    } else if (!isCompleted) {
-      alert("The itinerary isn't over yet, come back afterwards");
-    }
-  };
-
-  const handleFeedbackTourGuide = async (itinerary) => {
-    const isBooked = await check.isBooked(itinerary, "itinerary");
-    const isCompleted = await check.isCompleted(itinerary, "itinerary");
-
-    if (isBooked && isCompleted) {
-      navigate("/createReview", { state: { tourGuide: itinerary.tour_guide } });
-    } else if (!isBooked) {
-      alert("You haven't booked this itinerary yet");
-    } else if (!isCompleted) {
-      alert("The itinerary isn't over yet, come back afterwards");
+  const handleFlagChange = async (itinerary) => {
+    const data = {
+      flag_inapproperiate: !itinerary.flag_inapproperiate,
+    };
+    try {
+      const response = await axios.put(
+        `http://localhost:8000/api/admin/flag-inapproperiate-itinerary/${itinerary._id}`,
+        data
+      );
+      console.log(response);
+      alert("Successfully changed flag status");
+      setToggle((prev) => !prev);
+    } catch (error) {
+      console.log(error);
+      alert("Failed to change flag status");
     }
   };
 
@@ -278,79 +242,65 @@ const ViewItineraryGuest = () => {
       </div>
 
       <div className="itinerary-list">
-        {filteredItineraries.map((itinerary) => {
-          console.log(itinerary);
-          if (itinerary.flag_inapproperiate == true) return null;
-          return (
-            <div key={itinerary._id} className="itinerary-card">
-              <h2>{itinerary.name}</h2>
+        {filteredItineraries.map((itinerary) => (
+          <div key={itinerary._id} className="itinerary-card">
+            <h2>{itinerary.name}</h2>
+            <p>
+              <strong>Description:</strong> {itinerary.description}
+            </p>
+            <p>
+              <strong>Tour Guide:</strong>{" "}
+              {itinerary.tour_guide.user
+                ? itinerary.tour_guide.user.username
+                : "N/A"}
+            </p>
+            <p>
+              <strong>Language:</strong> {itinerary.language}
+            </p>
+            <p>
+              <strong>Price:</strong> ${itinerary.price}
+            </p>
+            <p>
+              <strong>Start Date:</strong>{" "}
+              {new Date(itinerary.start_date).toLocaleDateString()}
+            </p>
+            <p>
+              <strong>Start Time:</strong> {itinerary.start_time}
+            </p>
+            <p>
+              <strong>Accessibility:</strong>{" "}
+              {itinerary.accessibility ? "Yes" : "No"}
+            </p>
+            <p>
+              <strong>Active:</strong> {itinerary.active ? "Yes" : "No"}
+            </p>
+            {itinerary.pick_up && (
               <p>
-                <strong>Description:</strong> {itinerary.description}
+                <strong>Pick-up Location:</strong> Latitude:{" "}
+                {itinerary.pick_up.latitude}, Longitude:{" "}
+                {itinerary.pick_up.longitude}
               </p>
+            )}
+            {itinerary.drop_off && (
               <p>
-                <strong>Tour Guide:</strong>{" "}
-                {itinerary.tour_guide.user
-                  ? itinerary.tour_guide.user.username
-                  : "N/A"}
+                <strong>Drop-off Location:</strong> Latitude:{" "}
+                {itinerary.drop_off.latitude}, Longitude:{" "}
+                {itinerary.drop_off.longitude}
               </p>
-              <p>
-                <strong>Language:</strong> {itinerary.language}
-              </p>
-              <p>
-                <strong>Price:</strong> ${itinerary.price}
-              </p>
-              <p>
-                <strong>Start Date:</strong>{" "}
-                {new Date(itinerary.start_date).toLocaleDateString()}
-              </p>
-              <p>
-                <strong>Start Time:</strong> {itinerary.start_time}
-              </p>
-              <p>
-                <strong>Accessibility:</strong>{" "}
-                {itinerary.accessibility ? "Yes" : "No"}
-              </p>
-              <p>
-                <strong>Active:</strong> {itinerary.active ? "Yes" : "No"}
-              </p>
-              {itinerary.pick_up && (
-                <p>
-                  <strong>Pick-up Location:</strong> Latitude:{" "}
-                  {itinerary.pick_up.latitude}, Longitude:{" "}
-                  {itinerary.pick_up.longitude}
-                </p>
-              )}
-              {itinerary.drop_off && (
-                <p>
-                  <strong>Drop-off Location:</strong> Latitude:{" "}
-                  {itinerary.drop_off.latitude}, Longitude:{" "}
-                  {itinerary.drop_off.longitude}
-                </p>
-              )}
-              <ActivitiesSection activities={itinerary.activities} />
-              <button
-                id="bookItin"
-                onClick={() => handleBookItinerary(itinerary._id)}
-              >
-                Book Itinerary
-              </button>
-              <button
-                onClick={() => {
-                  handleFeedbackItinerary(itinerary);
-                }}
-              >
-                Itinerary Feedback
-              </button>
-              <button
-                onClick={() => {
-                  handleFeedbackTourGuide(itinerary);
-                }}
-              >
-                Tour Guide Feedback
-              </button>
+            )}
+            <ActivitiesSection activities={itinerary.activities} />
+            <div className="flag">
+              Flag status: {itinerary.flag_inapproperiate.toString()}
             </div>
-          );
-        })}
+            <button
+              onClick={() => {
+                handleFlagChange(itinerary);
+              }}
+            >
+              Flag/UnFlag itinerary
+            </button>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -433,4 +383,4 @@ const ActivitiesSection = ({ activities }) => {
   );
 };
 
-export default ViewItineraryGuest;
+export default ViewItineraryAdmin;

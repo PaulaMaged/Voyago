@@ -6,6 +6,8 @@ import ViewUsers from "./ViewAllusers";
 import ManageComplaints from "./ManageComplaints";
 import ManageActCategories from "./manageActCategories";
 import ManageTags from "./manageTags";
+import ViewActivitiesAdmin from "./ViewActivitiesAdmin";
+import ViewItinerariesAdmin from "./viewItinerariesAdmin";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("addUser");
@@ -22,9 +24,13 @@ export default function AdminDashboard() {
       case "manageComplaints":
         return <ManageComplaints />;
       case "manageActCategories":
-        return <ManageActCategories />;  
+        return <ManageActCategories />;
       case "manageTags":
-        return <ManageTags />;      
+        return <ManageTags />;
+      case "viewActivities":
+        return <ViewActivitiesAdmin />;
+      case "viewItineraries":
+        return <ViewItinerariesAdmin />;
       default:
         return <AddUser />;
     }
@@ -55,12 +61,22 @@ export default function AdminDashboard() {
           </li>
           <li>
             <button onClick={() => setActiveTab("manageActCategories")}>
-             Manage Activity Categories
+              Manage Activity Categories
             </button>
           </li>
           <li>
             <button onClick={() => setActiveTab("manageTags")}>
-             Manage Tags
+              Manage Tags
+            </button>
+          </li>
+          <li>
+            <button onClick={() => setActiveTab("viewActivities")}>
+              view Activities
+            </button>
+          </li>
+          <li>
+            <button onClick={() => setActiveTab("viewItineraries")}>
+              view Itineraries
             </button>
           </li>
         </ul>
