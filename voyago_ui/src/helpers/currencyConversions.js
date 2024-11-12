@@ -1,7 +1,7 @@
 const conversionRateFromUSDtoEGP = 50;
 
 const EGPtoUSD = (amountEGP) => {
-  return EGP / conversionRateFromUSDtoEGP;
+  return amountEGP / conversionRateFromUSDtoEGP;
 };
 
 const USDtoEGP = (amountUSD) => {
