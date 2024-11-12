@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import AddProduct from './addProduct';
 import EditProduct from './editProduct';
 
-const ViewProductAdmin = () => {
+const ViewProductSeller = () => {
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [minPrice, setMinPrice] = useState('');
@@ -12,8 +13,13 @@ const ViewProductAdmin = () => {
   const [editingProductData, setEditingProductData] = useState(null);
 
   const fetchProducts = async () => {
+    let sellerId = localStorage.getItem('roleId'); // Retrieve seller ID from local storage  localStorage.getItem('roleId')
+    if (!sellerId) {
+      console.error('Seller ID not found in local storage');
+      return;
+    }
     try {
-      const response = await axios.get('http://localhost:8000/api/seller/get-all-products');
+      const response = await axios.get(`http://localhost:8000/api/seller/get-all-seller-products/${sellerId}`);
       setProducts(response.data);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -82,6 +88,8 @@ const ViewProductAdmin = () => {
 
   return (
     <div>
+      <AddProduct fetchProducts={fetchProducts} />
+      
       {editingProductId && (
         <EditProduct 
           product={editingProductData} 
@@ -185,7 +193,7 @@ const ViewProductAdmin = () => {
                 {product.archived ? 'Unarchive' : 'Archive'}
               </button>
               <button 
-                onClick={() => deleteProduct(product._id)}
+                onClick={() => deleteProduct(product._id)} 
                 style={{ marginLeft: '10px', backgroundColor: 'red', color: 'white' }}
               >
                 Delete
@@ -200,4 +208,4 @@ const ViewProductAdmin = () => {
   );
 };
 
-export default ViewProductAdmin;
+export default ViewProductSeller;
