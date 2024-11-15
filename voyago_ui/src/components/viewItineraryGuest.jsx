@@ -87,9 +87,10 @@ const ViewItineraryGuest = () => {
         );
       const matchesLanguage =
         !selectedLanguage || itinerary.language === selectedLanguage;
-      const matchesPrice =
-        (!minPrice || convertFromDB(itinerary.price) >= parseFloat(minPrice)) &&
-        (!maxPrice || convertFromDB(itinerary.price) <= parseFloat(maxPrice));
+        const convertedPrice = currencyConversions.convertFromDB(itinerary.price);
+        const matchesPrice =
+          (!minPrice || convertedPrice >= parseFloat(minPrice)) &&
+          (!maxPrice || convertedPrice <= parseFloat(maxPrice));
       const matchesDate =
         !selectedDate ||
         new Date(itinerary.start_date).toISOString().split("T")[0] ===

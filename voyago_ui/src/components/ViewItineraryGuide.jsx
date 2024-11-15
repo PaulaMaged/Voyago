@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import currencyConversions from "../helpers/currencyConversions";
-import "./ViewItineraryGuide.css";
+import "./viewItineraryGuide.css";
 
 const ViewItineraryGuide = () => {
   const [itineraries, setItineraries] = useState([]);
@@ -123,13 +123,10 @@ const ViewItineraryGuide = () => {
         );
       const matchesLanguage =
         !selectedLanguage || itinerary.language === selectedLanguage;
-      const matchesPrice =
-        (!minPrice ||
-          currencyConversions.convertFromDB(itinerary.price) >=
-            parseFloat(minPrice)) &&
-        (!maxPrice ||
-          currencyConversions.convertFromDB(itinerary.price) <=
-            parseFloat(maxPrice));
+        const convertedPrice = currencyConversions.convertFromDB(itinerary.price);
+        const matchesPrice =
+          (!minPrice || convertedPrice >= parseFloat(minPrice)) &&
+          (!maxPrice || convertedPrice <= parseFloat(maxPrice));
       const matchesDate =
         !selectedDate ||
         new Date(itinerary.start_date).toISOString().split("T")[0] ===

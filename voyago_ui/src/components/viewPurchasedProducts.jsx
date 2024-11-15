@@ -201,7 +201,7 @@ export default function ViewPurchasedProducts() {
                 <p className="product-price">
                   {" "}
                   {currencyConversions
-                    .convertFromDB(activity.price)
+                    .convertFromDB(product.price)
                     .toFixed(2) +
                     " " +
                     localStorage.getItem("currency")}
