@@ -47,7 +47,7 @@ export default function TouristDashboard() {
         return <ViewLandmarks userId={userId} touristId={touristId} />;
       case "products":
         return <ViewProductTourist userId={userId} touristId={touristId} />;
-      case "purchasedProducts":
+      case "purchased Products":
         return <ViewPurchasedProducts userId={userId} touristId={touristId} />;
       case "loyalty":
         return <LoyaltySystem userId={userId} touristId={touristId} />;
@@ -83,7 +83,7 @@ export default function TouristDashboard() {
           <button onClick={() => setActiveSection("products")}>
             View Products
           </button>
-          <button onClick={() => setActiveSection("purchasedProducts")}>
+          <button onClick={() => setActiveSection("purchased Products")}>
             View Purchased Products
           </button>
           <button onClick={() => setActiveSection("loyalty")}>

@@ -2,6 +2,9 @@
 import mongoose from "mongoose"
 import Product from "../models/Product.js";
 import Order from "../models/Order.js";
+import Tourist from "../models/Tourist.js";
+import { updateTouristData } from './TouristController.js';
+
 /**
  * Retrieves sales and quantity data for all products in the database.
  *
@@ -326,12 +329,64 @@ const deleteProductById = async (req, res) => {
 };
 
 const createOrder = async (req, res) => {
-  const order = req.body;
   try {
-    const newOrder = new Order(order);
-    const savedOrder = await newOrder.save();
-    res.status(201).json(savedOrder);
+    const { touristId, productId, quantity, arrival_date, arrival_location, description } = req.body;
+
+    // Fetch the tourist directly using findById
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    // Fetch the product directly using findById
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    // Check if there's enough quantity available
+    if (product.available_quantity < quantity) {
+      return res.status(400).json({ message: "Insufficient product quantity" });
+    }
+
+    // Calculate the total price for the order
+    const totalPrice = product.price * quantity;
+
+    // Check if the tourist has sufficient balance in their wallet
+    if (tourist.wallet < totalPrice) {
+      return res.status(402).json({ message: "Insufficient balance" });
+    }
+
+    // Deduct the total price from the tourist's wallet
+    tourist.wallet -= totalPrice;
+
+    // Update tourist data (e.g., points, levels, badges)
+    const updatedTourist = await updateTouristData(tourist, totalPrice);
+
+    // Save the updated tourist document
+    await tourist.save();
+
+    // Update the product's available quantity
+    product.available_quantity -= quantity;
+    await product.save();
+
+    // Create the order
+    const order = new Order({
+      tourist: touristId,
+      product: productId,
+      quantity,
+      arrival_date,
+      arrival_location,
+      description,
+    });
+
+    // Save the order to the database
+    const savedOrder = await order.save();
+
+    // Respond with the created order and updated tourist data
+    res.status(201).json({ order: savedOrder, tourist: updatedTourist });
   } catch (error) {
+    console.error("Error in createOrder:", error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -339,8 +394,8 @@ const createOrder = async (req, res) => {
 const getOrderById = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id)
-      .populate("products")
-      .populate("customer");
+      .populate("product")
+      .populate("tourist");
     if (!order) return res.status(404).json({ message: "Order not found" });
     res.json(order);
   } catch (error) {
@@ -390,7 +445,7 @@ const getAllOrdersForTourist = async (req, res) => {
 
 const getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find().populate("products").populate("customer");
+    const orders = await Order.find().populate("product").populate("tourist");
     res.json(orders);
   } catch (error) {
     res.status(500).json({ error: error.message });

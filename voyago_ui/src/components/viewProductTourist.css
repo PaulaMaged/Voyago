@@ -107,6 +107,48 @@
   .reviewer-name {
     font-weight: bold;
   }
+
+  .order-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+  }
+  
+  .quantity-input {
+    width: 60px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    text-align: center;
+  }
+  
+  .order-button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+  }
+  
+  .order-button:hover {
+    background-color: #45a049;
+  }
+  
+  .order-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
   
   .no-products {
     text-align: center;

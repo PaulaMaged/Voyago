@@ -227,7 +227,7 @@ const touristPay = async (req, res) => {
  * @param {Number} totalPrice - Total price of the plans.
  * @returns {Object} Updated tourist object.
  */
-const updateTouristData = async (tourist, totalPrice) => {
+export const updateTouristData = async (tourist, totalPrice) => {
   try {
     // Define the level multipliers
     const levelMultipliers = {
@@ -981,6 +981,7 @@ const bookActivity = async (req, res) => {
 export default {
   createTourist,
   rateProduct,
+  updateTouristData,
   touristPay,
   redeemPoints,
   getTourist,
