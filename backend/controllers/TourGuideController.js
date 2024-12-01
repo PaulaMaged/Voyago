@@ -422,6 +422,53 @@ const getTouristsByMonth = async (req, res) => {
   }
 };
 
+const getAllNotifications = async (req, res) => {
+  try {
+    const tourGuideId = req.params.tourGuideId; // Assuming tourGuideId is in the URL params
+
+    // Fetch the tour guide by their ID
+    const tourGuide = await TourGuide.findById(tourGuideId).populate("user");
+    if (!tourGuide) {
+      return res.status(404).json({ message: "Tour guide not found" });
+    }
+
+    // Get the user associated with the tour guide
+    const user = tourGuide.user;
+
+    // Fetch all notifications for this user
+    const notifications = await Notification.find({ recipient: user._id });
+
+    res.status(200).json(notifications);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// backend/controllers/TourGuideController.js
+
+const getAllNotificationsByType = async (req, res) => {
+  try {
+    const tourGuideId = req.params.tourGuideId;
+    const type = req.body.type; // Assuming type is passed as a query parameter
+
+    if (!type) {
+      return res.status(400).json({ error: "Notification type is required" });
+    }
+
+    const tourGuide = await TourGuide.findById(tourGuideId).populate("user");
+    if (!tourGuide) {
+      return res.status(404).json({ message: "TourGuide not found" });
+    }
+
+    const user = tourGuide.user;
+    const notifications = await Notification.find({ recipient: user._id, type: type });
+
+    res.status(200).json(notifications);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 export default {
   createItinerary,
   getItinerary,

@@ -338,7 +338,7 @@ const getTouristsByMonth = async (req, res) => {
   }
 };
 
-const getAllNotificationsForAdvertiser = async (req, res) => {
+const getAllNotifications = async (req, res) => {
   try {
     const advertiserId = req.params.advertiserId; // Assuming advertiserId is in the URL params
 
@@ -353,6 +353,29 @@ const getAllNotificationsForAdvertiser = async (req, res) => {
 
     // Fetch all notifications for this user
     const notifications = await Notification.find({ recipient: user._id });
+
+    res.status(200).json(notifications);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getAllNotificationsByType = async (req, res) => {
+  try {
+    const advertiserId = req.params.advertiserId;
+    const type = req.body.type; // Assuming type is passed as a query parameter
+
+    if (!type) {
+      return res.status(400).json({ error: "Notification type is required" });
+    }
+
+    const advertiser = await Advertiser.findById(advertiserId).populate("user");
+    if (!advertiser) {
+      return res.status(404).json({ message: "Advertiser not found" });
+    }
+
+    const user = advertiser.user;
+    const notifications = await Notification.find({ recipient: user._id, type: type });
 
     res.status(200).json(notifications);
   } catch (error) {
