@@ -169,6 +169,8 @@ router.put(
   "/flag-inapproperiate-itinerary/:itineraryId",
   AdminController.setInapproperiateFlagItinerary
 );
+router.get("/get-total-users", AdminController.getTotalUsers);
+router.get("/get-total-new-users", AdminController.getTotalNewUsersInThismonth);
 
 // Export the router
 export default router;

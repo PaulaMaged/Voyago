@@ -10,6 +10,9 @@ import ActivityBooking from "../models/ActivityBooking.js";
 import Tourist from "../models/Tourist.js";
 import Itinerary from "../models/Itinerary.js";
 import ItineraryBooking from "../models/ItineraryBooking.js";
+import { startOfMonth, endOfMonth } from "date-fns";
+import { sendNotificationEmail } from "./mailer.js";
+import nodemailer from "nodemailer";
 
 //create Activity Category
 const createActivityCategory = async (req, res) => {
@@ -554,7 +557,6 @@ const setInapproperiateFlagActivity = async (req, res) => {
 const setInapproperiateFlagItinerary = async (req, res) => {
   try {
     const { itineraryId } = req.params;
-
     const itinerary = await Itinerary.findByIdAndUpdate(itineraryId, req.body, {
       new: true,
       runValidators: true,
@@ -588,8 +590,38 @@ const setInapproperiateFlagItinerary = async (req, res) => {
       .json({ message: `Error while setting inapproperiate flag: ${error}` });
   }
 };
+const getTotalUsers = async (req, res) => {
+  try {
+    //await sendNotificationEmail("Number1bos@hotmail.com");
+    const totalUsers = await User.countDocuments();
+    res.json({ totalUsers });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getTotalNewUsersInThismonth = async (req, res) => {
+  try {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+    const users = await User.countDocuments({
+      createdAt: {
+        $gte: startOfMonth,
+        $lt: endOfMonth,
+      },
+    });
+
+    res.json({ newUsersThisMonth: users });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 export default {
+  getTotalUsers,
+  getTotalNewUsersInThismonth,
   getAdminByUserId,
   getItineraryComplaintsByStatus,
   getActivityComplaintsByStatus,
