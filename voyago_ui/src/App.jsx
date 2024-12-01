@@ -17,6 +17,7 @@ import ViewActivityGuest from "./components/viewActivityGuest";
 import ViewItineraryGuest from "./components/viewItineraryGuest";
 import ViewItineraryGuide from "./components/ViewItineraryGuide";
 
+import GovernorLandmarks from "./components/GovernorLandmarks";
 import ViewLandmarks from "./components/viewLandmarks";
 import ViewProductAdmin from "./components/viewProductAdmin";
 import ViewProductSeller from "./components/viewProductSeller";
@@ -84,6 +85,7 @@ function App() {
             element={<ViewItineraryGuide />}
           ></Route>
           <Route path="/viewLandmarks" element={<ViewLandmarks />}></Route>
+          <Route path="/GovernorLandmarks" element={<GovernorLandmarks />}></Route>
           <Route
             path="/viewProductAdmin"
             element={<ViewProductAdmin />}

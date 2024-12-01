@@ -237,62 +237,66 @@ const updateUser = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { username, password } = req.body;
-    // Retrieve the user with the provided email from the database
-    console.log(username);
     const user = await User.findOne({ username });
-    // If the user does not exist, return a 404 error response
+    
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    // Compare the provided password with the hashed password stored in the database
+
     const isMatch = await bcrypt.compare(password, user.password);
-    // If the passwords do not match, return a 401 error response
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
     const role = user.role;
-    // Generate a JSON Web Token (JWT) for the authenticated user
-    if (
-      user.is_accepted === true &&
-      user.is_new === false &&
-      user.terms_and_conditions === false
-    ) {
+    console.log('User role:', role);
+
+    if (user.is_accepted === true && user.terms_and_conditions === false) {
       return res.status(201).json({
         message: "Please accept the terms and conditions",
         userId: user._id,
       });
     }
-    const token = createToken({ username, role });
 
+    const token = createToken({ username, role });
+    let responseData = { token, user };
+
+    // Make sure these property names match exactly with the frontend roleKeyMap
     switch (role) {
       case "TOURIST":
         const tourist = await Tourist.findOne({ user: user._id });
-        res.status(200).json({ token, user, tourist });
+        responseData.tourist = tourist;
         break;
       case "TOUR_GUIDE":
         const tourGuide = await TourGuide.findOne({ user: user._id });
-        res.status(200).json({ token, user, tourGuide });
+        responseData.tour_guide = tourGuide;  // Changed from tourguide to tour_guide
         break;
       case "ADVERTISER":
         const advertiser = await Advertiser.findOne({ user: user._id });
-        res.status(200).json({ token, user, advertiser });
+        responseData.advertiser = advertiser;
         break;
       case "TOUR_GOVERNOR":
         const tourGovernor = await TourGovernor.findOne({ user: user._id });
-        res.status(200).json({ token, user, tourGovernor });
+        responseData.tour_governor = tourGovernor;  // Changed from tourgovernor to tour_governor
         break;
       case "SELLER":
         const seller = await Seller.findOne({ user: user._id });
-        res.status(200).json({ token, user, seller });
+        responseData.seller = seller;
         break;
       case "ADMIN":
         const admin = await Admin.findOne({ user: user._id });
-        res.status(200).json({ token, user, admin });
+        responseData.admin = admin;
         break;
+      default:
+        return res.status(400).json({ message: "Invalid role" });
     }
+
+    // Log the response data to verify the structure
+    console.log('Response data being sent:', responseData);
+    res.status(200).json(responseData);
+
   } catch (error) {
-    // Catch any errors that occur during the process and return a 400 error response with the error message
+    console.error('Login error:', error);
     res.status(400).json({ message: error.message });
   }
 };

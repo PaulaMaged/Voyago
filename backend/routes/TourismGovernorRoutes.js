@@ -51,6 +51,7 @@ router.get(
 // ========================================== Location Routes ==========================================
 router.post("/create-location", TourismGovernorController.createLocation);
 router.get("/get-location/:locationId", TourismGovernorController.getLocation);
+router.put("/update-location/:locationId", TourismGovernorController.updateLocation);
 router.delete(
   "/delete-location/:locationId",
   TourismGovernorController.deleteLocation

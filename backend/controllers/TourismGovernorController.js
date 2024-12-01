@@ -203,7 +203,7 @@ const deleteLandmark = async (req, res) => {
 // View All Tourism Governor's Landmarks
 const getGovernorLandmarks = async (req, res) => {
   try {
-    const landmarks = await Landmark.find({ tour_governor: req.params.tourgovernorId });
+    const landmarks = await Landmark.find({ tour_governor: req.params.tourgovernorId }).populate("tour_governor").populate("tags").populate("location");
     res.status(200).json(landmarks);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -232,6 +232,23 @@ const deleteLocation = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+const updateLocation = async (req, res) => {
+  try {
+    const location = await Location.findByIdAndUpdate(
+      req.params.locationId,
+      req.body,
+      { new: true }
+    );
+    if (!location) {
+      return res.status(404).json({ message: "Location not found" });
+    }
+    res.status(200).json(location);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 
 //get Location
 const getLocation = async (req, res) => {
@@ -262,6 +279,7 @@ export default {
   updateTourGovernor,
   getTourGovernor,
   createLocation,
+  updateLocation,
   deleteLocation,
   getLocation,
   getTourGovernorByUserId,

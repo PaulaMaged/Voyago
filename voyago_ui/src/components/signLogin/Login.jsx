@@ -11,78 +11,96 @@ const handleSubmit = (e, setShowTerms, setUserId) => {
 
 const login = async (username, password, setShowTerms, setUserId) => {
   try {
+    console.log('Attempting login for:', username);
     const response = await axios.post("http://localhost:8000/api/user/login", {
       username,
       password,
     });
 
     if (response.status === 200) {
-      // Destructure the response data
-      const { token, user, ...roleData } = response.data;
+      const { token, user, tourist, tour_guide, tour_governor, seller, advertiser, admin } = response.data;
+      console.log('Response data:', response.data);
 
-      // List of possible roles
-      const roleNames = [
-        "ADMIN",
-        "USER",
-        "TOURIST",
-        "TOUR_GUIDE",
-        "TOUR_GOVERNOR",
-        "SELLER",
-        "ADVERTISER",
-      ];
-
+      // Get role from user object
+      const roleName = user.role;
       let roleId = null;
-      let roleName = null;
 
-      // Find the role present in the response
-      for (const role of roleNames) {
-        const roleKey = role.toLowerCase();
-        if (roleData[roleKey]) {
-          roleId = roleData[roleKey]._id;
-          roleName = role;
-          console.log(`Role found: ${roleName}, ID: ${roleId}`);
+      // Determine roleId based on role
+      switch(roleName) {
+        case "TOURIST":
+          roleId = tourist?._id;
           break;
-        }
+        case "TOUR_GUIDE":
+          roleId = tour_guide?._id;
+          break;
+        case "TOUR_GOVERNOR":
+          roleId = tour_governor?._id;
+          break;
+        case "SELLER":
+          roleId = seller?._id;
+          break;
+        case "ADVERTISER":
+          roleId = advertiser?._id;
+          break;
+        case "ADMIN":
+          roleId = admin?._id;
+          break;
+        default:
+          console.error('Unknown role:', roleName);
       }
 
-      // Store token, user, and role ID in localStorage
+      console.log('Role found:', roleName, 'with ID:', roleId);
+
+      // Store data in localStorage
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
+      
       if (roleId) {
         localStorage.setItem("roleId", roleId);
         localStorage.setItem("roleName", roleName);
       } else {
-        throw new Error("Login failed");
+        console.error('No roleId found for role:', roleName);
+        throw new Error(`No roleId found for ${roleName}`);
       }
-
-      // Retrieve the user object and parse it from JSON
-      const user2 = JSON.parse(localStorage.getItem("user"));
-      console.log("User:", user2);
-      console.log(user2._id);
-
-      // Retrieve the roleId and roleName if they exist
-      const roleId2 = localStorage.getItem("roleId");
-      const roleName2 = localStorage.getItem("roleName");
-      console.log("RoleId:", roleId2);
-      console.log("RoleName:", roleName2);
 
       alert("Login successful");
-      if (roleName2 === "TOURIST") {
-        window.location.href = "http://localhost:5173/Tourist_Dashboard";
+      
+      // Handle redirects
+      switch(roleName) {
+        case "TOURIST":
+          window.location.href = "http://localhost:5173/Tourist_Dashboard";
+          break;
+        case "ADMIN":
+          window.location.href = "http://localhost:5173/Admin_Dashboard";
+          break;
+        case "TOUR_GOVERNOR":
+          window.location.href = "http://localhost:5173/GovernorLandmarks";
+          break;
+        case "TOUR_GUIDE":
+          window.location.href = "http://localhost:5173/Guide_Dashboard";
+          break;
+        case "SELLER":
+          window.location.href = "http://localhost:5173/Seller_Dashboard";
+          break;
+        case "ADVERTISER":
+          window.location.href = "http://localhost:5173/Advertiser_Dashboard";
+          break;
+        default:
+          console.log(`No redirect specified for role: ${roleName}`);
       }
-      if (roleName2 === "ADMIN") {
-        window.location.href = "http://localhost:5173/Admin_Dashboard";
-      }
+
     } else if (response.status === 201) {
-      // New user accepted, show terms and conditions popup
       setShowTerms(true);
       const userId = response.data.userId;
-      console.log("User ID:", userId);
       setUserId(userId);
-      console.log(userId);
     }
   } catch (error) {
-    console.error(error);
+    console.error('Login error:', error);
+    if (error.response) {
+      alert(`Login failed: ${error.response.data.message}`);
+    } else {
+      alert(`Login failed: ${error.message}`);
+    }
   }
 };
 
@@ -90,21 +108,24 @@ function Login() {
   const [showTerms, setShowTerms] = useState(false);
   const [userId, setUserId] = useState(null);
 
-  const handleAccept = () => {
-    setShowTerms(false);
-
-    axios.put(`http://localhost:8000/api/user/update-user/${userId}`, {
-      terms_and_conditions: true,
-    });
-    alert("Terms and conditions accepted. You can now Use the system!");
+  const handleAccept = async () => {
+    try {
+      await axios.put(`http://localhost:8000/api/user/update-user/${userId}`, {
+        terms_and_conditions: true,
+        is_new: false
+      });
+      setShowTerms(false);
+      alert("Terms and conditions accepted. You can now use the system!");
+      window.location.reload();
+    } catch (error) {
+      console.error('Error accepting terms:', error);
+      alert("Error accepting terms and conditions. Please try again.");
+    }
   };
 
   const handleDecline = () => {
     setShowTerms(false);
-    alert(
-      "You must accept the terms and conditions in order to use the system!."
-    );
-    // Additional logic for declining terms can be added here
+    alert("You must accept the terms and conditions to use the system!");
   };
 
   return (
@@ -113,11 +134,9 @@ function Login() {
         <div className="terms">
           <h2 className="terms-title">Terms and Conditions</h2>
           <div className="terms-content">
-            {/* Example content for terms and conditions */}
             <p>
               By using this service, you agree to the following terms and
               conditions...
-              {/* Add the rest of the terms here */}
             </p>
             <p>Please read these terms carefully before continuing.</p>
             <div className="terms-actions">
