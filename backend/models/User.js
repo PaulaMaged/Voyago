@@ -8,6 +8,8 @@ const userSchema = new mongoose.Schema({
     unique: true,
   },
   createdAt: { type: Date, default: Date.now },
+  otp: { type: String },
+  otpExpiration: { type: Date },
 
   role: {
     type: String,

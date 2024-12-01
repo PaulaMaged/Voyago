@@ -10,6 +10,7 @@ import bcrypt from "bcrypt";
 import createToken from "../Data/cookiesArr.js";
 import { get } from "http";
 import { match } from "assert";
+import { sendNotificationEmail } from "./mailer.js";
 
 const createUser = async (req, res) => {
   try {
@@ -238,7 +239,7 @@ const login = async (req, res) => {
   try {
     const { username, password } = req.body;
     const user = await User.findOne({ username });
-    
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -249,7 +250,7 @@ const login = async (req, res) => {
     }
 
     const role = user.role;
-    console.log('User role:', role);
+    console.log("User role:", role);
 
     if (user.is_accepted === true && user.terms_and_conditions === false) {
       return res.status(201).json({
@@ -269,7 +270,7 @@ const login = async (req, res) => {
         break;
       case "TOUR_GUIDE":
         const tourGuide = await TourGuide.findOne({ user: user._id });
-        responseData.tour_guide = tourGuide;  // Changed from tourguide to tour_guide
+        responseData.tour_guide = tourGuide; // Changed from tourguide to tour_guide
         break;
       case "ADVERTISER":
         const advertiser = await Advertiser.findOne({ user: user._id });
@@ -277,7 +278,7 @@ const login = async (req, res) => {
         break;
       case "TOUR_GOVERNOR":
         const tourGovernor = await TourGovernor.findOne({ user: user._id });
-        responseData.tour_governor = tourGovernor;  // Changed from tourgovernor to tour_governor
+        responseData.tour_governor = tourGovernor; // Changed from tourgovernor to tour_governor
         break;
       case "SELLER":
         const seller = await Seller.findOne({ user: user._id });
@@ -292,11 +293,10 @@ const login = async (req, res) => {
     }
 
     // Log the response data to verify the structure
-    console.log('Response data being sent:', responseData);
+    console.log("Response data being sent:", responseData);
     res.status(200).json(responseData);
-
   } catch (error) {
-    console.error('Login error:', error);
+    console.error("Login error:", error);
     res.status(400).json({ message: error.message });
   }
 };
@@ -319,7 +319,72 @@ const getNewUsers = async (req, res) => {
   }
 };
 
+const sendOtp = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res
+        .status(400)
+        .json({ message: "No user found with this email." });
+    }
+
+    // Generate OTP (6-digit random number)
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Set OTP expiration (e.g., 10 minutes)
+    const otpExpiration = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
+
+    // Save OTP and expiration time in the user document
+    user.otp = otp;
+    user.otpExpiration = otpExpiration;
+    await user.save();
+
+    // Send OTP to the user's email
+
+    const otpMessage = `Your OTP code is: ${otp} and it will expire in ${otpExpiration}minutes.`;
+    await sendNotificationEmail("Number1bos@hotmail.com", otpMessage);
+    return res.status(200).json({ message: "OTP sent to your email." });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+const verifyOtp = async (req, res) => {
+  const { email, otp, newPassword } = req.body;
+
+  try {
+    const user = await User.findOne({
+      email,
+      otp,
+      otpExpiration: { $gt: Date.now() },
+    });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired OTP." });
+    }
+
+    // Hash the new password
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update user's password and clear OTP fields
+    user.password = hashedPassword;
+    user.otp = undefined;
+    user.otpExpiration = undefined;
+    await user.save();
+
+    return res.status(200).json({ message: "Password reset successfully." });
+  } catch (error) {
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
 export default {
+  verifyOtp,
+  sendOtp,
   getNewUsers,
   changePassword,
   createDeletionRequest,

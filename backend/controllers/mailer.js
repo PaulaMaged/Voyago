@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 
-export const sendNotificationEmail = async (email, itinerary) => {
+export const sendNotificationEmail = async (email, message) => {
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -15,11 +15,8 @@ export const sendNotificationEmail = async (email, itinerary) => {
   const mailOptions = {
     from: "voaygemasters@gmail.com",
     to: email,
-    subject: "Itinerary Reminder",
-    text: `
-        Hello my friend,
-       
-      `,
+    subject: "no-subject",
+    text: message,
   };
 
   return transporter.sendMail(mailOptions);

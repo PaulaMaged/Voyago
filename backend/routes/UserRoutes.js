@@ -46,6 +46,9 @@ router.post(
   UserController.createDeletionRequest
 );
 
+router.post("/otp", UserController.sendOtp);
+router.post("/verify-otp", UserController.verifyOtp);
+
 router.get("/logout", UserController.logout);
 
 export default router;
