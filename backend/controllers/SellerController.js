@@ -300,9 +300,9 @@ const getSalesReportFiltered = async (req, res) => {
         const sellerId = req.params.sellerId;
         const { productId, date, month } = req.query;
 
-        const products = productId ?
-            await Product.find({ _id: productId, seller: sellerId }) :
-            await Product.find({ seller: sellerId });
+    const products = productId
+      ? await Product.find({ _id: productId, seller: sellerId })
+      : await Product.find({ seller: sellerId });
 
         let totalRevenue = 0;
         for (let i = 0; i < products.length; i++) {
