@@ -172,29 +172,30 @@ const updateItinerary = async (req, res) => {
       req.params.itineraryId,
       { $set: req.body },
       { new: true }
-    ).populate({
-      path: "activities",
-      populate: [
-        {
-          path: "tags",
-          model: "Tag",
+    )
+      .populate({
+        path: "activities",
+        populate: [
+          {
+            path: "tags",
+            model: "Tag",
+          },
+          {
+            path: "category",
+            model: "ActivityCategory",
+          },
+        ],
+      })
+      .populate({
+        path: "tour_guide",
+        populate: {
+          path: "user",
+          model: "User",
+          select: "username", // Assuming you want to include the username
         },
-        {
-          path: "category",
-          model: "ActivityCategory",
-        },
-      ],
-    })
-    .populate({
-      path: "tour_guide",
-      populate: {
-        path: "user",
-        model: "User",
-        select: "username", // Assuming you want to include the username
-      },
-    })
-    .populate("pick_up")
-    .populate("drop_off");
+      })
+      .populate("pick_up")
+      .populate("drop_off");
     if (!updatedItinerary)
       return res.status(404).json({ message: "Itinerary not found" });
     res.status(200).json(updatedItinerary);
@@ -231,29 +232,30 @@ const getTourGuideItineraries = async (req, res) => {
   try {
     const itineraries = await Itinerary.find({
       tour_guide: req.params.tourGuideId,
-    }).populate({
-      path: "activities",
-      populate: [
-        {
-          path: "tags",
-          model: "Tag",
-        },
-        {
-          path: "category",
-          model: "ActivityCategory",
-        },
-      ],
     })
-    .populate({
-      path: "tour_guide",
-      populate: {
-        path: "user",
-        model: "User",
-        select: "username", // Assuming you want to include the username
-      },
-    })
-    .populate("pick_up")
-    .populate("drop_off");
+      .populate({
+        path: "activities",
+        populate: [
+          {
+            path: "tags",
+            model: "Tag",
+          },
+          {
+            path: "category",
+            model: "ActivityCategory",
+          },
+        ],
+      })
+      .populate({
+        path: "tour_guide",
+        populate: {
+          path: "user",
+          model: "User",
+          select: "username", // Assuming you want to include the username
+        },
+      })
+      .populate("pick_up")
+      .populate("drop_off");
     res.status(200).json(itineraries);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -272,6 +274,199 @@ const getTourGuideReview = async (req, res) => {
     tourGuide: req.params.tourGuideId,
   });
   res.send(tourGuideReviews);
+};
+
+//get total revenue of tour guide
+const getTotalRevenue = async (req, res) => {
+  try {
+    const tourGuideId = req.params.tourGuideId;
+    const itineraries = await Itinerary.find({ tour_guide: tourGuideId });
+
+    let sum = 0;
+
+    for (let i = 0; i < itineraries.length; i++) {
+      const bookings = await ItineraryBooking.find({
+        itinerary: itineraries[i]._id,
+      });
+      for (let j = 0; j < bookings.length; j++) {
+        if (bookings[j].attended) {
+          sum += bookings[j].Itinerary.price;
+        }
+      }
+    }
+    res.status(200).json({ totalRevenue: sum });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getTotalRevenueByDate = async (req, res) => {
+  try {
+    const tourGuideId = req.params.tourGuideId;
+    const { date } = req.query; // Assuming the date is passed as a query parameter
+    const itineraries = await Itinerary.find({ tour_guide: tourGuideId });
+
+    let sum = 0;
+    for (let i = 0; i < itineraries.length; i++) {
+      let bookings;
+      if (date) {
+        const startDate = new Date(date);
+        const endDate = new Date(date);
+        endDate.setDate(startDate.getDate() + 1); // Add one day to include the whole target day
+
+        bookings = await ItineraryBooking.find({
+          itinerary: itineraries[i]._id,
+          booking_date: { $gte: startDate, $lt: endDate },
+        });
+      } else {
+        bookings = await ItineraryBooking.find({
+          itinerary: itineraries[i]._id,
+        });
+      }
+
+      for (let j = 0; j < bookings.length; j++) {
+        if (bookings[j].attended) {
+          sum += bookings[j].itinerary.price;
+        }
+      }
+    }
+    res.status(200).json({ totalRevenue: sum });
+  } catch (error) {
+    // This will catch invalid date formats as well
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getAllRevenueByItinerary = async (req, res) => {
+  try {
+    const itineraryId = req.params.itineraryId; // Assuming itineraryId is in the URL params
+
+    // Fetch the itinerary to get the price
+    const itinerary = await Itinerary.findById(itineraryId);
+    if (!itinerary) {
+      return res.status(404).json({ message: "Itinerary not found" });
+    }
+
+    let sum = 0;
+
+    const itineraryBookings = await ItineraryBooking.find({
+      itinerary: itineraryId,
+    });
+
+    for (let i = 0; i < itineraryBookings.length; i++) {
+      if (itineraryBookings[i].attended) {
+        sum += itinerary.price;
+      }
+    }
+
+    res.status(200).json({ revenue: sum });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getTotalTourists = async (req, res) => {
+  try {
+    const tourGuideId = req.params.tourGuideId; // Assuming tourGuideId is in the URL params
+
+    // Get all itineraries for this tour guide
+    const itineraries = await Itinerary.find({ tourGuide: tourGuideId });
+
+    let totalTourists = 0;
+
+    // Iterate through each itinerary and sum up the number of tourists
+    for (let i = 0; i < itineraries.length; i++) {
+      const bookings = await ItineraryBooking.find({
+        itinerary: itineraries[i]._id,
+      });
+      totalTourists += bookings.filter((booking) => booking.attended).length;
+    }
+
+    res.status(200).json({ totalTourists });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getTouristsByMonth = async (req, res) => {
+  try {
+    const tourGuideId = req.params.tourGuideId;
+    const { month } = req.body; // Assuming month is in the request body
+
+    // Validate month input (optional, but recommended)
+    if (!month || isNaN(month) || month < 1 || month > 12) {
+      return res
+        .status(400)
+        .json({
+          error: "Invalid month. Please provide a number between 1 and 12.",
+        });
+    }
+
+    const itineraries = await Itinerary.find({ tour_guide: tourGuideId });
+    let touristsCount = 0;
+
+    for (let i = 0; i < itineraries.length; i++) {
+      // Use $month operator to filter bookings by month
+      const bookings = await ItineraryBooking.find({
+        itinerary: itineraries[i]._id,
+        booking_date: { $month: month },
+        attended: true, // Directly filter for attended bookings
+      });
+
+      touristsCount += bookings.length;
+    }
+
+    res.status(200).json({ touristsCount });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getAllNotifications = async (req, res) => {
+  try {
+    const tourGuideId = req.params.tourGuideId; // Assuming tourGuideId is in the URL params
+
+    // Fetch the tour guide by their ID
+    const tourGuide = await TourGuide.findById(tourGuideId).populate("user");
+    if (!tourGuide) {
+      return res.status(404).json({ message: "Tour guide not found" });
+    }
+
+    // Get the user associated with the tour guide
+    const user = tourGuide.user;
+
+    // Fetch all notifications for this user
+    const notifications = await Notification.find({ recipient: user._id });
+
+    res.status(200).json(notifications);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// backend/controllers/TourGuideController.js
+
+const getAllNotificationsByType = async (req, res) => {
+  try {
+    const tourGuideId = req.params.tourGuideId;
+    const type = req.body.type; // Assuming type is passed as a query parameter
+
+    if (!type) {
+      return res.status(400).json({ error: "Notification type is required" });
+    }
+
+    const tourGuide = await TourGuide.findById(tourGuideId).populate("user");
+    if (!tourGuide) {
+      return res.status(404).json({ message: "TourGuide not found" });
+    }
+
+    const user = tourGuide.user;
+    const notifications = await Notification.find({ recipient: user._id, type: type });
+
+    res.status(200).json(notifications);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
 
 export default {
