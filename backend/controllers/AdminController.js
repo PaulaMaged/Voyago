@@ -10,6 +10,7 @@ import ActivityBooking from "../models/ActivityBooking.js";
 import Tourist from "../models/Tourist.js";
 import Itinerary from "../models/Itinerary.js";
 import ItineraryBooking from "../models/ItineraryBooking.js";
+import Order from "../models/Order.js";
 
 //create Activity Category
 const createActivityCategory = async (req, res) => {
@@ -520,7 +521,7 @@ const setInapproperiateFlagActivity = async (req, res) => {
     const activity = await Activity.findByIdAndUpdate(activityId, req.body, {
       new: true,
       runValidators: true,
-    });
+    }).populate("advertiser");
 
     if (!activity) {
       return res.status(404).json({ message: "activity not found" });
@@ -538,6 +539,13 @@ const setInapproperiateFlagActivity = async (req, res) => {
     }
 
     await ActivityBooking.deleteMany({ activity: activityId });
+
+    // Create a notification for the advertiser
+    const notification = new Notification({
+      recipient: activity.advertiser.user, // Access user ID after populating
+      message: `Your activity "${activity.title}" has been flagged as inappropriate and removed. All bookings have been cancelled and tourists refunded.`,
+    });
+    await notification.save();
 
     return res.status(200).json({
       message:
@@ -558,7 +566,7 @@ const setInapproperiateFlagItinerary = async (req, res) => {
     const itinerary = await Itinerary.findByIdAndUpdate(itineraryId, req.body, {
       new: true,
       runValidators: true,
-    });
+    }).populate("tour_guide"); // Populate the tour_guide field
 
     if (!itinerary) {
       return res.status(404).json({ message: "itinerary not found" });
@@ -577,6 +585,13 @@ const setInapproperiateFlagItinerary = async (req, res) => {
 
     await ItineraryBooking.deleteMany({ itinerary: itineraryId });
 
+    // Create a notification for the tour guide
+    const notification = new Notification({
+      recipient: itinerary.tour_guide.user, // Access user ID after populating
+      message: `Your itinerary "${itinerary.title}" has been flagged as inappropriate and removed. All bookings have been cancelled and tourists refunded.`,
+    });
+    await notification.save();
+
     return res.status(200).json({
       message:
         "successfully refunded all tourists and cancelled all bookings relevant to this itinerary",
@@ -588,6 +603,83 @@ const setInapproperiateFlagItinerary = async (req, res) => {
       .json({ message: `Error while setting inapproperiate flag: ${error}` });
   }
 };
+
+async function getTotalItineraryRevenue() {
+  try {
+    const bookings = await ItineraryBooking.find().populate(
+      "itinerary",
+      "price"
+    );
+
+    let totalRevenue = 0;
+    for (const booking of bookings) {
+      if (booking.itinerary && booking.itinerary.price && booking.attended) {
+        totalRevenue += booking.itinerary.price;
+      }
+    }
+
+    return totalRevenue;
+  } catch (error) {
+    console.error("Error calculating total itinerary revenue:", error);
+    throw error;
+  }
+}
+
+async function getTotalActivityRevenue() {
+  try {
+    const bookings = await ActivityBooking.find().populate("activity", "price");
+
+    let totalRevenue = 0;
+    for (const booking of bookings) {
+      if (booking.activity && booking.activity.price && booking.attended) {
+        totalRevenue += booking.activity.price;
+      }
+    }
+
+    return totalRevenue;
+  } catch (error) {
+    console.error("Error calculating total activity revenue:", error);
+    throw error;
+  }
+}
+
+async function getTotalProductRevenue() {
+  try {
+    // Fetch all orders and populate the 'product' field
+    const orders = await Order.find().populate("product", "price");
+
+    // Calculate the total revenue by summing up the prices of all products
+    let totalRevenue = 0;
+    for (const order of orders) {
+      if (order.product && order.product.price) {
+        totalRevenue += order.quantity * order.product.price;
+      }
+    }
+
+    return totalRevenue;
+  } catch (error) {
+    console.error("Error calculating total product revenue:", error);
+    throw error;
+  }
+}
+
+const getTotalRevenue = async (req, res) => {
+  try {
+    const itineraryRevenue = await getTotalItineraryRevenue();
+    const activityRevenue = await getTotalActivityRevenue();
+    const productRevenue = await getTotalProductRevenue();
+
+    const totalRevenue = itineraryRevenue + activityRevenue + productRevenue;
+
+    return res
+      .status(200)
+      .json({ message: "Total revenue", revenue: totalRevenue });
+  } catch (error) {
+    console.error("Error calculating total revenue:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 
 export default {
   getAdminByUserId,

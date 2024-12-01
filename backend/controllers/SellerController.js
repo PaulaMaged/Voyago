@@ -1,5 +1,6 @@
 import Product from "../models/Product.js";
 import Seller from "../models/Seller.js";
+import Order from "../models/Order.js";
 import mongoose from "mongoose";
 import multer from "multer";
 /**
@@ -130,7 +131,15 @@ const deleteSeller = async (req, res) => {
 };
 
 const createProduct = async (req, res) => {
-  const { seller, name, description, price, available_quantity, picture, archived } = req.body;
+  const {
+    seller,
+    name,
+    description,
+    price,
+    available_quantity,
+    picture,
+    archived,
+  } = req.body;
 
   // Ensure all required fields are provided
   if (!seller || !name || !price || !available_quantity) {
@@ -148,11 +157,11 @@ const createProduct = async (req, res) => {
     const newProduct = new Product({
       seller,
       name,
-      description: description || "",  // Default to an empty string if not provided
+      description: description || "", // Default to an empty string if not provided
       price,
       available_quantity,
-      picture: picture || "",  // Default to an empty string if not provided
-      archived: archived || false,  // Default to false if not provided
+      picture: picture || "", // Default to an empty string if not provided
+      archived: archived || false, // Default to false if not provided
     });
 
     // Save the product to the database
@@ -200,7 +209,6 @@ const getAllProducts = async (req, res) => {
   }
 };
 
-
 const getAllProductsBySeller = async (req, res) => {
   try {
     const { sellerId } = req.params; // Get sellerId from the URL parameters
@@ -228,7 +236,9 @@ const getAllProductsBySeller = async (req, res) => {
       });
 
     if (!products || products.length === 0) {
-      return res.status(404).json({ message: "No products found for this seller." });
+      return res
+        .status(404)
+        .json({ message: "No products found for this seller." });
     }
 
     res.json(products); // Return the products
@@ -236,7 +246,6 @@ const getAllProductsBySeller = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
 
 const updateProduct = async (req, res) => {
   try {
@@ -264,6 +273,61 @@ const deleteProduct = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+};
+
+const getTotalRevenue = async (req, res) => {
+  const sellerId = req.params.sellerId;
+  const productsOfSeller = await Product.find({ seller: sellerId });
+
+  let sum = 0;
+
+  for (let i = 0; i < productsOfSeller.length; i++) {
+    const product = productsOfSeller[i];
+
+    const orders = await Order.find({ product: product._id }).populate();
+
+    for (let j = 0; j < orders.length; j++) {
+      const order = orders[j];
+      sum += order.product.price * order.product.quantity;
+    }
+  }
+
+  res.json({ totalRevenue: sum });
+};
+
+const getSalesReportFiltered = async (req, res) => {
+    try {
+        const sellerId = req.params.sellerId;
+        const { productId, date, month } = req.query;
+
+        const products = productId ?
+            await Product.find({ _id: productId, seller: sellerId }) :
+            await Product.find({ seller: sellerId });
+
+        let totalRevenue = 0;
+        for (let i = 0; i < products.length; i++) {
+            let orders;
+            const filter = { product: products[i]._id };
+
+            if (date) {
+                const startDate = new Date(date);
+                const endDate = new Date(date);
+                endDate.setDate(startDate.getDate() + 1);
+                filter.order_date = { $gte: startDate, $lt: endDate };
+            } else if (month) {
+                filter.order_date = { $month: parseInt(month) }; // Assuming month is passed as 1-12
+            }
+
+            orders = await Order.find(filter);
+
+            for (let j = 0; j < orders.length; j++) {
+                totalRevenue += products[i].price * orders[j].quantity;
+            }
+        }
+        res.status(200).json({ totalRevenue: totalRevenue });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 };
 
 export default {
