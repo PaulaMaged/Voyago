@@ -24,7 +24,7 @@ export default function ViewPurchasedProducts() {
   const fetchPurchasedProducts = async () => {
     try {
       setLoading(true);
-      let touristId = localStorage.getItem("roleId"); // Example tourist ID localStorage.getItem("roleId")
+      let touristId = localStorage.getItem("roleId");
       if (!touristId) {
         throw new Error("Tourist ID not found");
       }
@@ -32,9 +32,8 @@ export default function ViewPurchasedProducts() {
         `http://localhost:8000/api/product/retrieve-all-orders-by-touristid/${touristId}`
       );
 
-      const orders = response.data; // axios automatically parses JSON
-      const productsWithDetails = orders.map((order) => ({
-        ...order.product,
+      // Modify how we process the orders
+      const productsWithDetails = response.data.map((order) => ({
         orderId: order._id,
         orderDate: new Date(order.arrival_date).toLocaleDateString(),
         quantity: order.quantity,
@@ -42,7 +41,10 @@ export default function ViewPurchasedProducts() {
         userReview: order.product.reviews.find(
           (review) => review.reviewer === touristId
         ),
+        // Spread the product details, but after our custom fields to avoid overwrites
+        ...order.product,
       }));
+
       setPurchasedProducts(productsWithDetails);
       setLoading(false);
     } catch (error) {
@@ -58,31 +60,41 @@ export default function ViewPurchasedProducts() {
     return sum / reviews.length;
   };
 
-  const filteredProducts = purchasedProducts
-    .filter((product) =>
+  const getFilteredAndSortedProducts = () => {
+    // Start with a fresh copy of purchasedProducts
+    let result = [...purchasedProducts];
+    
+    // Apply filters
+    result = result.filter(product => 
       product.name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .filter((product) => {
-      const productPrice = parseFloat(
-        currencyConversions.convertFromDB(product.price)
-      );
-      const min = minPrice ? parseFloat(minPrice) : 0;
-      const max = maxPrice ? parseFloat(maxPrice) : Infinity;
-      return productPrice >= min && productPrice <= max;
-    });
+    );
 
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-    if (sortRating === "asc") {
-      return a.rating - b.rating;
-    } else if (sortRating === "desc") {
-      return b.rating - a.rating;
+    // Apply price filter
+    if (minPrice || maxPrice) {
+      result = result.filter(product => {
+        const productPrice = parseFloat(currencyConversions.convertFromDB(product.price));
+        const min = minPrice ? parseFloat(minPrice) : 0;
+        const max = maxPrice ? parseFloat(maxPrice) : Infinity;
+        return productPrice >= min && productPrice <= max;
+      });
     }
-    return 0;
-  });
+
+    // Apply sorting
+    if (sortRating !== "none") {
+      result.sort((a, b) => {
+        if (sortRating === "asc") {
+          return a.rating - b.rating;
+        }
+        return b.rating - a.rating;
+      });
+    }
+
+    return result;
+  };
 
   const handleRateProduct = async (productId) => {
     try {
-      let touristId = localStorage.getItem("roleId"); // Example tourist ID localStorage.getItem("roleId")
+      let touristId = localStorage.getItem("roleId");
 
       if (!touristId) {
         throw new Error("Tourist ID not found");
@@ -108,16 +120,14 @@ export default function ViewPurchasedProducts() {
         setReview("");
         setSelectedProduct(null);
         setIsModalOpen(false);
-        setErrorMessage(""); // Clear any existing error message
+        setErrorMessage("");
       } else {
         throw new Error("Failed to submit rating and review");
       }
     } catch (error) {
       if (error.response && error.response.status === 400) {
-        // If the error is a 400 Bad Request, display the error message from the server
         setErrorMessage(error.response.data.message);
       } else {
-        // Handle any other errors
         console.error("Error rating product:", error);
         setErrorMessage(
           "An unexpected error occurred. Please try again later."
@@ -145,9 +155,10 @@ export default function ViewPurchasedProducts() {
     setReview("");
   };
 
-  if (loading)
-    return <div className="loading">Loading purchased products...</div>;
+  if (loading) return <div className="loading">Loading purchased products...</div>;
   if (error) return <div className="error">{error}</div>;
+
+  const displayProducts = getFilteredAndSortedProducts();
 
   return (
     <div className="container">
@@ -186,10 +197,10 @@ export default function ViewPurchasedProducts() {
         </select>
       </div>
 
-      {sortedProducts.length > 0 ? (
+      {displayProducts.length > 0 ? (
         <div className="product-grid">
-          {sortedProducts.map((product) => (
-            <div key={product._id} className="product-card">
+          {displayProducts.map((product) => (
+            <div key={product.orderId} className="product-card">
               <img
                 src={product.picture || "/placeholder.svg?height=200&width=200"}
                 alt={product.name}
@@ -199,7 +210,6 @@ export default function ViewPurchasedProducts() {
                 <h2 className="product-name">{product.name}</h2>
                 <p className="product-description">{product.description}</p>
                 <p className="product-price">
-                  {" "}
                   {currencyConversions
                     .convertFromDB(product.price)
                     .toFixed(2) +
@@ -262,7 +272,6 @@ export default function ViewPurchasedProducts() {
               {selectedProduct.name}
             </h2>
 
-            {/* Display error message */}
             {errorMessage && (
               <div className="error-message">{errorMessage}</div>
             )}
