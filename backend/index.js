@@ -8,6 +8,7 @@ import TourismGovernorRoutes from "./routes/TourismGovernorRoutes.js";
 import TouristRoutes from "./routes/TouristRoutes.js";
 import SellerRoutes from "./routes/SellerRoutes.js";
 import AdminRoutes from "./routes/AdminRoutes.js";
+import promoCodeRoutes from "./routes/routes_promoCodeRoutes.js";
 import UserRoutes from "./routes/UserRoutes.js";
 import ProductRoutes from "./routes/ProductRoutes.js";
 import cookieParser from "cookie-parser";
@@ -210,6 +211,7 @@ app.use("/api/admin", AdminRoutes);
 app.use("/api/user", UserRoutes);
 app.use("/api/tourism-governor", TourismGovernorRoutes);
 app.use("/api/seller", SellerRoutes);
+app.use("/api/promo-codes", promoCodeRoutes);
 // Root route for testing
 app.get("/", (req, res) => {
   res.send("Hello World!");

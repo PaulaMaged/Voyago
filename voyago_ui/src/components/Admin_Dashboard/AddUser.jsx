@@ -116,7 +116,7 @@ export default function AddUser() {
           max-width: 300px;
           margin: 0 auto;
         }
-        h2 {
+        h3 {
           color: #2c3e50;
           margin-bottom: 20px;
         }
