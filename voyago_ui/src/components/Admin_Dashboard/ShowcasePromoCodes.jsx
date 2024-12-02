@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { set } from "mongoose";
 
 // This is hardcoded data for demonstration purposes
 const hardcodedPromoCodes = [
