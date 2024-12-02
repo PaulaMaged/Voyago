@@ -10,9 +10,9 @@ import SellerRoutes from "./routes/SellerRoutes.js";
 import AdminRoutes from "./routes/AdminRoutes.js";
 import UserRoutes from "./routes/UserRoutes.js";
 import ProductRoutes from "./routes/ProductRoutes.js";
+import cartRoutes from "./routes/cartRoutes.js";
 import cookieParser from "cookie-parser";
 import axios from "axios";
-import cartRoutes from "./routes/cartRoutes.js";
 import cors from "cors";
 
 const app = express();
