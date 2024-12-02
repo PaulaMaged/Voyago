@@ -237,7 +237,7 @@ export default function AdminDashboard() {
     <div className="admin-dashboard">
       <nav className="sidebar">
         <div className="sidebar-header">
-          <h2>Admin Dashboard</h2>
+          <h2 style={{ color: "white" }}>Admin Dashboard</h2>
         </div>
         <ul className="sidebar-menu">
           {sections.map((section, index) => (
@@ -283,15 +283,12 @@ export default function AdminDashboard() {
               )?.title || "Dashboard"}
             </h1>
             <div className="header-actions">
-              <div className="search-bar">
-                <input type="text" placeholder="Search..." />
-                <Search className="icon" />
-              </div>
-              <button className="icon-button">
-                <Bell className="icon" />
+              <button className="icon-button1">
+                <Bell className="icon" style={{ color: "rgb(52, 73, 94)" }} />
               </button>
-              <button className="user-button">
-                <User className="icon" />
+
+              <button className="user-button1">
+                <User className="icon" style={{ color: "rgb(52, 73, 94)" }} />
                 <span>Admin</span>
               </button>
             </div>
@@ -447,8 +444,8 @@ export default function AdminDashboard() {
           color: #7f8c8d;
         }
 
-        .icon-button,
-        .user-button {
+        .icon-button1,
+        .user-button1 {
           background: none;
           border: none;
           cursor: pointer;
@@ -459,12 +456,12 @@ export default function AdminDashboard() {
           transition: background-color 0.3s;
         }
 
-        .icon-button:hover,
-        .user-button:hover {
+        .icon-button1:hover,
+        .user-button1:hover {
           background-color: #f1f3f5;
         }
 
-        .user-button span {
+        .user-button1 span {
           margin-left: 5px;
           font-size: 0.9rem;
           color: #2c3e50;

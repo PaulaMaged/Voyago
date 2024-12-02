@@ -21,9 +21,9 @@ export default function ManageComplaints() {
   const [selectedComplaint, setSelectedComplaint] = useState(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    async function fetchData() {
       await getAllComplaints(setComplaints);
-    };
+    }
     fetchData();
   }, []);
 
