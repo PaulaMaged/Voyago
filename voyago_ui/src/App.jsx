@@ -4,8 +4,8 @@ import SignUpAll from "./components/signLogin/signUpAll";
 import Login from "./components/signLogin/Login";
 import AdminDash from "./components/Admin_Dashboard/Admin_dash";
 import TouristDashboard from "./components/Toursit_Dashboard/Tourist_dash";
-import TourGuideDashboard from "./components/TourGuide_Dashboard/TourGuide_Dashboard";
-import AdvertiserDashboard from "./components/Advertiser_Dashboard/advertiserDashboard";
+// import TourGuideDashboard from "./components/TourGuide_Dashboard/TourGuide_Dashboard";
+// import AdvertiserDashboard from "./components/Advertiser_Dashboard/advertiserDashboard";
 import ViewAdvertiserProfile from "./components/Profiles/Advertiser_profile";
 import ViewTourGuideProfile from "./components/Profiles/Tour_guide_profile";
 import ViewSellerProfile from "./components/Profiles/Seller_profile";
@@ -71,10 +71,10 @@ function App() {
             element={<ViewSellerProfile />}
           ></Route>
 
-          <Route
+          {/* <Route
             path="/TourGuide_Dashboard"
             element={<TourGuideDashboard />}
-          ></Route>
+          ></Route> */}
           <Route path="/viewActivityAdv" element={<ViewActivityAdv />}></Route>
           <Route
             path="/viewActivityGuest"
@@ -84,10 +84,10 @@ function App() {
             path="/viewItineraryGuest"
             element={<ViewItineraryGuest />}
           ></Route>
-          <Route
+          {/* <Route
             path="/advertiser_dashboard"
             element={<AdvertiserDashboard />}
-          ></Route>
+          ></Route> */}
           <Route
             path="/viewItineraryGuide"
             element={<ViewItineraryGuide />}
