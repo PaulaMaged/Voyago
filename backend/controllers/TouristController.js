@@ -170,8 +170,36 @@ const touristPay = async (req, res) => {
           });
         }
 
+        //check if it is already booked by tourist
+        if (plan.type === "Activity") {
+          const activityBooked = await ActivityBooking.findOne({
+            activity: plan.activityId,
+            tourist: tourist._id,
+          });
+
+          if (activityBooked)
+            return res
+              .status(409)
+              .json({ message: "You have already booked this activity" });
+        } else if (plan.type === "Itinerary") {
+          const itineraryBooked = await ItineraryBooking.findOne({
+            itinerary: plan.itineraryId,
+            tourist: tourist._id,
+          });
+
+          if (itineraryBooked)
+            return res
+              .status(409)
+              .json({ message: "You have already booked this itinerary" });
+        }
+
         // Accumulate the total price
         totalPrice += existingPlan.price;
+
+        // Check if the tourist has sufficient balance
+        if (tourist.wallet < totalPrice) {
+          return res.status(402).json({ message: "Insufficient balance" });
+        }
 
         // Create the appropriate booking
         if (plan.type === "Activity") {
@@ -199,11 +227,6 @@ const touristPay = async (req, res) => {
       }
     }
 
-    // Check if the tourist has sufficient balance
-    if (tourist.wallet < totalPrice) {
-      return res.status(402).json({ message: "Insufficient balance" });
-    }
-
     // Deduct the total price from the tourist's wallet
     tourist.wallet -= totalPrice;
 
@@ -214,7 +237,7 @@ const touristPay = async (req, res) => {
     await tourist.save();
 
     // Respond with the updated tourist data
-    res.json(updatedTourist);
+    res.status(201).json(updatedTourist);
   } catch (error) {
     console.error("Error in touristPay:", error);
     res.status(500).json({ error: error.message });
