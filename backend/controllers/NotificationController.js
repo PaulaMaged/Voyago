@@ -2,7 +2,7 @@ import Notification from "../models/Notification.js";
 import ActivityBooking from "../models/ActivityBooking.js";
 import Tourist from "../models/Tourist.js";
 
-const createUpcomingActivityNotifications = async () => {
+export const createUpcomingActivityNotifications = async () => {
   try {
     const currentDate = new Date();
     const upcomingDate = new Date();
@@ -28,5 +28,3 @@ const createUpcomingActivityNotifications = async () => {
     console.error("Error creating notifications:", error);
   }
 };
-
-export default { createUpcomingActivityNotifications };
