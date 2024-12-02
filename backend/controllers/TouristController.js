@@ -977,6 +977,114 @@ const bookActivity = async (req, res) => {
   }
 };
 
+const getUpcomingBookings = async (req, res) => {
+  try {
+    const touristId = req.params.touristId;
+    const currentDate = new Date();
+
+    // Get upcoming activity bookings
+    const activityBookings = await ActivityBooking.find({
+      tourist: touristId,
+      active: true,
+      attended: false
+    })
+    .populate({
+      path: 'activity',
+      select: 'name description start_date end_date price location'
+    });
+
+    // Get upcoming itinerary bookings
+    const itineraryBookings = await ItineraryBooking.find({
+      tourist: touristId,
+      active: true,
+      attended: false
+    })
+    .populate({
+      path: 'itinerary',
+      select: 'name description start_date end_date price location'
+    });
+
+    // Filter for only upcoming events
+    const upcomingActivities = activityBookings.filter(booking => 
+      new Date(booking.activity.start_date) > currentDate
+    );
+
+    const upcomingItineraries = itineraryBookings.filter(booking => 
+      new Date(booking.itinerary.start_date) > currentDate
+    );
+
+    res.status(200).json({
+      activities: upcomingActivities,
+      itineraries: upcomingItineraries
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getBookingHistory = async (req, res) => {
+  try {
+    const touristId = req.params.touristId;
+    const currentDate = new Date();
+
+    // Get past activity bookings
+    const activityBookings = await ActivityBooking.find({
+      tourist: touristId,
+      $or: [
+        { attended: true },
+        { 
+          active: true,
+          'activity.end_date': { $lt: currentDate }
+        }
+      ]
+    })
+    .populate({
+      path: 'activity',
+      select: 'name description start_date end_date price location'
+    })
+    .sort({ booking_date: -1 }); // Sort by booking date, most recent first
+
+    // Get past itinerary bookings
+    const itineraryBookings = await ItineraryBooking.find({
+      tourist: touristId,
+      $or: [
+        { attended: true },
+        { 
+          active: true,
+          'itinerary.end_date': { $lt: currentDate }
+        }
+      ]
+    })
+    .populate({
+      path: 'itinerary',
+      select: 'name description start_date end_date price location'
+    })
+    .sort({ booking_date: -1 }); // Sort by booking date, most recent first
+
+    // Filter for only past events and add status
+    const pastActivities = activityBookings.map(booking => ({
+      ...booking.toObject(),
+      status: booking.attended ? 'Completed' : 
+              !booking.active ? 'Cancelled' : 'Expired'
+    }));
+
+    const pastItineraries = itineraryBookings.map(booking => ({
+      ...booking.toObject(),
+      status: booking.attended ? 'Completed' : 
+              !booking.active ? 'Cancelled' : 'Expired'
+    }));
+
+    res.status(200).json({
+      activities: pastActivities,
+      itineraries: pastItineraries
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 // Export the controllers
 export default {
   createTourist,
@@ -1006,4 +1114,6 @@ export default {
   getAllComplaints,
   updateComplaint,
   bookActivity,
+  getUpcomingBookings,
+  getBookingHistory,
 };
