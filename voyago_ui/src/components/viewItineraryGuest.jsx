@@ -87,10 +87,10 @@ const ViewItineraryGuest = () => {
         );
       const matchesLanguage =
         !selectedLanguage || itinerary.language === selectedLanguage;
-        const convertedPrice = currencyConversions.convertFromDB(itinerary.price);
-        const matchesPrice =
-          (!minPrice || convertedPrice >= parseFloat(minPrice)) &&
-          (!maxPrice || convertedPrice <= parseFloat(maxPrice));
+      const convertedPrice = currencyConversions.convertFromDB(itinerary.price);
+      const matchesPrice =
+        (!minPrice || convertedPrice >= parseFloat(minPrice)) &&
+        (!maxPrice || convertedPrice <= parseFloat(maxPrice));
       const matchesDate =
         !selectedDate ||
         new Date(itinerary.start_date).toISOString().split("T")[0] ===
@@ -133,11 +133,12 @@ const ViewItineraryGuest = () => {
         `http://localhost:8000/api/tourist/tourist-pay/${touristId}`,
         data
       );
-      console.log(response.data);
-      // Handle successful booking
+      if (response.status === 201) {
+        alert("Itinerary booked successfully!");
+      }
     } catch (error) {
-      console.error("Error booking itinerary:", error);
-      // Handle booking error
+      console.log(error);
+      alert(error.response.data.message);
     }
   };
 
@@ -311,7 +312,9 @@ const ViewItineraryGuest = () => {
               </p>
               <p>
                 <strong>Price:</strong>
-                {currencyConversions.convertFromDB(itinerary.price).toFixed(2) +
+                {currencyConversions
+                  .convertFromDB(itinerary.price)
+                  ?.toFixed(2) +
                   " " +
                   localStorage.getItem("currency")}
               </p>
