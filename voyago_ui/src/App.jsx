@@ -14,7 +14,6 @@ import AddTourismGovenor from "./components/Admin_/add_tourism_govenor";
 import AddAdmin from "./components/Admin_/add_admin";
 
 import ViewActivityAdv from "./components/viewActivityAdv";
-
 import ViewActivityGuest from "./components/viewActivityGuest";
 import ViewItineraryGuest from "./components/viewItineraryGuest";
 import ViewItineraryGuide from "./components/ViewItineraryGuide";
@@ -32,89 +31,43 @@ import HotelSearch from "./components/ThirdParty/HotelSearching";
 import FlightSearch from "./components/ThirdParty/FlightSearch";
 import FlightBooking from "./components/ThirdParty/FlightBooking";
 
+import Cart from "./components/Cart"; // Import Cart
+
 function App() {
   return (
-    <>
-      <BrowserRouter>
-        <Routes>
-          <Route index element={<Home />}></Route>
-          <Route path="/home" element={<Home />}></Route>
-          <Route path="/signUp" element={<SignUpAll />}></Route>
-          <Route path="/login" element={<Login />}></Route>
-          {/* <Route path="/Change" element={<ChangePassword />}></Route> */}
-          <Route path="/nav" element={<NavigationPage />}></Route>
-          <Route
-            path="/Tourist_Dashboard"
-            element={<TouristDashboard />}
-          ></Route>
-          <Route path="/Admin_Dashboard" element={<AdminDash />}></Route>
-          <Route
-            path="/addTourismGovenor"
-            element={<AddTourismGovenor />}
-          ></Route>
-
-          <Route path="/addAdmin" element={<AddAdmin />}></Route>
-          <Route path="/hotelBooking" element={<HotelSearch />}></Route>
-          <Route path="/FlightSearch" element={<FlightSearch />}></Route>
-          <Route path="/FlightBooking" element={<FlightBooking />}></Route>
-
-          <Route
-            path="/ViewAdvertiserProfile"
-            element={<ViewAdvertiserProfile />}
-          ></Route>
-          <Route
-            path="ViewTourGuideProfile"
-            element={<ViewTourGuideProfile />}
-          ></Route>
-          <Route
-            path="/ViewSellerProfile"
-            element={<ViewSellerProfile />}
-          ></Route>
-
-          {/* <Route
-            path="/TourGuide_Dashboard"
-            element={<TourGuideDashboard />}
-          ></Route> */}
-          <Route path="/viewActivityAdv" element={<ViewActivityAdv />}></Route>
-          <Route
-            path="/viewActivityGuest"
-            element={<ViewActivityGuest />}
-          ></Route>
-          <Route
-            path="/viewItineraryGuest"
-            element={<ViewItineraryGuest />}
-          ></Route>
-          {/* <Route
-            path="/advertiser_dashboard"
-            element={<AdvertiserDashboard />}
-          ></Route> */}
-          <Route
-            path="/viewItineraryGuide"
-            element={<ViewItineraryGuide />}
-          ></Route>
-          <Route path="/viewLandmarks" element={<ViewLandmarks />}></Route>
-          <Route
-            path="/GovernorLandmarks"
-            element={<GovernorLandmarks />}
-          ></Route>
-          <Route
-            path="/viewProductAdmin"
-            element={<ViewProductAdmin />}
-          ></Route>
-          <Route
-            path="/viewProductSeller"
-            element={<ViewProductSeller />}
-          ></Route>
-          <Route
-            path="/viewProductTourist"
-            element={<ViewProductTourist />}
-          ></Route>
-          <Route path="/editProduct" element={<EditProduct />}></Route>
-          <Route path="/crudCategory" element={<CrudCategory />}></Route>
-          <Route path="createReview" element={<CreateReview />} />
-        </Routes>
-      </BrowserRouter>
-    </>
+    <BrowserRouter>
+      <Routes>
+        <Route index element={<Home />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="/signUp" element={<SignUpAll />} />
+        <Route path="/login" element={<Login />} />
+        {/* <Route path="/Change" element={<ChangePassword />} /> */}
+        <Route path="/nav" element={<NavigationPage />} />
+        <Route path="/Tourist_Dashboard" element={<TouristDashboard />} />
+        <Route path="/Admin_Dashboard" element={<AdminDash />} />
+        <Route path="/addTourismGovenor" element={<AddTourismGovenor />} />
+        <Route path="/addAdmin" element={<AddAdmin />} />
+        <Route path="/hotelBooking" element={<HotelSearch />} />
+        <Route path="/FlightSearch" element={<FlightSearch />} />
+        <Route path="/FlightBooking" element={<FlightBooking />} />
+        <Route path="/ViewAdvertiserProfile" element={<ViewAdvertiserProfile />} />
+        <Route path="ViewTourGuideProfile" element={<ViewTourGuideProfile />} />
+        <Route path="/ViewSellerProfile" element={<ViewSellerProfile />} />
+        <Route path="/viewActivityAdv" element={<ViewActivityAdv />} />
+        <Route path="/viewActivityGuest" element={<ViewActivityGuest />} />
+        <Route path="/viewItineraryGuest" element={<ViewItineraryGuest />} />
+        <Route path="/viewItineraryGuide" element={<ViewItineraryGuide />} />
+        <Route path="/viewLandmarks" element={<ViewLandmarks />} />
+        <Route path="/GovernorLandmarks" element={<GovernorLandmarks />} />
+        <Route path="/viewProductAdmin" element={<ViewProductAdmin />} />
+        <Route path="/viewProductSeller" element={<ViewProductSeller />} />
+        <Route path="/viewProductTourist" element={<ViewProductTourist />} />
+        <Route path="/editProduct" element={<EditProduct />} />
+        <Route path="/crudCategory" element={<CrudCategory />} />
+        <Route path="/createReview" element={<CreateReview />} />
+        <Route path="/cart" element={<Cart />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
