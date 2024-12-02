@@ -63,4 +63,8 @@ router.put("/update-product/:productId", SellerController.updateProduct);
 // Delete Product by ID
 router.delete("/delete-product/:productId", SellerController.deleteProduct);
 
+router.get('/product-orders/:productId', SellerController.getProductOrders);
+router.get('/total-revenue/:sellerId', SellerController.getTotalRevenue);
+router.get('/sales-report/:sellerId', SellerController.getSalesReportFiltered);
+
 export default router;

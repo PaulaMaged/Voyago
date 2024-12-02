@@ -134,10 +134,18 @@ const ViewItineraryGuest = () => {
         data
       );
       console.log(response.data);
+      if (response.status === 201) {
+        alert("Itinerary booked successfully!");
+      } else {
+        alert("Failed to book the Itinerary. Please try again.");
+      }
       // Handle successful booking
     } catch (error) {
       console.error("Error booking itinerary:", error);
       // Handle booking error
+      alert(
+        "An error occurred while booking the Itinerary. Please try again later."
+      );
     }
   };
 

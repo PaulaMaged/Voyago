@@ -19,10 +19,13 @@ import ViewItineraryGuide from "./components/ViewItineraryGuide";
 
 import GovernorLandmarks from "./components/GovernorLandmarks";
 import ViewLandmarks from "./components/viewLandmarks";
+
 import ViewProductAdmin from "./components/viewProductAdmin";
 import ViewProductSeller from "./components/viewProductSeller";
 import ViewProductTourist from "./components/viewProductTourist";
 import EditProduct from "./components/editProduct";
+import SellerSales from './components/Sales/SellerSales';
+
 import CrudCategory from "./components/Admin_Dashboard/manageActCategories";
 import NavigationPage from "./components/TouristNavigationPage";
 import CreateReview from "./components/CreateReview";
@@ -99,6 +102,8 @@ function App() {
             element={<ViewProductTourist />}
           ></Route>
           <Route path="/editProduct" element={<EditProduct />}></Route>
+          <Route path="/sellerSales" element={<SellerSales />}></Route>
+
           <Route path="/crudCategory" element={<CrudCategory />}></Route>
           <Route path="createReview" element={<CreateReview />} />
         </Routes>

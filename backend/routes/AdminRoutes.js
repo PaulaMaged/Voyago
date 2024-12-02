@@ -170,5 +170,11 @@ router.put(
   AdminController.setInapproperiateFlagItinerary
 );
 
+
+router.get('/total-revenue', AdminController.getTotalRevenue);
+router.get('/itinerary-revenue', AdminController.getTotalItineraryRevenue);
+router.get('/activity-revenue', AdminController.getTotalActivityRevenue);
+router.get('/product-revenue', AdminController.getTotalProductRevenue);
+
 // Export the router
 export default router;

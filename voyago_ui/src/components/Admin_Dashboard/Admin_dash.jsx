@@ -8,6 +8,7 @@ import ManageActCategories from "./manageActCategories";
 import ManageTags from "./manageTags";
 import ViewActivitiesAdmin from "./ViewActivitiesAdmin";
 import ViewItinerariesAdmin from "./ViewItinerariesAdmin";
+import SalesReport from '../Admin_Dashboard/SalesReport';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("addUser");
@@ -31,6 +32,8 @@ export default function AdminDashboard() {
         return <ViewActivitiesAdmin />;
       case "viewItineraries":
         return <ViewItinerariesAdmin />;
+      case "saleReport":
+        return <SalesReport />;  
       default:
         return <AddUser />;
     }
@@ -77,6 +80,11 @@ export default function AdminDashboard() {
           <li>
             <button onClick={() => setActiveTab("viewItineraries")}>
               view Itineraries
+            </button>
+          </li>
+          <li>
+            <button onClick={() => setActiveTab("saleReport")}>
+              Sales Report
             </button>
           </li>
         </ul>

@@ -275,6 +275,17 @@ const deleteProduct = async (req, res) => {
   }
 };
 
+const getProductOrders = async (req, res) => {
+  try {
+    const orders = await Order.find({ 
+      product: req.params.productId,
+    });
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const getTotalRevenue = async (req, res) => {
   const sellerId = req.params.sellerId;
   const productsOfSeller = await Product.find({ seller: sellerId });
@@ -296,38 +307,76 @@ const getTotalRevenue = async (req, res) => {
 };
 
 const getSalesReportFiltered = async (req, res) => {
-    try {
-        const sellerId = req.params.sellerId;
-        const { productId, date, month } = req.query;
+  try {
+      const sellerId = req.params.sellerId;
+      const { date, month } = req.query;
 
-    const products = productId
-      ? await Product.find({ _id: productId, seller: sellerId })
-      : await Product.find({ seller: sellerId });
+      // Get all products for this seller
+      const products = await Product.find({ seller: sellerId });
 
-        let totalRevenue = 0;
-        for (let i = 0; i < products.length; i++) {
-            let orders;
-            const filter = { product: products[i]._id };
+      let totalRevenue = 0;
 
-            if (date) {
-                const startDate = new Date(date);
-                const endDate = new Date(date);
-                endDate.setDate(startDate.getDate() + 1);
-                filter.order_date = { $gte: startDate, $lt: endDate };
-            } else if (month) {
-                filter.order_date = { $month: parseInt(month) }; // Assuming month is passed as 1-12
-            }
+      for (const product of products) {
+          // Base filter with product ID
+          let orderFilter = { 
+              product: product._id 
+          };
 
-            orders = await Order.find(filter);
+          if (date) {
+              // For specific date
+              const startDate = new Date(date);
+              startDate.setHours(0, 0, 0, 0);
+              
+              const endDate = new Date(date);
+              endDate.setHours(23, 59, 59, 999);
 
-            for (let j = 0; j < orders.length; j++) {
-                totalRevenue += products[i].price * orders[j].quantity;
-            }
-        }
-        res.status(200).json({ totalRevenue: totalRevenue });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+              orderFilter.arrival_date = {
+                  $gte: startDate,
+                  $lte: endDate
+              };
+          } else if (month) {
+              // For specific month
+              const year = new Date().getFullYear();
+              const monthIndex = parseInt(month) - 1;
+              
+              const startDate = new Date(year, monthIndex, 1);
+              const endDate = new Date(year, monthIndex + 1, 0, 23, 59, 59, 999);
+
+              orderFilter.arrival_date = {
+                  $gte: startDate,
+                  $lte: endDate
+              };
+          }
+
+          // Get orders and populate product details
+          const orders = await Order.find(orderFilter)
+              .populate('product', 'price name');
+
+          // Calculate revenue for this product
+          const productRevenue = orders.reduce((sum, order) => {
+              return sum + (order.quantity * product.price);
+          }, 0);
+
+          totalRevenue += productRevenue;
+
+          // Debug logging
+          console.log(`Product ${product.name}:`, {
+              orders: orders.length,
+              revenue: productRevenue,
+              filter: orderFilter
+          });
+      }
+
+      console.log('Total Filtered Revenue:', totalRevenue);
+
+      res.status(200).json({ totalRevenue });
+  } catch (error) {
+      console.error('Error in getSalesReportFiltered:', error);
+      res.status(500).json({ 
+          error: 'Error generating sales report',
+          details: error.message 
+      });
+  }
 };
 
 export default {
@@ -343,4 +392,7 @@ export default {
   deleteSeller,
   getSellerByUserId,
   getProductsBelongingToSeller,
+  getProductOrders,
+  getSalesReportFiltered,
+  getTotalRevenue,
 };

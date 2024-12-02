@@ -682,9 +682,12 @@ const getTotalRevenue = async (req, res) => {
 
     const totalRevenue = itineraryRevenue + activityRevenue + productRevenue;
 
-    return res
-      .status(200)
-      .json({ message: "Total revenue", revenue: totalRevenue });
+    // Return the data in the expected format
+    return res.status(200).json({
+      itineraryRevenue,
+      activityRevenue,
+      productRevenue
+    });
   } catch (error) {
     console.error("Error calculating total revenue:", error);
     return res.status(500).json({ message: "Internal server error" });
@@ -918,4 +921,8 @@ export default {
   getAllActivityCategories,
   setInapproperiateFlagActivity,
   setInapproperiateFlagItinerary,
+  getTotalRevenue,
+  getTotalItineraryRevenue,
+  getTotalActivityRevenue,
+  getTotalProductRevenue,
 };

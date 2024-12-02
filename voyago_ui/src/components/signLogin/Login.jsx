@@ -80,7 +80,7 @@ const login = async (username, password, setShowTerms, setUserId) => {
           window.location.href = "http://localhost:5173/Guide_Dashboard";
           break;
         case "SELLER":
-          window.location.href = "http://localhost:5173/Seller_Dashboard";
+          window.location.href = "http://localhost:5173/sellerSales";
           break;
         case "ADVERTISER":
           window.location.href = "http://localhost:5173/Advertiser_Dashboard";

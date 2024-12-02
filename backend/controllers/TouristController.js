@@ -214,7 +214,7 @@ const touristPay = async (req, res) => {
     await tourist.save();
 
     // Respond with the updated tourist data
-    res.json(updatedTourist);
+    res.status(201).json(updatedTourist);
   } catch (error) {
     console.error("Error in touristPay:", error);
     res.status(500).json({ error: error.message });
