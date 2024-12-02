@@ -27,12 +27,16 @@
     "@babel/preset-react": "^7.25.9",
     "babel-jest": "^29.7.0",
     "jest": "^29.7.0",
-    "mongodb-memory-server": "^10.1.2"
+    "mongodb-memory-server": "^10.1.2",
+    "supertest": "^7.0.0"
   },
   "jest": {
     "transform": {
-      "^.+\\.(js|jsx)$": "babel-jest"
+      "^.+\\.jsx?$": "babel-jest"
     },
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.js$": "$1"
+    }
   }
 }
