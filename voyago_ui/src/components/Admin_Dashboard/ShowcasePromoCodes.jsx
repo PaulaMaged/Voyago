@@ -32,7 +32,7 @@ export default function ShowcasePromoCodes() {
         setPromoCodes(promoCodesResponse.data);
 
         const usersResponse = await axios.get(
-          "http://localhost:8000/api/user/get-all-users"
+          "http://localhost:8000/api/tourist/get-all-tourists"
         );
         setUsers(usersResponse.data);
       } catch (error) {
@@ -102,7 +102,7 @@ export default function ShowcasePromoCodes() {
         <h3 className="text-lg font-semibold mb-2">Select Users</h3>
         <div className="space-y-2">
           {users
-            .filter((user) => user.role === "TOURIST")
+            .filter((user) => user.user.role === "TOURIST")
             .map((user) => (
               <label key={user._id} className="flex items-center space-x-2">
                 <input
@@ -118,7 +118,7 @@ export default function ShowcasePromoCodes() {
                   className="form-checkbox h-5 w-5 text-blue-600"
                 />
                 <span>
-                  {user.name} ({user.email})
+                  {user.user.name} ({user.user.email})
                 </span>
               </label>
             ))}
