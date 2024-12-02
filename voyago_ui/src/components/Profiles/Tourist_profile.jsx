@@ -242,7 +242,6 @@ import {
   FaSpinner,
   FaUserCircle,
 } from "react-icons/fa";
-import currencyConversions from "../../helpers/currencyConversions";
 
 function Tourist_profile({ userId, touristId }) {
   const [profileData, setProfileData] = useState(null);
@@ -261,9 +260,6 @@ function Tourist_profile({ userId, touristId }) {
           `http://localhost:8000/api/tourist/get-tourist/${touristId}`
         );
         if (response.status === 200) {
-          response.data.wallet = currencyConversions.convertFromDB(
-            response.data.wallet
-          );
           setProfileData(response.data);
           setPending(false);
         } else {
