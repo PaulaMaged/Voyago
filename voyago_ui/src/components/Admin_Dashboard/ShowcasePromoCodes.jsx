@@ -15,6 +15,8 @@ const hardcodedUsers = [
 ];
 
 export default function ShowcasePromoCodes() {
+  const today = new Date().toISOString().slice(0, 10);
+
   const [selectedPromoCode, setSelectedPromoCode] = useState(null);
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [message, setMessage] = useState("");
@@ -43,6 +45,7 @@ export default function ShowcasePromoCodes() {
 
   const handleSendPromoCode = async () => {
     if (!selectedPromoCode || selectedUsers.length === 0) {
+      console.log(today);
       setMessage("Please select a promo code and at least one user.");
       return;
     }
@@ -102,25 +105,41 @@ export default function ShowcasePromoCodes() {
         <div className="space-y-2">
           {users
             .filter((user) => user.user.role === "TOURIST")
-            .map((user) => (
-              <label key={user._id} className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  checked={selectedUsers.includes(user._id)}
-                  onChange={() => {
-                    setSelectedUsers((prev) =>
-                      prev.includes(user._id)
-                        ? prev.filter((id) => id !== user._id)
-                        : [...prev, user._id]
-                    );
-                  }}
-                  className="form-checkbox h-5 w-5 text-blue-600"
-                />
-                <span>
-                  {user.user.name} ({user.user.email})
-                </span>
-              </label>
-            ))}
+            .map((user) => {
+              const userDOB = new Date(user.DOB);
+              const isBirthdayToday =
+                userDOB.getMonth() === new Date().getMonth() &&
+                userDOB.getDate() === new Date().getDate();
+              return (
+                <label
+                  key={user._id}
+                  className={`flex items-center space-x-2 ${
+                    isBirthdayToday ? "bg-yellow-100 p-2 rounded" : ""
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedUsers.includes(user._id)}
+                    onChange={() => {
+                      setSelectedUsers((prev) =>
+                        prev.includes(user._id)
+                          ? prev.filter((id) => id !== user._id)
+                          : [...prev, user._id]
+                      );
+                    }}
+                    className="form-checkbox h-5 w-5 text-blue-600"
+                  />
+                  <span>
+                    {user.user.name} ({user.user.email})
+                    {isBirthdayToday && (
+                      <span className="text-red-500 ml-2">
+                        (Birthday Today!)
+                      </span>
+                    )}
+                  </span>
+                </label>
+              );
+            })}
         </div>
       </div>
 
