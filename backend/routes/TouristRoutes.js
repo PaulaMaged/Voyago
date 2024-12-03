@@ -1,5 +1,6 @@
 import express from "express";
 import TouristController from "../controllers/TouristController.js";
+import BookmarkController from "../controllers/BookmarkController.js";
 const router = express.Router();
 
 /**
@@ -124,4 +125,9 @@ router.get(
 router.get("/get-all-tourists", TouristController.getAllTourists);
 router.delete("/delete-tourist/:touristId", TouristController.deleteTourist);
 router.post("/book-activties", TouristController.bookActivity );
+
+router.post("/create-bookmark", BookmarkController.createBookmark);
+router.get("/get-bookmarks/:touristId", BookmarkController.getTouristBookmarks);
+router.delete("/remove-bookmark/:touristId/:bookmarkId", BookmarkController.removeBookmark);
+
 export default router;
