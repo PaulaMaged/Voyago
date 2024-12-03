@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import check from "../helpers/checks";
 import axios from "axios";
 import currencyConversions from "../helpers/currencyConversions";
+import BookmarkButton from "./BookmarkButton";
 export default function ViewActivityGuest() {
   const [searchTerm, setSearchTerm] = useState("");
   const [budget, setBudget] = useState("");
@@ -231,6 +232,7 @@ export default function ViewActivityGuest() {
                     </div>
                   </div>
                 )}
+                <BookmarkButton activityId={activity._id} />
                 <button
                   id="book-activity"
                   onClick={() => handleBookActivity(activity._id)}

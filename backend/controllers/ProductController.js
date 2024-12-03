@@ -1,9 +1,11 @@
 // Import the Product model to interact with the product collection in the database
-import mongoose from "mongoose"
+import mongoose from "mongoose";
 import Product from "../models/Product.js";
 import Order from "../models/Order.js";
+import User from "../models/User.js"
+import Notification from "../models/Notification.js"
 import Tourist from "../models/Tourist.js";
-import { updateTouristData } from './TouristController.js';
+import { updateTouristData } from "./TouristController.js";
 
 /**
  * Retrieves sales and quantity data for all products in the database.
@@ -330,7 +332,14 @@ const deleteProductById = async (req, res) => {
 
 const createOrder = async (req, res) => {
   try {
-    const { touristId, productId, quantity, arrival_date, arrival_location, description } = req.body;
+    const {
+      touristId,
+      productId,
+      quantity,
+      arrival_date,
+      arrival_location,
+      description,
+    } = req.body;
 
     // Fetch the tourist directly using findById
     const tourist = await Tourist.findById(touristId);
@@ -339,7 +348,7 @@ const createOrder = async (req, res) => {
     }
 
     // Fetch the product directly using findById
-    const product = await Product.findById(productId);
+    const product = await Product.findById(productId).populate("seller");
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
@@ -369,6 +378,22 @@ const createOrder = async (req, res) => {
     // Update the product's available quantity
     product.available_quantity -= quantity;
     await product.save();
+
+    // Check if the product quantity is zero
+    if (product.available_quantity === 0) {
+      // Grab the product seller user
+      const seller = await User.findById(product.seller.user);
+
+      // Create a notification for the seller
+      const notification = new Notification({
+        recipient: seller._id,
+        message: `${product.name} has sold out.`,
+        type: "WARNING",
+      });
+
+      // Save the notification
+      await notification.save();
+    }
 
     // Create the order
     const order = new Order({
@@ -406,7 +431,7 @@ const getOrderById = async (req, res) => {
 const getAllOrdersForTourist = async (req, res) => {
   try {
     const touristId = req.params.touristId;
-    
+
     // Validate if touristId is a valid ObjectId
     if (!mongoose.Types.ObjectId.isValid(touristId)) {
       return res.status(400).json({ message: "Invalid tourist ID" });
@@ -415,25 +440,27 @@ const getAllOrdersForTourist = async (req, res) => {
     // Fetch orders for the tourist and populate all relevant fields
     const orders = await Order.find({ tourist: touristId })
       .populate({
-        path: 'product', // Populate the 'product' field
+        path: "product", // Populate the 'product' field
         populate: [
-          { 
-            path: 'reviews', // Populate the 'reviews' field inside the product
-            populate: { 
-              path: 'reviewer' // Optionally populate the reviewer (Tourist) for each review
-            }
+          {
+            path: "reviews", // Populate the 'reviews' field inside the product
+            populate: {
+              path: "reviewer", // Optionally populate the reviewer (Tourist) for each review
+            },
           },
-          { 
-            path: 'seller', // Populate the 'seller' field inside the product
+          {
+            path: "seller", // Populate the 'seller' field inside the product
             // No need to specify fields here, it will include everything from Seller schema
-          }
-        ]
+          },
+        ],
       })
-      .populate('arrival_location'); // Populate the 'arrival_location' field in the order
+      .populate("arrival_location"); // Populate the 'arrival_location' field in the order
 
     // If no orders are found
     if (!orders || orders.length === 0) {
-      return res.status(404).json({ message: "No orders found for this tourist" });
+      return res
+        .status(404)
+        .json({ message: "No orders found for this tourist" });
     }
 
     res.json(orders); // Return the populated orders
@@ -441,7 +468,6 @@ const getAllOrdersForTourist = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
 
 const getAllOrders = async (req, res) => {
   try {

@@ -13,6 +13,8 @@ import ProductRoutes from "./routes/ProductRoutes.js";
 import cookieParser from "cookie-parser";
 import axios from "axios";
 import cors from "cors";
+import cron from 'node-cron';
+import { createUpcomingActivityNotifications, checkBookmarkedActivities } from './controllers/NotificationController.js';
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -215,7 +217,21 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
+// Schedule automatic notifications (runs every minute)
+cron.schedule('* * * * *', async () => {
+  console.log('Running notification checks...');
+  try {
+    await createUpcomingActivityNotifications();
+    await checkBookmarkedActivities();
+    console.log('Notification checks completed successfully');
+  } catch (error) {
+    console.error('Error in notification checks:', error);
+  }
+});
+
 // Start the server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
+
+export default app;

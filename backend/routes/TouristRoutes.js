@@ -1,5 +1,6 @@
 import express from "express";
 import TouristController from "../controllers/TouristController.js";
+import BookmarkController from "../controllers/BookmarkController.js";
 const router = express.Router();
 
 /**
@@ -48,6 +49,14 @@ router.delete(
 router.delete(
   "/tourist-cancel-itinerary-booking/:itineraryBookingId",
   TouristController.cancelItineraryBooking
+);
+router.get(
+  "/get-upcoming-bookings/:touristId",
+  TouristController.getUpcomingBookings
+);
+router.get(
+  "/get-booking-history/:touristId",
+  TouristController.getBookingHistory
 );
 
 /**
@@ -115,5 +124,15 @@ router.get(
 
 router.get("/get-all-tourists", TouristController.getAllTourists);
 router.delete("/delete-tourist/:touristId", TouristController.deleteTourist);
-router.post("/book-activies", TouristController.bookActivity );
+router.post("/book-activties", TouristController.bookActivity );
+
+router.post("/create-bookmark", BookmarkController.createBookmark);
+router.get("/get-bookmarks/:touristId", BookmarkController.getTouristBookmarks);
+router.delete("/remove-bookmark/:touristId/:bookmarkId", BookmarkController.removeBookmark);
+
+router.get(
+  "/get-tourist-notifications/:touristId",
+  TouristController.getTouristNotifications
+);
+
 export default router;
