@@ -12,10 +12,13 @@ import AddTourismGovenor from "./components/Admin_/add_tourism_govenor";
 import AddAdmin from "./components/Admin_/add_admin";
 
 import ViewActivityAdv from "./components/viewActivityAdv";
-
 import ViewActivityGuest from "./components/viewActivityGuest";
+import AdvSales from "./components/Sales/AdvSales"
+
 import ViewItineraryGuest from "./components/viewItineraryGuest";
 import ViewItineraryGuide from "./components/ViewItineraryGuide";
+import GuideSales from "./components/Sales/GuideSales"
+
 
 import GovernorLandmarks from "./components/GovernorLandmarks";
 import ViewLandmarks from "./components/viewLandmarks";
@@ -79,6 +82,8 @@ function App() {
             path="/viewActivityGuest"
             element={<ViewActivityGuest />}
           ></Route>
+          <Route path="/advSales" element={<AdvSales />}></Route>
+
           <Route
             path="/viewItineraryGuest"
             element={<ViewItineraryGuest />}
@@ -87,8 +92,12 @@ function App() {
             path="/viewItineraryGuide"
             element={<ViewItineraryGuide />}
           ></Route>
+          <Route path="/guideSales" element={<GuideSales />}></Route>
+
+
           <Route path="/viewLandmarks" element={<ViewLandmarks />}></Route>
           <Route path="/GovernorLandmarks" element={<GovernorLandmarks />}></Route>
+
           <Route
             path="/viewProductAdmin"
             element={<ViewProductAdmin />}

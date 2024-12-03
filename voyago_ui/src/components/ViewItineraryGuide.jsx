@@ -268,88 +268,6 @@ const ViewItineraryGuide = () => {
     <div className="itinerary-guide-viewer">
       <h1>Manage Itineraries</h1>
 
-      <div className="itinerary-guide-filters">
-        <input
-          type="text"
-          placeholder="Search itineraries..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="itinerary-guide-filter-input"
-        />
-
-        <select
-          value={selectedTag}
-          onChange={(e) => setSelectedTag(e.target.value)}
-          className="itinerary-guide-filter-select"
-        >
-          <option value="">All Tags</option>
-          {tags.map((tag) => (
-            <option key={tag._id} value={tag._id}>
-              {tag.tag_name}
-            </option>
-          ))}
-        </select>
-
-        <select
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-          className="itinerary-guide-filter-select"
-        >
-          <option value="">All Categories</option>
-          {categories.map((category) => (
-            <option key={category._id} value={category._id}>
-              {category.category}
-            </option>
-          ))}
-        </select>
-
-        <select
-          value={selectedLanguage}
-          onChange={(e) => setSelectedLanguage(e.target.value)}
-          className="itinerary-guide-filter-select"
-        >
-          <option value="">All Languages</option>
-          {getAllLanguages().map((language) => (
-            <option key={language} value={language}>
-              {language}
-            </option>
-          ))}
-        </select>
-
-        <input
-          type="number"
-          placeholder="Min Price"
-          value={minPrice}
-          onChange={(e) => setMinPrice(e.target.value)}
-          className="itinerary-guide-filter-input"
-        />
-
-        <input
-          type="number"
-          placeholder="Max Price"
-          value={maxPrice}
-          onChange={(e) => setMaxPrice(e.target.value)}
-          className="itinerary-guide-filter-input"
-        />
-
-        <input
-          type="date"
-          value={selectedDate}
-          onChange={(e) => setSelectedDate(e.target.value)}
-          className="itinerary-guide-filter-input"
-        />
-
-        <select
-          value={sortCriteria}
-          onChange={(e) => setSortCriteria(e.target.value)}
-          className="itinerary-guide-filter-select"
-        >
-          <option value="">Sort By</option>
-          <option value="price_asc">Price: Low to High</option>
-          <option value="price_desc">Price: High to Low</option>
-        </select>
-      </div>
-
       <div className="itinerary-guide-create-form">
         <h2>{editingItinerary ? "Edit Itinerary" : "Create New Itinerary"}</h2>
         <input
@@ -432,6 +350,88 @@ const ViewItineraryGuide = () => {
         {editingItinerary && (
           <button onClick={() => setEditingItinerary(null)}>Cancel Edit</button>
         )}
+      </div>
+
+      <div className="itinerary-guide-filters">
+        <input
+          type="text"
+          placeholder="Search itineraries..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="itinerary-guide-filter-input"
+        />
+
+        <select
+          value={selectedTag}
+          onChange={(e) => setSelectedTag(e.target.value)}
+          className="itinerary-guide-filter-select"
+        >
+          <option value="">All Tags</option>
+          {tags.map((tag) => (
+            <option key={tag._id} value={tag._id}>
+              {tag.tag_name}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+          className="itinerary-guide-filter-select"
+        >
+          <option value="">All Categories</option>
+          {categories.map((category) => (
+            <option key={category._id} value={category._id}>
+              {category.category}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={selectedLanguage}
+          onChange={(e) => setSelectedLanguage(e.target.value)}
+          className="itinerary-guide-filter-select"
+        >
+          <option value="">All Languages</option>
+          {getAllLanguages().map((language) => (
+            <option key={language} value={language}>
+              {language}
+            </option>
+          ))}
+        </select>
+
+        <input
+          type="number"
+          placeholder="Min Price"
+          value={minPrice}
+          onChange={(e) => setMinPrice(e.target.value)}
+          className="itinerary-guide-filter-input"
+        />
+
+        <input
+          type="number"
+          placeholder="Max Price"
+          value={maxPrice}
+          onChange={(e) => setMaxPrice(e.target.value)}
+          className="itinerary-guide-filter-input"
+        />
+
+        <input
+          type="date"
+          value={selectedDate}
+          onChange={(e) => setSelectedDate(e.target.value)}
+          className="itinerary-guide-filter-input"
+        />
+
+        <select
+          value={sortCriteria}
+          onChange={(e) => setSortCriteria(e.target.value)}
+          className="itinerary-guide-filter-select"
+        >
+          <option value="">Sort By</option>
+          <option value="price_asc">Price: Low to High</option>
+          <option value="price_desc">Price: High to Low</option>
+        </select>
       </div>
 
       <div className="itinerary-guide-list">

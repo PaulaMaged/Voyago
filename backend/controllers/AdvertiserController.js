@@ -196,113 +196,214 @@ const getAllActivities = async (req, res) => {
   }
 };
 
+const getActivityBookings = async (req, res) => {
+  try {
+    const activityId = req.params.activityId;
+    const bookings = await ActivityBooking.find({ activity: activityId })
+      .populate('tourist')
+      .populate('activity');
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Update getAllRevenue to include more detailed information
 const getAllRevenue = async (req, res) => {
   try {
     const advertiserId = req.params.advertiserId;
-    const activities = await Activity.find({
-      advertiser: advertiserId,
-    });
+    const activities = await Activity.find({ advertiser: advertiserId });
+    
     let totalRevenue = 0;
+    const activityStats = {};
 
-    for (let i = 0; i < activities.length; i++) {
+    for (const activity of activities) {
       const activityBookings = await ActivityBooking.find({
-        activity: activities[i].id,
+        activity: activity._id
       });
-      for (let j = 0; j < activityBookings.length; j++) {
-        if (activityBookings[j].attended) {
-          totalRevenue += activities[i].price;
-        }
-      }
+
+      const attendedBookings = activityBookings.filter(booking => booking.attended);
+      const revenue = attendedBookings.length * activity.price;
+
+      activityStats[activity._id] = {
+        totalSales: revenue,
+        bookingCount: activityBookings.length,
+        attendedCount: attendedBookings.length
+      };
+
+      totalRevenue += revenue;
     }
 
-    res.status(200).json({ revenue: totalRevenue });
+    res.status(200).json({
+      totalRevenue,
+      activityStats,
+      activities
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
+
+// Update getAllRevenueByDate to include more detailed information
 const getAllRevenueByDate = async (req, res) => {
   try {
     const advertiserId = req.params.advertiserId;
-    const { date } = req.query; // Assuming the date is passed as a query parameter
+    const { date } = req.query;
     const activities = await Activity.find({ advertiser: advertiserId });
 
     let totalRevenue = 0;
-    for (let i = 0; i < activities.length; i++) {
+    const activityStats = {};
+
+    for (const activity of activities) {
       let activityBookings;
+      
       if (date) {
         const startDate = new Date(date);
         const endDate = new Date(date);
-        endDate.setDate(startDate.getDate() + 1); // Add one day to include the whole target day
+        endDate.setDate(startDate.getDate() + 1);
 
         activityBookings = await ActivityBooking.find({
-          activity: activities[i]._id,
-          booking_date: { $gte: startDate, $lt: endDate },
+          activity: activity._id,
+          booking_date: { $gte: startDate, $lt: endDate }
         });
       } else {
         activityBookings = await ActivityBooking.find({
-          activity: activities[i].id,
+          activity: activity._id
         });
       }
 
-      for (let j = 0; j < activityBookings.length; j++) {
-        if (activityBookings[j].attended) {
-          totalRevenue += activities[i].price;
-        }
-      }
+      const attendedBookings = activityBookings.filter(booking => booking.attended);
+      const revenue = attendedBookings.length * activity.price;
+
+      activityStats[activity._id] = {
+        totalSales: revenue,
+        bookingCount: activityBookings.length,
+        attendedCount: attendedBookings.length
+      };
+
+      totalRevenue += revenue;
     }
-    res.status(200).json({ revenue: totalRevenue });
+
+    res.status(200).json({
+      totalRevenue,
+      activityStats,
+      activities
+    });
   } catch (error) {
-    // This will catch invalid date formats as well
     res.status(500).json({ error: error.message });
   }
 };
 
+// Fix the getAllRevenueByActivity method
 const getAllRevenueByActivity = async (req, res) => {
   try {
-    const activityId = req.params.activityId; // Assuming activityId is in the URL params
+    const { advertiserId, activityId } = req.params;
 
-    // Fetch the activity to get the price
-    const activity = await Activity.findById(activityId);
-    if (!activity) {
-      return res.status(404).json({ message: "Activity not found" });
-    }
-
-    let sum = 0;
-
-    const activityBookings = await ActivityBooking.find({
-      activity: activityId,
+    // Get the specific activity
+    const activity = await Activity.findOne({
+      _id: activityId,
+      advertiser: advertiserId
     });
 
-    for (let i = 0; i < activityBookings.length; i++) {
-      if (activityBookings[j].attended) {
-        sum += activity.price;
-      }
+    if (!activity) {
+      return res.status(404).json({ error: "Activity not found" });
     }
 
-    res.status(200).json({ revenue: sum });
+    // Get all bookings for this activity
+    const bookings = await ActivityBooking.find({ activity: activityId });
+    const attendedBookings = bookings.filter(booking => booking.attended);
+    const revenue = attendedBookings.length * activity.price;
+
+    // Get all activities for the dropdown (important!)
+    const allActivities = await Activity.find({ advertiser: advertiserId });
+
+    res.status(200).json({
+      revenue,
+      bookingCount: bookings.length,
+      attendedCount: attendedBookings.length,
+      activities: allActivities, // Send all activities
+      activity: activity // Send the specific activity data
+    });
   } catch (error) {
+    console.error('Controller Error:', error);
     res.status(500).json({ error: error.message });
   }
 };
 
+const getAllRevenueByMonth = async (req, res) => {
+  try {
+    const advertiserId = req.params.advertiserId;
+    const { month } = req.query;
+    const activities = await Activity.find({ advertiser: advertiserId });
+
+    let totalRevenue = 0;
+    const activityStats = {};
+
+    for (const activity of activities) {
+      // Create date range for the specified month
+      const year = new Date().getFullYear();
+      const startDate = new Date(year, month - 1, 1);
+      const endDate = new Date(year, month, 0); // Last day of the month
+
+      const activityBookings = await ActivityBooking.find({
+        activity: activity._id,
+        booking_date: {
+          $gte: startDate,
+          $lte: endDate
+        }
+      });
+
+      const attendedBookings = activityBookings.filter(booking => booking.attended);
+      const revenue = attendedBookings.length * activity.price;
+
+      activityStats[activity._id] = {
+        totalSales: revenue,
+        bookingCount: activityBookings.length,
+        attendedCount: attendedBookings.length
+      };
+
+      totalRevenue += revenue;
+    }
+
+    res.status(200).json({
+      totalRevenue,
+      activityStats,
+      activities
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 const getTotalTourists = async (req, res) => {
   try {
-    const advertiserId = req.params.advertiserId; // Assuming advertiserId is in the URL params
-
-    // Get all activities for this advertiser
+    const advertiserId = req.params.advertiserId;
     const activities = await Activity.find({ advertiser: advertiserId });
 
     let totalTourists = 0;
+    const activityStats = {};
 
-    // Iterate through each activity and sum up the number of tourists
-    for (let i = 0; i < activities.length; i++) {
-      const bookings = await ActivityBooking.find({ activity: activities[i]._id });
-      totalTourists += bookings.filter(booking => booking.attended).length;
+    for (const activity of activities) {
+      const bookings = await ActivityBooking.find({
+        activity: activity._id
+      });
+
+      const attendedCount = bookings.filter(booking => booking.attended).length;
+      
+      activityStats[activity._id] = {
+        totalBookings: bookings.length,
+        attendedCount: attendedCount
+      };
+
+      totalTourists += attendedCount;
     }
 
-    res.status(200).json({ totalTourists });
+    res.status(200).json({
+      totalTourists,
+      activityStats,
+      activities
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -311,28 +412,44 @@ const getTotalTourists = async (req, res) => {
 const getTouristsByMonth = async (req, res) => {
   try {
     const advertiserId = req.params.advertiserId;
-    const { month } = req.body; // Assuming month is in the request body
+    const { month } = req.query;
 
-    // Validate month input (optional, but recommended)
-    if (!month || isNaN(month) || month < 1 || month > 12) {
-      return res.status(400).json({ error: "Invalid month. Please provide a number between 1 and 12." });
+    if (!month) {
+      return res.status(400).json({ error: "Month parameter is required" });
     }
+
+    const year = new Date().getFullYear();
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0);
 
     const activities = await Activity.find({ advertiser: advertiserId });
-    let touristsCount = 0;
+    let totalTourists = 0;
+    const activityStats = {};
 
-    for (let i = 0; i < activities.length; i++) {
-      // Use $month operator to filter bookings by month
+    for (const activity of activities) {
       const bookings = await ActivityBooking.find({
-        activity: activities[i]._id,
-        booking_date: { $month: month },
-        attended: true // Directly filter for attended bookings
+        activity: activity._id,
+        booking_date: {
+          $gte: startDate,
+          $lte: endDate
+        }
       });
 
-      touristsCount += bookings.length;
+      const attendedCount = bookings.filter(booking => booking.attended).length;
+      
+      activityStats[activity._id] = {
+        totalBookings: bookings.length,
+        attendedCount: attendedCount
+      };
+
+      totalTourists += attendedCount;
     }
 
-    res.status(200).json({ touristsCount });
+    res.status(200).json({
+      totalTourists,
+      activityStats,
+      activities
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -399,4 +516,11 @@ export default {
   updateAdvertiser,
   deleteAdvertiser,
   getAllActivities,
+  getAllRevenue,
+  getAllRevenueByDate,
+  getAllRevenueByActivity,
+  getActivityBookings,
+  getAllRevenueByMonth,
+  getTotalTourists,
+  getTouristsByMonth,
 };

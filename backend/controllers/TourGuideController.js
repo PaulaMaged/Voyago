@@ -276,25 +276,36 @@ const getTourGuideReview = async (req, res) => {
   res.send(tourGuideReviews);
 };
 
-//get total revenue of tour guide
-const getTotalRevenue = async (req, res) => {
+const getAllSales = async (req, res) => {
   try {
     const tourGuideId = req.params.tourGuideId;
     const itineraries = await Itinerary.find({ tour_guide: tourGuideId });
+    
+    let totalRevenue = 0;
+    const itineraryStats = {};
 
-    let sum = 0;
-
-    for (let i = 0; i < itineraries.length; i++) {
-      const bookings = await ItineraryBooking.find({
-        itinerary: itineraries[i]._id,
+    for (const itinerary of itineraries) {
+      const itineraryBookings = await ItineraryBooking.find({
+        itinerary: itinerary._id
       });
-      for (let j = 0; j < bookings.length; j++) {
-        if (bookings[j].attended) {
-          sum += bookings[j].Itinerary.price;
-        }
-      }
+
+      const attendedBookings = itineraryBookings.filter(booking => booking.attended);
+      const revenue = attendedBookings.length * itinerary.price;
+
+      itineraryStats[itinerary._id] = {
+        totalSales: revenue,
+        bookingCount: itineraryBookings.length,
+        attendedCount: attendedBookings.length
+      };
+
+      totalRevenue += revenue;
     }
-    res.status(200).json({ totalRevenue: sum });
+
+    res.status(200).json({
+      totalRevenue,
+      itineraryStats,
+      itineraries
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -303,86 +314,168 @@ const getTotalRevenue = async (req, res) => {
 const getTotalRevenueByDate = async (req, res) => {
   try {
     const tourGuideId = req.params.tourGuideId;
-    const { date } = req.query; // Assuming the date is passed as a query parameter
-    const itineraries = await Itinerary.find({ tour_guide: tourGuideId });
-
-    let sum = 0;
-    for (let i = 0; i < itineraries.length; i++) {
-      let bookings;
-      if (date) {
-        const startDate = new Date(date);
-        const endDate = new Date(date);
-        endDate.setDate(startDate.getDate() + 1); // Add one day to include the whole target day
-
-        bookings = await ItineraryBooking.find({
-          itinerary: itineraries[i]._id,
-          booking_date: { $gte: startDate, $lt: endDate },
-        });
-      } else {
-        bookings = await ItineraryBooking.find({
-          itinerary: itineraries[i]._id,
-        });
-      }
-
-      for (let j = 0; j < bookings.length; j++) {
-        if (bookings[j].attended) {
-          sum += bookings[j].itinerary.price;
-        }
-      }
+    const { date } = req.query;
+    
+    if (!date) {
+      return res.status(400).json({ error: "Date parameter is required" });
     }
-    res.status(200).json({ totalRevenue: sum });
+
+    // Create date range for the specified date
+    const startDate = new Date(date);
+    const endDate = new Date(date);
+    endDate.setDate(endDate.getDate() + 1); // Add one day to include the whole target day
+
+    const itineraries = await Itinerary.find({ tour_guide: tourGuideId });
+    let totalRevenue = 0;
+    const itineraryStats = {};
+
+    for (const itinerary of itineraries) {
+      const itineraryBookings = await ItineraryBooking.find({
+        itinerary: itinerary._id,
+        booking_date: {
+          $gte: startDate,
+          $lt: endDate
+        }
+      }).populate('tourist');
+
+      const attendedBookings = itineraryBookings.filter(booking => booking.attended);
+      const revenue = attendedBookings.length * itinerary.price;
+
+      itineraryStats[itinerary._id] = {
+        totalSales: revenue,
+        bookingCount: itineraryBookings.length,
+        attendedCount: attendedBookings.length
+      };
+
+      totalRevenue += revenue;
+    }
+
+    res.status(200).json({
+      totalRevenue,
+      itineraryStats,
+      itineraries
+    });
   } catch (error) {
-    // This will catch invalid date formats as well
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getTotalRevenueByMonth = async (req, res) => {
+  try {
+    const tourGuideId = req.params.tourGuideId;
+    const { month } = req.query;
+    
+    if (!month) {
+      return res.status(400).json({ error: "Month parameter is required" });
+    }
+
+    const year = new Date().getFullYear();
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0);
+
+    const itineraries = await Itinerary.find({ tour_guide: tourGuideId });
+    let totalRevenue = 0;
+    const itineraryStats = {};
+
+    for (const itinerary of itineraries) {
+      const itineraryBookings = await ItineraryBooking.find({
+        itinerary: itinerary._id,
+        booking_date: {
+          $gte: startDate,
+          $lte: endDate
+        }
+      });
+
+      const attendedBookings = itineraryBookings.filter(booking => booking.attended);
+      const revenue = attendedBookings.length * itinerary.price;
+
+      itineraryStats[itinerary._id] = {
+        totalSales: revenue,
+        bookingCount: itineraryBookings.length,
+        attendedCount: attendedBookings.length
+      };
+
+      totalRevenue += revenue;
+    }
+
+    res.status(200).json({
+      totalRevenue,
+      itineraryStats,
+      itineraries
+    });
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
 const getAllRevenueByItinerary = async (req, res) => {
   try {
-    const itineraryId = req.params.itineraryId; // Assuming itineraryId is in the URL params
+    const { tourGuideId, itineraryId } = req.params;
 
-    // Fetch the itinerary to get the price
-    const itinerary = await Itinerary.findById(itineraryId);
-    if (!itinerary) {
-      return res.status(404).json({ message: "Itinerary not found" });
-    }
-
-    let sum = 0;
-
-    const itineraryBookings = await ItineraryBooking.find({
-      itinerary: itineraryId,
+    // Find the specific itinerary and verify it belongs to the tour guide
+    const itinerary = await Itinerary.findOne({
+      _id: itineraryId,
+      tour_guide: tourGuideId
     });
 
-    for (let i = 0; i < itineraryBookings.length; i++) {
-      if (itineraryBookings[i].attended) {
-        sum += itinerary.price;
-      }
+    if (!itinerary) {
+      return res.status(404).json({ error: "Itinerary not found" });
     }
 
-    res.status(200).json({ revenue: sum });
+    // Get all bookings for this itinerary
+    const bookings = await ItineraryBooking.find({
+      itinerary: itineraryId
+    });
+
+    const attendedBookings = bookings.filter(booking => booking.attended);
+    const revenue = attendedBookings.length * itinerary.price;
+
+    // Return in the same format as other endpoints for consistency
+    res.status(200).json({
+      totalRevenue: revenue,
+      itineraries: [itinerary],
+      itineraryStats: {
+        [itinerary._id]: {
+          totalSales: revenue,
+          bookingCount: bookings.length,
+          attendedCount: attendedBookings.length
+        }
+      }
+    });
   } catch (error) {
+    console.error('Controller Error:', error);
     res.status(500).json({ error: error.message });
   }
 };
 
 const getTotalTourists = async (req, res) => {
   try {
-    const tourGuideId = req.params.tourGuideId; // Assuming tourGuideId is in the URL params
-
-    // Get all itineraries for this tour guide
-    const itineraries = await Itinerary.find({ tourGuide: tourGuideId });
+    const tourGuideId = req.params.tourGuideId;
+    const itineraries = await Itinerary.find({ tour_guide: tourGuideId });
 
     let totalTourists = 0;
+    const itineraryStats = {};
 
-    // Iterate through each itinerary and sum up the number of tourists
-    for (let i = 0; i < itineraries.length; i++) {
+    for (const itinerary of itineraries) {
       const bookings = await ItineraryBooking.find({
-        itinerary: itineraries[i]._id,
+        itinerary: itinerary._id
       });
-      totalTourists += bookings.filter((booking) => booking.attended).length;
+
+      const attendedCount = bookings.filter(booking => booking.attended).length;
+      
+      itineraryStats[itinerary._id] = {
+        totalBookings: bookings.length,
+        attendedCount: attendedCount
+      };
+
+      totalTourists += attendedCount;
     }
 
-    res.status(200).json({ totalTourists });
+    res.status(200).json({
+      totalTourists,
+      itineraryStats,
+      itineraries
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -391,32 +484,44 @@ const getTotalTourists = async (req, res) => {
 const getTouristsByMonth = async (req, res) => {
   try {
     const tourGuideId = req.params.tourGuideId;
-    const { month } = req.body; // Assuming month is in the request body
+    const { month } = req.query;
 
-    // Validate month input (optional, but recommended)
-    if (!month || isNaN(month) || month < 1 || month > 12) {
-      return res
-        .status(400)
-        .json({
-          error: "Invalid month. Please provide a number between 1 and 12.",
-        });
+    if (!month) {
+      return res.status(400).json({ error: "Month parameter is required" });
     }
+
+    const year = new Date().getFullYear();
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0);
 
     const itineraries = await Itinerary.find({ tour_guide: tourGuideId });
-    let touristsCount = 0;
+    let totalTourists = 0;
+    const itineraryStats = {};
 
-    for (let i = 0; i < itineraries.length; i++) {
-      // Use $month operator to filter bookings by month
+    for (const itinerary of itineraries) {
       const bookings = await ItineraryBooking.find({
-        itinerary: itineraries[i]._id,
-        booking_date: { $month: month },
-        attended: true, // Directly filter for attended bookings
+        itinerary: itinerary._id,
+        booking_date: {
+          $gte: startDate,
+          $lte: endDate
+        }
       });
 
-      touristsCount += bookings.length;
+      const attendedCount = bookings.filter(booking => booking.attended).length;
+      
+      itineraryStats[itinerary._id] = {
+        totalBookings: bookings.length,
+        attendedCount: attendedCount
+      };
+
+      totalTourists += attendedCount;
     }
 
-    res.status(200).json({ touristsCount });
+    res.status(200).json({
+      totalTourists,
+      itineraryStats,
+      itineraries
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -484,4 +589,11 @@ export default {
   getAllItineraries,
   getActivityRate,
   getTourGuideReview,
+  getAllSales,
+  getTotalRevenueByDate,
+  getTotalRevenueByMonth,
+  getAllRevenueByItinerary,
+  getTotalTourists,
+  getTouristsByMonth,
+
 };

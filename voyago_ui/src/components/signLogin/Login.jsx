@@ -77,13 +77,13 @@ const login = async (username, password, setShowTerms, setUserId) => {
           window.location.href = "http://localhost:5173/GovernorLandmarks";
           break;
         case "TOUR_GUIDE":
-          window.location.href = "http://localhost:5173/Guide_Dashboard";
+          window.location.href = "http://localhost:5173/guideSales";
           break;
         case "SELLER":
           window.location.href = "http://localhost:5173/sellerSales";
           break;
         case "ADVERTISER":
-          window.location.href = "http://localhost:5173/Advertiser_Dashboard";
+          window.location.href = "http://localhost:5173/advSales";
           break;
         default:
           console.log(`No redirect specified for role: ${roleName}`);

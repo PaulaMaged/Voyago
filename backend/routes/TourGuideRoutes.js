@@ -109,4 +109,12 @@ router.get(
   TourGuideController.getTourGuideReview
 );
 
+// Sales
+router.get("/sales-report/:tourGuideId", TourGuideController.getAllSales);
+router.get("/sales-report/:tourGuideId/by-date", TourGuideController.getTotalRevenueByDate);
+router.get("/sales-report/:tourGuideId/by-month", TourGuideController.getTotalRevenueByMonth);
+router.get("/sales-report/:tourGuideId/by-itinerary/:itineraryId", TourGuideController.getAllRevenueByItinerary);
+//tourist count 
+router.get("/tourist-count/:tourGuideId", TourGuideController.getTotalTourists);
+router.get("/tourist-count/:tourGuideId/by-month", TourGuideController.getTouristsByMonth);
 export default router;
