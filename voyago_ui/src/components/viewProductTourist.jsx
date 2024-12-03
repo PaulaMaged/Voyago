@@ -134,11 +134,15 @@ export default function ViewProductTourist() {
 
   const addToWishlist = async (productId) => {
     try {
-      await axios.post("/api/wishlist/add", { productId });
-      // Show success message
+      const userId = localStorage.getItem("userId");
+      if (!userId) {
+        alert("Please log in to add items to your wishlist");
+        return;
+      }
+      
+      await axios.post(`/api/wishlist/${userId}/${productId}`);
       alert("Product added to wishlist!");
     } catch (err) {
-      // Show error message
       alert(err.response?.data?.message || "Failed to add product to wishlist");
     }
   };

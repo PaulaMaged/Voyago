@@ -6,51 +6,35 @@ const WishlistPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [newProductId, setNewProductId] = useState("");
+  const userId = localStorage.getItem("userId");
 
   useEffect(() => {
-    fetchWishlist();
-  }, []);
+    if (userId) {
+      fetchWishlist();
+    } else {
+      setError("Please log in to view your wishlist");
+      setLoading(false);
+    }
+  }, [userId]);
 
   const fetchWishlist = async () => {
     try {
-      const { data } = await axios.get("http://localhost:8000/api/wishlist");
+      const { data } = await axios.get(`/api/wishlist/${userId}`);
       setWishlist(data.products || []);
     } catch (err) {
-      console.error("Error fetching wishlist:", err);
-      setError("Unable to load wishlist");
+      setError(err.response?.data?.message || "Unable to load wishlist");
     } finally {
       setLoading(false);
     }
   };
 
-  const addProductToWishlist = async () => {
-    if (!newProductId.trim()) {
-      setError("Please enter a product ID");
-      return;
-    }
-
-    setError("");
-    setSuccess("");
-    try {
-      const { data } = await axios.post("http://localhost:8000/api/wishlist/add", { 
-        productId: newProductId 
-      });
-      await fetchWishlist();
-      setSuccess("Product added to wishlist");
-      setNewProductId("");
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to add product to wishlist");
-    }
-  };
-
   const removeProductFromWishlist = async (productId) => {
-    if (!productId) return;
+    if (!productId || !userId) return;
     
     setError("");
     setSuccess("");
     try {
-      await axios.post("http://localhost:8000/api/wishlist/remove", { productId });
+      await axios.delete(`/api/wishlist/${userId}/${productId}`);
       await fetchWishlist();
       setSuccess("Product removed from wishlist");
     } catch (err) {
@@ -69,7 +53,9 @@ const WishlistPage = () => {
       {error && <p style={styles.error}>{error}</p>}
       {success && <p style={styles.success}>{success}</p>}
       
-      {wishlist.length === 0 ? (
+      {!userId ? (
+        <p style={styles.error}>Please log in to view your wishlist</p>
+      ) : wishlist.length === 0 ? (
         <p style={styles.emptyMessage}>Your wishlist is empty</p>
       ) : (
         <ul style={styles.list}>
@@ -86,23 +72,6 @@ const WishlistPage = () => {
           ))}
         </ul>
       )}
-
-      <div style={styles.addSection}>
-        <input
-          style={styles.input}
-          type="text"
-          placeholder="Enter Product ID"
-          value={newProductId}
-          onChange={(e) => setNewProductId(e.target.value)}
-        />
-        <button 
-          style={styles.addButton}
-          onClick={addProductToWishlist}
-          disabled={!newProductId.trim()}
-        >
-          Add to Wishlist
-        </button>
-      </div>
     </div>
   );
 };
