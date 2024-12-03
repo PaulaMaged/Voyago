@@ -260,6 +260,15 @@ export default function ViewProductTourist() {
                 <button
                   onClick={() => addToWishlist(product._id)}
                   className="wishlist-button"
+                  style={{
+                    backgroundColor: '#ff69b4',
+                    color: 'white',
+                    border: 'none',
+                    padding: '8px 15px',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    marginTop: '10px'
+                  }}
                 >
                   Add to Wishlist
                 </button>
