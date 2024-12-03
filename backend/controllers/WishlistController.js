@@ -1,3 +1,4 @@
+import Product from '../models/Product.js';
 import Wishlist from '../models/Wishlist.js';
 
 export const addToWishlist = async (req, res) => {
@@ -52,6 +53,7 @@ export const removeFromWishlist = async (req, res) => {
 export const getWishlist = async (req, res) => {
   try {
     const { userId } = req.params;
+    const {product} = req.body;   
     
     const wishlist = await Wishlist.findOne({ user: userId })
       .populate('items.itemId');

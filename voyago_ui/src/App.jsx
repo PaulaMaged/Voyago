@@ -122,7 +122,6 @@ function App() {
           <Route path="createReview" element={<CreateReview />} />
           <Route path="/bookmarks" element={<Bookmarks />} />
           <Route path="/notifications" element={<Notifications />} />
-          <Route path="/wishlist" element={<WishlistPage />} />
         </Routes>
         <Routes>
         <Route index element={<Home />} />

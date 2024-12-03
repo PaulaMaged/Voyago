@@ -140,7 +140,7 @@ export default function ViewProductTourist() {
         return;
       }
       
-      await axios.post(`/api/wishlist/${touristId}/${productId}`);
+      await axios.post(`http://localhost:8000/api/wishlist/${touristId}/${productId}`);
       alert("Product added to wishlist!");
     } catch (err) {
       alert(err.response?.data?.message || "Failed to add product to wishlist");

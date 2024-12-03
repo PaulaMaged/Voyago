@@ -1,6 +1,6 @@
 // routes/wishlist.js
 import express from "express";
-import Wishlist from "../models/wishlist.js";
+import Wishlist from "../models/Wishlist.js";
 import Product from "../models/Product.js";
 
 const router = express.Router();
@@ -9,11 +9,32 @@ const router = express.Router();
 router.get("/:touristId", async (req, res) => {
   try {
     const { touristId } = req.params;
-    let wishlist = await Wishlist.findOne({ tourist: touristId }).populate("items.itemId");
+    let wishlist = await Wishlist.findOne({ tourist: touristId })
+      .populate({
+        path: 'items.itemId',
+        populate: {
+          path: 'seller',
+          model: 'Seller'
+        }
+      });
+      
     if (!wishlist) {
       return res.json({ items: [] });
     }
-    res.json(wishlist);
+
+    // Transform the data to make it easier to use in frontend
+    const transformedItems = wishlist.items.map(item => ({
+      _id: item.itemId._id,
+      name: item.itemId.name,
+      description: item.itemId.description,
+      price: item.itemId.price,
+      picture: item.itemId.picture,
+      seller: item.itemId.seller,
+      itemType: item.itemType
+    }));
+
+    // Only send the transformed items array
+    res.json({ items: transformedItems });
   } catch (error) {
     res.status(500).json({ message: "Server Error", error: error.message });
   }

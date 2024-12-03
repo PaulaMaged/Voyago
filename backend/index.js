@@ -17,7 +17,7 @@ import cron from 'node-cron';
 import { createUpcomingActivityNotifications, checkBookmarkedActivities } from './controllers/NotificationController.js';
 import CartRoutes from "./routes/cartRoutes.js";
 import OrderRoutes from "./routes/OrderRoutes.js";
-import wishlistRoutes from './routes/wishlistRoutes.js';
+import wishlistRoutes from './routes/WishlistRoutes.js';
 
 const app = express();
 const port = process.env.PORT || 8000;
