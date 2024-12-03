@@ -31,7 +31,7 @@ import ViewProductTourist from "./components/viewProductTourist";
 import EditProduct from "./components/editProduct";
 import SellerSales from './components/Sales/SellerSales';
 
-import CrudCategory from "./components/Admin_Dashboard/ManageActCategories";
+import CrudCategory from "./components/Admin_Dashboard/manageActCategories";
 import NavigationPage from "./components/TouristNavigationPage";
 import CreateReview from "./components/CreateReview";
 import HotelSearch from "./components/ThirdParty/HotelSearching";

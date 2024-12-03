@@ -133,11 +133,11 @@
 import React, { useState } from "react";
 import { ChevronDown, ChevronRight, Bell, Search, User } from "lucide-react";
 import AddUser from "./AddUser";
-import ViewUsers from "./ViewAllUsers";
+import ViewUsers from "./ViewAllusers";
 import ViewDocuments from "./ViewDoucments";
 import ManageComplaints from "./ManageComplaints";
-import ManageActCategories from "./ManageActCategories";
-import ManageTags from "./ManageTags";
+import ManageActCategories from "./manageActCategories";
+import ManageTags from "./manageTags";
 import ViewActivitiesAdmin from "./ViewActivitiesAdmin";
 import ViewItinerariesAdmin from "./ViewItinerariesAdmin";
 import SalesReport from '../Admin_Dashboard/SalesReport';
