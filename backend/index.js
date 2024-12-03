@@ -10,10 +10,13 @@ import SellerRoutes from "./routes/SellerRoutes.js";
 import AdminRoutes from "./routes/AdminRoutes.js";
 import UserRoutes from "./routes/UserRoutes.js";
 import ProductRoutes from "./routes/ProductRoutes.js";
-import cartRoutes from "./routes/cartRoutes.js";
 import cookieParser from "cookie-parser";
 import axios from "axios";
 import cors from "cors";
+import cron from 'node-cron';
+import { createUpcomingActivityNotifications, checkBookmarkedActivities } from './controllers/NotificationController.js';
+import CartRoutes from "./routes/cartRoutes.js";
+import OrderRoutes from "./routes/OrderRoutes.js";
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -209,15 +212,30 @@ app.use("/api/product", ProductRoutes);
 app.use("/api/tour-guide", TourGuideRoutes);
 app.use("/api/admin", AdminRoutes);
 app.use("/api/user", UserRoutes);
-app.use("/api/cart", cartRoutes);
 app.use("/api/tourism-governor", TourismGovernorRoutes);
 app.use("/api/seller", SellerRoutes);
+app.use("/api/cart", CartRoutes);
+app.use("/api/orders", OrderRoutes);
 // Root route for testing
 app.get("/", (req, res) => {
   res.send("Hello World!");
+});
+
+// Schedule automatic notifications (runs every minute)
+cron.schedule('* * * * *', async () => {
+  console.log('Running notification checks...');
+  try {
+    await createUpcomingActivityNotifications();
+    await checkBookmarkedActivities();
+    console.log('Notification checks completed successfully');
+  } catch (error) {
+    console.error('Error in notification checks:', error);
+  }
 });
 
 // Start the server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
+
+export default app;
