@@ -4,6 +4,7 @@ import check from "../helpers/checks";
 import axios from "axios";
 import currencyConversions from "../helpers/currencyConversions";
 import "./viewItinerary.css";
+import useFetch from "../hooks/useFetch";
 
 const ViewItineraryGuest = () => {
   const [itineraries, setItineraries] = useState([]);
@@ -19,6 +20,7 @@ const ViewItineraryGuest = () => {
   const [sortCriteria, setSortCriteria] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isBooked, setIsBooked] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,6 +42,7 @@ const ViewItineraryGuest = () => {
     selectedDate,
     sortCriteria,
     itineraries,
+    isBooked,
   ]);
 
   const fetchItineraries = async () => {
@@ -69,8 +72,44 @@ const ViewItineraryGuest = () => {
     }
   };
 
+  const touristId = localStorage.getItem("roleId");
+
+  const { error: bookingsError, data: bookings } = useFetch(
+    `http://localhost:8000/api/tourist/get-all-tourists-itinerary-bookings/${touristId}`
+  );
+
+  const handleCancel = (itinerary) => {
+    const booking = bookings.filter(
+      (booking) => booking.itinerary._id === itinerary._id
+    )[0];
+
+    if (!booking) {
+      alert("You haven't booked this itinerary");
+      return;
+    }
+    try {
+      axios.delete(
+        `http://localhost:8000/api/tourist/tourist-cancel-itinerary-booking/${booking._id}`
+      );
+      alert(
+        `Cancelled successfully, amount of ${booking.itinerary.price} is refunded to your wallet`
+      );
+    } catch (error) {
+      alert("Error occured while handling refund.");
+      console.log(error);
+    }
+  };
+
   const applyFilters = () => {
     let filtered = itineraries.filter((itinerary) => {
+      const booked =
+        !isBooked ||
+        bookings.some(
+          (bookedItinerary) => bookedItinerary.itinerary._id === itinerary._id
+        );
+
+      const isUpcoming = new Date(itinerary.start_date) > new Date();
+
       const matchesSearch = itinerary.name
         .toLowerCase()
         .includes(searchTerm.toLowerCase());
@@ -79,6 +118,7 @@ const ViewItineraryGuest = () => {
         itinerary.activities.some((activity) =>
           activity.tags.some((tag) => tag._id === selectedTag)
         );
+
       const matchesCategory =
         !selectedCategory ||
         itinerary.activities.some(
@@ -102,7 +142,9 @@ const ViewItineraryGuest = () => {
         matchesCategory &&
         matchesLanguage &&
         matchesPrice &&
-        matchesDate
+        matchesDate &&
+        booked &&
+        isUpcoming
       );
     });
 
@@ -278,6 +320,13 @@ const ViewItineraryGuest = () => {
           <option value="price_asc">Price: Low to High</option>
           <option value="price_desc">Price: High to Low</option>
         </select>
+
+        <label for="booking"> My Bookings</label>
+        <input
+          type="checkbox"
+          id="booking"
+          onChange={(e) => setIsBooked(e.target.checked)}
+        />
       </div>
 
       <div className="itinerary-list">
@@ -347,6 +396,9 @@ const ViewItineraryGuest = () => {
                 </p>
               )}
               <ActivitiesSection activities={itinerary.activities} />
+              <button onClick={() => handleCancel(itinerary)}>
+                Cancel Itinerary
+              </button>
               <button
                 id="bookItin"
                 onClick={() => handleBookItinerary(itinerary._id)}

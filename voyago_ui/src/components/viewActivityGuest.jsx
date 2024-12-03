@@ -108,10 +108,23 @@ export default function ViewActivityGuest() {
     const booking = bookings.filter(
       (booking) => booking.activity._id === activity._id
     )[0];
-    console.log(booking);
-    axios.delete(
-      `http://localhost:8000/api/tourist/tourist-cancel-activity-booking/${booking._id}`
-    );
+
+    if (!booking) {
+      alert("You haven't booked this itinerary");
+      return;
+    }
+
+    try {
+      axios.delete(
+        `http://localhost:8000/api/tourist/tourist-cancel-activity-booking/${booking._id}`
+      );
+      alert(
+        `Cancelled successfully, amount of ${booking.activity.price} is refunded to your wallet`
+      );
+    } catch (error) {
+      alert("Error occured while handling refund.");
+      console.log(error);
+    }
   };
 
   const handleFeedback = async (activity) => {
