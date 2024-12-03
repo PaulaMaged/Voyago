@@ -1,4 +1,3 @@
-// Import the required models for the Itinerary and Tourist entities
 import Itinerary from "../models/Itinerary.js";
 import Activity from "../models/Activity.js";
 import Tourist from "../models/Tourist.js";
@@ -948,17 +947,45 @@ const bookActivity = async (req, res) => {
   try {
     const { activityId, touristId } = req.body;
 
-    // Check if the activity and tourist exist
+    // Check if the activity exists
     const activity = await Activity.findById(activityId);
-    const tourist = await Tourist.findById(touristId);
-
     if (!activity) {
       return res.status(404).json({ error: "Activity not found" });
     }
 
+    // Check if bookings are open
+    if (!activity.booking_open) {
+      return res.status(400).json({ error: "Bookings for this activity are closed" });
+    }
+
+    // Check if the activity start time has passed
+    if (new Date(activity.start_time) < new Date()) {
+      return res.status(400).json({ error: "Cannot book an activity that has already started" });
+    }
+
+    // Check if the tourist exists
+    const tourist = await Tourist.findById(touristId);
     if (!tourist) {
       return res.status(404).json({ error: "Tourist not found" });
     }
+
+    // Check if the tourist has already booked the activity
+    const existingBooking = await ActivityBooking.findOne({
+      activity: activityId,
+      tourist: touristId,
+    });
+    if (existingBooking) {
+      return res.status(400).json({ error: "Tourist has already booked this activity" });
+    }
+
+    // Check if the tourist has sufficient funds in their wallet
+    if (tourist.wallet < activity.price) {
+      return res.status(400).json({ error: "Insufficient funds in tourist's wallet" });
+    }
+
+    // Deduct the activity price from the tourist's wallet
+    tourist.wallet -= activity.price;
+    await tourist.save();
 
     // Create a new activity booking
     const newBooking = new ActivityBooking({
@@ -977,6 +1004,7 @@ const bookActivity = async (req, res) => {
   }
 };
 
+
 const getUpcomingBookings = async (req, res) => {
   try {
     const touristId = req.params.touristId;
@@ -990,7 +1018,7 @@ const getUpcomingBookings = async (req, res) => {
     })
     .populate({
       path: 'activity',
-      select: 'name description start_date end_date price location'
+      select: 'title description start_time duration price location'
     });
 
     // Get upcoming itinerary bookings
@@ -1006,7 +1034,7 @@ const getUpcomingBookings = async (req, res) => {
 
     // Filter for only upcoming events
     const upcomingActivities = activityBookings.filter(booking => 
-      new Date(booking.activity.start_date) > currentDate
+      new Date(booking.activity.start_time) > currentDate
     );
 
     const upcomingItineraries = itineraryBookings.filter(booking => 
