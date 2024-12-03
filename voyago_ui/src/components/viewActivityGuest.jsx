@@ -10,6 +10,7 @@ export default function ViewActivityGuest() {
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [sortOrder, setSortOrder] = useState("");
+  const [isBooked, setIsBooked] = useState(false);
   const navigate = useNavigate();
 
   const handleBookActivity = async (activityId) => {
@@ -24,7 +25,6 @@ export default function ViewActivityGuest() {
       ],
     };
 
-    console.log(data);
     try {
       const response = await axios.post(
         `http://localhost:8000/api/tourist/tourist-pay/${touristId}`,
@@ -48,8 +48,22 @@ export default function ViewActivityGuest() {
     "http://localhost:8000/api/admin/get-all-activity-categories"
   );
 
+  const touristId = localStorage.getItem("roleId");
+
+  const { error: bookingsError, data: bookings } = useFetch(
+    `http://localhost:8000/api/tourist/get-all-tourists-activity-bookings/${touristId}`
+  );
+
   const filteredActivities = activities
     .filter((activity) => {
+      const booked =
+        !isBooked ||
+        bookings.some(
+          (bookedActivity) => bookedActivity.activity._id === activity._id
+        );
+
+      const isUpcoming = new Date(activity.start_time) > new Date();
+
       const matchesSearch =
         activity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (activity.category &&
@@ -75,13 +89,30 @@ export default function ViewActivityGuest() {
           new Date(selectedDate).toLocaleDateString()
         : true;
 
-      return matchesSearch && withinBudget && matchesDate && matchesCategory;
+      return (
+        matchesSearch &&
+        withinBudget &&
+        matchesDate &&
+        matchesCategory &&
+        booked &&
+        isUpcoming
+      );
     })
     .sort((a, b) => {
       if (sortOrder === "asc") return a.price - b.price;
       if (sortOrder === "desc") return b.price - a.price;
       return 0;
     });
+
+  const handleCancel = (activity) => {
+    const booking = bookings.filter(
+      (booking) => booking.activity._id === activity._id
+    )[0];
+    console.log(booking);
+    axios.delete(
+      `http://localhost:8000/api/tourist/tourist-cancel-activity-booking/${booking._id}`
+    );
+  };
 
   const handleFeedback = async (activity) => {
     const isBooked = await check.isBooked(activity, "activity");
@@ -146,6 +177,13 @@ export default function ViewActivityGuest() {
           <option value="asc">Low to High</option>
           <option value="desc">High to Low</option>
         </select>
+
+        <label for="booked"> My Bookings </label>
+        <input
+          type="checkbox"
+          id="booked"
+          onChange={(e) => setIsBooked(e.target.checked)}
+        />
       </div>
 
       <div style={styles.activityGrid}>
@@ -227,6 +265,10 @@ export default function ViewActivityGuest() {
                     </div>
                   </div>
                 )}
+
+                <button onClick={() => handleCancel(activity)}>
+                  Cancel Activity
+                </button>
                 <button
                   id="book-activity"
                   onClick={() => handleBookActivity(activity._id)}
