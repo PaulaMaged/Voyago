@@ -1,5 +1,7 @@
 import Bookmark from "../models/Bookmark.js";
 import Activity from "../models/Activity.js";
+import Tourist from "../models/Tourist.js";
+import Notification from "../models/Notification.js";
 
 // Create a bookmark
 const createBookmark = async (req, res) => {
@@ -64,8 +66,29 @@ const removeBookmark = async (req, res) => {
   }
 };
 
+// Get tourist notifications
+const getTouristNotifications = async (req, res) => {
+  try {
+    const touristId = req.params.touristId;
+    const tourist = await Tourist.findById(touristId).populate('user');
+    
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    const notifications = await Notification.find({ 
+      recipient: tourist.user._id 
+    }).sort({ created_at: -1 });
+
+    res.status(200).json(notifications);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 export default {
   createBookmark,
   getTouristBookmarks,
-  removeBookmark
+  removeBookmark,
+  getTouristNotifications
 }; 

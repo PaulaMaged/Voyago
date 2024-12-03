@@ -1127,9 +1127,10 @@ const getTouristNotifications = async (req, res) => {
     const notifications = await Notification.find({ 
       recipient: tourist.user._id 
     }).sort({ created_at: -1 });
-
+    console.log('Found Notifications:', notifications);
     res.status(200).json(notifications);
   } catch (error) {
+    console.error('Error:', error);
     res.status(500).json({ error: error.message });
   }
 };
