@@ -1,34 +1,43 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-
+import '../styles/Notifications.css';
 export default function Notifications() {
   const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const touristId = localStorage.getItem("roleId");
 
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const userId = localStorage.getItem("userId");
-        const response = await axios.get(`http://localhost:8000/api/notifications/${userId}`);
+        const response = await axios.get(`http://localhost:8000/api/tourist/get-tourist-notifications/${touristId}`);
         setNotifications(response.data);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching notifications:", error);
+        setLoading(false);
       }
     };
 
     fetchNotifications();
-  }, []);
+  }, [touristId]);
+
+  if (loading) {
+    return <div>Loading notifications...</div>;
+  }
 
   return (
-    <div>
+    <div className="notifications-container">
       <h2>Notifications</h2>
-      {notifications.length > 0 ? (
-        notifications.map((notification) => (
-          <div key={notification._id}>
-            <p>{notification.message}</p>
-          </div>
-        ))
+      {notifications.length === 0 ? (
+        <p>No notifications available.</p>
       ) : (
-        <p>No notifications</p>
+        <ul>
+          {notifications.map((notification) => (
+            <li key={notification._id}>
+              {notification.message}
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );

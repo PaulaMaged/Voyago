@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import Home from "./components/home";
 import SignUpAll from "./components/signLogin/signUpAll";
 import Login from "./components/signLogin/Login";
@@ -29,6 +29,7 @@ import HotelSearch from "./components/ThirdParty/HotelSearching";
 import FlightSearch from "./components/ThirdParty/FlightSearch";
 import FlightBooking from "./components/ThirdParty/FlightBooking";
 import Bookmarks from './pages/Bookmarks';
+import Notifications from './components/Notifications';
 
 function App() {
   return (
@@ -101,6 +102,7 @@ function App() {
           <Route path="/crudCategory" element={<CrudCategory />}></Route>
           <Route path="createReview" element={<CreateReview />} />
           <Route path="/bookmarks" element={<Bookmarks />} />
+          <Route path="/notifications" element={<Notifications />} />
         </Routes>
       </BrowserRouter>
     </>
