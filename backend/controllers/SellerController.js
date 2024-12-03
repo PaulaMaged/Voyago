@@ -296,38 +296,50 @@ const getTotalRevenue = async (req, res) => {
 };
 
 const getSalesReportFiltered = async (req, res) => {
-    try {
-        const sellerId = req.params.sellerId;
-        const { productId, date, month } = req.query;
+  try {
+    const sellerId = req.params.sellerId;
+    const { productId, date, month } = req.query;
 
     const products = productId
       ? await Product.find({ _id: productId, seller: sellerId })
       : await Product.find({ seller: sellerId });
 
-        let totalRevenue = 0;
-        for (let i = 0; i < products.length; i++) {
-            let orders;
-            const filter = { product: products[i]._id };
+    let totalRevenue = 0;
+    for (let i = 0; i < products.length; i++) {
+      let orders;
+      const filter = { product: products[i]._id };
 
-            if (date) {
-                const startDate = new Date(date);
-                const endDate = new Date(date);
-                endDate.setDate(startDate.getDate() + 1);
-                filter.order_date = { $gte: startDate, $lt: endDate };
-            } else if (month) {
-                filter.order_date = { $month: parseInt(month) }; // Assuming month is passed as 1-12
-            }
+      if (date) {
+        const startDate = new Date(date);
+        const endDate = new Date(date);
+        endDate.setDate(startDate.getDate() + 1);
+        filter.order_date = { $gte: startDate, $lt: endDate };
+      } else if (month) {
+        filter.order_date = { $month: parseInt(month) }; // Assuming month is passed as 1-12
+      }
 
-            orders = await Order.find(filter);
+      orders = await Order.find(filter);
 
-            for (let j = 0; j < orders.length; j++) {
-                totalRevenue += products[i].price * orders[j].quantity;
-            }
-        }
-        res.status(200).json({ totalRevenue: totalRevenue });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
+      for (let j = 0; j < orders.length; j++) {
+        totalRevenue += products[i].price * orders[j].quantity;
+      }
     }
+    res.status(200).json({ totalRevenue: totalRevenue });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getNotifications = async (req, res) => {
+  try {
+    const sellerId = req.params.sellerId;
+    const seller = await Seller.findById(sellerId);
+    if (!seller) return res.status(404).json({ message: "Seller not found" });
+    const notifications = await Notification.find({ user: seller.user });
+    res.json(notifications);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
 
 export default {
