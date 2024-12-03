@@ -1,16 +1,25 @@
 // models/Wishlist.js
-import mongoose, { Schema } from "mongoose";
+import mongoose from 'mongoose';
 
-const wishlistSchema = new Schema({
-  user: { type: Schema.Types.ObjectId, ref: "User", required: true, unique: true }, // Each user has one wishlist
-  products: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "Product",
+const wishlistSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  items: [{
+    itemId: {
+      type: mongoose.Schema.Types.ObjectId,
+      refPath: 'items.itemType',
+      required: true
     },
-  ],
+    itemType: {
+      type: String,
+      required: true,
+      enum: ['Itinerary', 'Activity', 'Product']
+    }
+  }]
 }, { timestamps: true });
 
-const Wishlist = mongoose.model("Wishlist", wishlistSchema);
-export default Wishlist;
+export default mongoose.model('Wishlist', wishlistSchema);
 

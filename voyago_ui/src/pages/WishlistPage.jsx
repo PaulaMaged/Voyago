@@ -14,7 +14,7 @@ const WishlistPage = () => {
 
   const fetchWishlist = async () => {
     try {
-      const { data } = await axios.get("/api/wishlist");
+      const { data } = await axios.get("http://localhost:8000/api/wishlist");
       setWishlist(data.products || []);
     } catch (err) {
       console.error("Error fetching wishlist:", err);
@@ -33,7 +33,7 @@ const WishlistPage = () => {
     setError("");
     setSuccess("");
     try {
-      const { data } = await axios.post("/api/wishlist/add", { 
+      const { data } = await axios.post("http://localhost:8000/api/wishlist/add", { 
         productId: newProductId 
       });
       await fetchWishlist();
@@ -50,7 +50,7 @@ const WishlistPage = () => {
     setError("");
     setSuccess("");
     try {
-      await axios.post("/api/wishlist/remove", { productId });
+      await axios.post("http://localhost:8000/api/wishlist/remove", { productId });
       await fetchWishlist();
       setSuccess("Product removed from wishlist");
     } catch (err) {
