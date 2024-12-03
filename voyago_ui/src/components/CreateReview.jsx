@@ -35,14 +35,10 @@ const CreateReview = () => {
         comment: comment,
       };
 
-      const user = JSON.parse(localStorage.getItem("user"));
-
-      const { data: tourist } = await axios.get(
-        `http://localhost:8000/api/tourist/get-tourist-by-user-id/${user._id}`
-      );
+      const touristId = localStorage.getItem("roleId");
 
       await axios.post(
-        `http://localhost:8000/api/tourist/tourist-rate-${entityName}/${tourist._id}`,
+        `http://localhost:8000/api/tourist/tourist-rate-${entityName}/${touristId}`,
         data
       );
 

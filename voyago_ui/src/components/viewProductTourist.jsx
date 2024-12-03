@@ -43,7 +43,9 @@ export default function ViewProductTourist() {
   const fetchTouristData = async () => {
     const touristId = localStorage.getItem("roleId");
     try {
-      const response = await axios.get(`http://localhost:8000/api/tourist/get-tourist/${touristId}`);
+      const response = await axios.get(
+        `http://localhost:8000/api/tourist/get-tourist/${touristId}`
+      );
       setWalletBalance(response.data.wallet);
     } catch (error) {
       console.error("Error fetching tourist data:", error);
@@ -91,24 +93,33 @@ export default function ViewProductTourist() {
     const totalPrice = product.price * quantity;
 
     if (walletBalance < totalPrice) {
-      alert("Insufficient balance in your wallet. Please add funds to continue.");
+      alert(
+        "Insufficient balance in your wallet. Please add funds to continue."
+      );
       return;
     }
 
     try {
-      const response = await axios.post("http://localhost:8000/api/product/create-order", {
-        touristId,
-        productId: product._id,
-        quantity,
-        arrival_date: new Date(),
-        arrival_location: null,
-        description: `Order for ${product.name}`,
-      });
+      const response = await axios.post(
+        "http://localhost:8000/api/product/create-order",
+        {
+          touristId,
+          productId: product._id,
+          quantity,
+          arrival_date: new Date(),
+          arrival_location: null,
+          description: `Order for ${product.name}`,
+        }
+      );
 
       if (response.status === 201) {
         const { order, tourist } = response.data;
         setWalletBalance(tourist.wallet);
-        alert(`Order created successfully! Total price: ${currencyConversions.convertFromDB(totalPrice).toFixed(2)} ${localStorage.getItem("currency")}`);
+        alert(
+          `Order created successfully! Total price: ${currencyConversions
+            .convertFromDB(totalPrice)
+            .toFixed(2)} ${localStorage.getItem("currency")}`
+        );
         fetchProducts(); // Refresh the product list
       }
     } catch (error) {
@@ -127,7 +138,11 @@ export default function ViewProductTourist() {
   return (
     <div className="container">
       <h1 className="title">Product List</h1>
-      <p className="wallet-balance">Wallet Balance: {currencyConversions.convertFromDB(walletBalance).toFixed(2)} {localStorage.getItem("currency")}</p>
+      <p className="wallet-balance">
+        Wallet Balance:{" "}
+        {currencyConversions.convertFromDB(walletBalance).toFixed(2)}{" "}
+        {localStorage.getItem("currency")}
+      </p>
 
       <div className="filters">
         <input
@@ -216,10 +231,18 @@ export default function ViewProductTourist() {
                     min="1"
                     max={product.available_quantity}
                     value={orderQuantities[product._id] || 1}
-                    onChange={(e) => handleQuantityChange(product._id, parseInt(e.target.value))}
+                    onChange={(e) =>
+                      handleQuantityChange(
+                        product._id,
+                        parseInt(e.target.value)
+                      )
+                    }
                     className="quantity-input"
                   />
-                  <button onClick={() => handleCreateOrder(product)} className="order-button">
+                  <button
+                    onClick={() => handleCreateOrder(product)}
+                    className="order-button"
+                  >
                     Order
                   </button>
                 </div>

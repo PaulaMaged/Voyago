@@ -34,14 +34,10 @@ export default function ViewActivityGuest() {
       // Handle successful booking response
       if (response.status === 201) {
         alert("Activity booked successfully!");
-      } else {
-        alert("Failed to book the activity. Please try again.");
       }
     } catch (error) {
-      console.error("Error booking activity:", error);
-      alert(
-        "An error occurred while booking the activity. Please try again later."
-      );
+      console.log(error);
+      alert(error.response.data.message);
     }
   };
 
