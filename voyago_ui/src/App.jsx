@@ -28,6 +28,7 @@ import CreateReview from "./components/CreateReview";
 import HotelSearch from "./components/ThirdParty/HotelSearching";
 import FlightSearch from "./components/ThirdParty/FlightSearch";
 import FlightBooking from "./components/ThirdParty/FlightBooking";
+import Bookmarks from './pages/Bookmarks';
 
 function App() {
   return (
@@ -99,6 +100,7 @@ function App() {
           <Route path="/editProduct" element={<EditProduct />}></Route>
           <Route path="/crudCategory" element={<CrudCategory />}></Route>
           <Route path="createReview" element={<CreateReview />} />
+          <Route path="/bookmarks" element={<Bookmarks />} />
         </Routes>
       </BrowserRouter>
     </>
