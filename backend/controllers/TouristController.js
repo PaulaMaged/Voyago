@@ -12,6 +12,8 @@ import ActivityReview from "../models/ActivityReview.js";
 import TourGuide from "../models/TourGuide.js"; // Added
 import Product from "../models/Product.js"; // Added
 import Complain from "../models/Complaint.js";
+import Notification from "../models/Notification.js";
+import Bookmark from "../models/Bookmark.js";
 /**
  * Create a new tourist.
  * @param {Object} req - Express request object.
@@ -1113,6 +1115,25 @@ const getBookingHistory = async (req, res) => {
   }
 };
 
+const getTouristNotifications = async (req, res) => {
+  try {
+    const touristId = req.params.touristId;
+    const tourist = await Tourist.findById(touristId).populate('user');
+    
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    const notifications = await Notification.find({ 
+      recipient: tourist.user._id 
+    }).sort({ created_at: -1 });
+
+    res.status(200).json(notifications);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 // Export the controllers
 export default {
   createTourist,
@@ -1144,4 +1165,5 @@ export default {
   bookActivity,
   getUpcomingBookings,
   getBookingHistory,
+  getTouristNotifications,
 };

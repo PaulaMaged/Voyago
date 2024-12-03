@@ -130,4 +130,9 @@ router.post("/create-bookmark", BookmarkController.createBookmark);
 router.get("/get-bookmarks/:touristId", BookmarkController.getTouristBookmarks);
 router.delete("/remove-bookmark/:touristId/:bookmarkId", BookmarkController.removeBookmark);
 
+router.get(
+  "/get-tourist-notifications/:touristId",
+  TouristController.getTouristNotifications
+);
+
 export default router;
