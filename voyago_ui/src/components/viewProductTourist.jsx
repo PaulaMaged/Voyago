@@ -134,13 +134,13 @@ export default function ViewProductTourist() {
 
   const addToWishlist = async (productId) => {
     try {
-      const userId = localStorage.getItem("userId");
-      if (!userId) {
+      const touristId = localStorage.getItem("roleId");
+      if (!touristId) {
         alert("Please log in to add items to your wishlist");
         return;
       }
       
-      await axios.post(`/api/wishlist/${userId}/${productId}`);
+      await axios.post(`/api/wishlist/${touristId}/${productId}`);
       alert("Product added to wishlist!");
     } catch (err) {
       alert(err.response?.data?.message || "Failed to add product to wishlist");

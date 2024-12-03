@@ -5,13 +5,13 @@ import Product from "../models/Product.js";
 
 const router = express.Router();
 
-// GET /api/wishlist/:userId - Get user's wishlist
-router.get("/:userId", async (req, res) => {
+// GET /api/wishlist/:touristId
+router.get("/:touristId", async (req, res) => {
   try {
-    const { userId } = req.params;
-    let wishlist = await Wishlist.findOne({ user: userId }).populate("products");
+    const { touristId } = req.params;
+    let wishlist = await Wishlist.findOne({ tourist: touristId }).populate("items.itemId");
     if (!wishlist) {
-      return res.json({ products: [] });
+      return res.json({ items: [] });
     }
     res.json(wishlist);
   } catch (error) {
@@ -19,23 +19,30 @@ router.get("/:userId", async (req, res) => {
   }
 });
 
-// POST /api/wishlist/:userId/:productId - Add product to wishlist
-router.post("/:userId/:productId", async (req, res) => {
+// POST /api/wishlist/:touristId/:productId
+router.post("/:touristId/:productId", async (req, res) => {
   try {
-    const { userId, productId } = req.params;
+    const { touristId, productId } = req.params;
     
     const product = await Product.findById(productId);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    let wishlist = await Wishlist.findOne({ user: userId });
+    let wishlist = await Wishlist.findOne({ tourist: touristId });
     if (!wishlist) {
-      wishlist = new Wishlist({ user: userId, products: [productId] });
-    } else if (wishlist.products.includes(productId)) {
-      return res.status(400).json({ message: "Product already in wishlist" });
+      wishlist = new Wishlist({ 
+        tourist: touristId, 
+        items: [{ itemId: productId, itemType: 'Product' }] 
+      });
     } else {
-      wishlist.products.push(productId);
+      const itemExists = wishlist.items.some(
+        item => item.itemId.toString() === productId && item.itemType === 'Product'
+      );
+      if (itemExists) {
+        return res.status(400).json({ message: "Product already in wishlist" });
+      }
+      wishlist.items.push({ itemId: productId, itemType: 'Product' });
     }
     
     await wishlist.save();
@@ -45,18 +52,18 @@ router.post("/:userId/:productId", async (req, res) => {
   }
 });
 
-// DELETE /api/wishlist/:userId/:productId - Remove product from wishlist
-router.delete("/:userId/:productId", async (req, res) => {
+// DELETE /api/wishlist/:touristId/:productId
+router.delete("/:touristId/:productId", async (req, res) => {
   try {
-    const { userId, productId } = req.params;
+    const { touristId, productId } = req.params;
     
-    let wishlist = await Wishlist.findOne({ user: userId });
+    let wishlist = await Wishlist.findOne({ tourist: touristId });
     if (!wishlist) {
       return res.status(404).json({ message: "Wishlist not found" });
     }
 
-    wishlist.products = wishlist.products.filter(
-      (id) => id.toString() !== productId
+    wishlist.items = wishlist.items.filter(
+      item => !(item.itemId.toString() === productId && item.itemType === 'Product')
     );
     
     await wishlist.save();

@@ -6,21 +6,21 @@ const WishlistPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const userId = localStorage.getItem("userId");
+  const touristId = localStorage.getItem("roleId");
 
   useEffect(() => {
-    if (userId) {
+    if (touristId) {
       fetchWishlist();
     } else {
       setError("Please log in to view your wishlist");
       setLoading(false);
     }
-  }, [userId]);
+  }, [touristId]);
 
   const fetchWishlist = async () => {
     try {
-      const { data } = await axios.get(`/api/wishlist/${userId}`);
-      setWishlist(data.products || []);
+      const { data } = await axios.get(`/api/wishlist/${touristId}`);
+      setWishlist(data.items || []);
     } catch (err) {
       setError(err.response?.data?.message || "Unable to load wishlist");
     } finally {
@@ -29,12 +29,12 @@ const WishlistPage = () => {
   };
 
   const removeProductFromWishlist = async (productId) => {
-    if (!productId || !userId) return;
+    if (!productId || !touristId) return;
     
     setError("");
     setSuccess("");
     try {
-      await axios.delete(`/api/wishlist/${userId}/${productId}`);
+      await axios.delete(`/api/wishlist/${touristId}/${productId}`);
       await fetchWishlist();
       setSuccess("Product removed from wishlist");
     } catch (err) {
@@ -53,7 +53,7 @@ const WishlistPage = () => {
       {error && <p style={styles.error}>{error}</p>}
       {success && <p style={styles.success}>{success}</p>}
       
-      {!userId ? (
+      {!touristId ? (
         <p style={styles.error}>Please log in to view your wishlist</p>
       ) : wishlist.length === 0 ? (
         <p style={styles.emptyMessage}>Your wishlist is empty</p>
