@@ -17,6 +17,7 @@ import cron from 'node-cron';
 import { createUpcomingActivityNotifications, checkBookmarkedActivities } from './controllers/NotificationController.js';
 import CartRoutes from "./routes/cartRoutes.js";
 import OrderRoutes from "./routes/OrderRoutes.js";
+import WishlistRoutes from "./routes/WishlistRoutes.js";
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -216,6 +217,7 @@ app.use("/api/tourism-governor", TourismGovernorRoutes);
 app.use("/api/seller", SellerRoutes);
 app.use("/api/cart", CartRoutes);
 app.use("/api/orders", OrderRoutes);
+app.use("/api/wishlist", WishlistRoutes);
 // Root route for testing
 app.get("/", (req, res) => {
   res.send("Hello World!");

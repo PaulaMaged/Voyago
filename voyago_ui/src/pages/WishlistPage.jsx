@@ -1,117 +1,92 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const Wishlist = () => {
+const WishlistPage = () => {
   const [wishlist, setWishlist] = useState([]);
-  const [newProductId, setNewProductId] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [newProductId, setNewProductId] = useState("");
 
   useEffect(() => {
     fetchWishlist();
   }, []);
 
   const fetchWishlist = async () => {
-    setLoading(true);
-    setError("");
     try {
-      const { data } = await axios.get("/api/wishlist", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-      setWishlist(data.products);
+      const { data } = await axios.get("/api/wishlist");
+      setWishlist(data.products || []);
     } catch (err) {
-      setError("Failed to fetch wishlist");
+      console.error("Error fetching wishlist:", err);
+      setError("Unable to load wishlist");
     } finally {
       setLoading(false);
     }
   };
 
   const addProductToWishlist = async () => {
-    if (!newProductId.trim()) return;
+    if (!newProductId.trim()) {
+      setError("Please enter a product ID");
+      return;
+    }
+
     setError("");
     setSuccess("");
     try {
-      const { data } = await axios.post(
-        "/api/wishlist/add",
-        { productId: newProductId },
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
-      );
-      setWishlist(data.wishlist.products);
-      setNewProductId("");
+      const { data } = await axios.post("/api/wishlist/add", { 
+        productId: newProductId 
+      });
+      await fetchWishlist();
       setSuccess("Product added to wishlist");
+      setNewProductId("");
     } catch (err) {
-      setError("Failed to add product to wishlist");
+      setError(err.response?.data?.message || "Failed to add product to wishlist");
     }
   };
 
   const removeProductFromWishlist = async (productId) => {
+    if (!productId) return;
+    
     setError("");
     setSuccess("");
     try {
-      const { data } = await axios.post(
-        "/api/wishlist/remove",
-        { productId },
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
-      );
-      setWishlist(data.wishlist.products);
+      await axios.post("/api/wishlist/remove", { productId });
+      await fetchWishlist();
       setSuccess("Product removed from wishlist");
     } catch (err) {
-      setError("Failed to remove product from wishlist");
+      setError(err.response?.data?.message || "Failed to remove product from wishlist");
     }
   };
 
-  const addToCart = async (productId) => {
-    setError("");
-    setSuccess("");
-    try {
-      await axios.post(
-        "/api/cart/add",
-        { productId },
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
-      );
-      setSuccess("Product added to cart");
-    } catch (err) {
-      setError("Failed to add product to cart");
-    }
-  };
+  if (loading) {
+    return <div style={styles.container}>Loading...</div>;
+  }
 
   return (
     <div style={styles.container}>
       <h1 style={styles.header}>My Wishlist</h1>
+      
       {error && <p style={styles.error}>{error}</p>}
       {success && <p style={styles.success}>{success}</p>}
-      {loading ? (
-        <p>Loading...</p>
+      
+      {wishlist.length === 0 ? (
+        <p style={styles.emptyMessage}>Your wishlist is empty</p>
       ) : (
         <ul style={styles.list}>
           {wishlist.map((product) => (
             <li key={product._id} style={styles.listItem}>
               <span>{product.name || `Product ID: ${product._id}`}</span>
-              <div>
-                <button
-                  style={styles.cartButton}
-                  onClick={() => addToCart(product._id)}
-                >
-                  Add to Cart
-                </button>
-                <button
-                  style={styles.removeButton}
-                  onClick={() => removeProductFromWishlist(product._id)}
-                >
-                  Remove
-                </button>
-              </div>
+              <button
+                style={styles.removeButton}
+                onClick={() => removeProductFromWishlist(product._id)}
+              >
+                Remove
+              </button>
             </li>
           ))}
         </ul>
       )}
+
       <div style={styles.addSection}>
         <input
           style={styles.input}
@@ -120,7 +95,11 @@ const Wishlist = () => {
           value={newProductId}
           onChange={(e) => setNewProductId(e.target.value)}
         />
-        <button style={styles.addButton} onClick={addProductToWishlist}>
+        <button 
+          style={styles.addButton}
+          onClick={addProductToWishlist}
+          disabled={!newProductId.trim()}
+        >
           Add to Wishlist
         </button>
       </div>
@@ -130,72 +109,70 @@ const Wishlist = () => {
 
 const styles = {
   container: {
-    maxWidth: "600px",
-    margin: "0 auto",
-    padding: "1rem",
-    fontFamily: "Arial, sans-serif",
+    padding: '20px',
+    maxWidth: '800px',
+    margin: '0 auto',
   },
   header: {
-    textAlign: "center",
-    color: "#0078d7",
+    textAlign: 'center',
+    color: '#333',
   },
   error: {
-    color: "red",
-    textAlign: "center",
+    color: '#dc3545',
+    textAlign: 'center',
+    marginBottom: '10px',
   },
   success: {
-    color: "green",
-    textAlign: "center",
+    color: '#28a745',
+    textAlign: 'center',
+    marginBottom: '10px',
+  },
+  emptyMessage: {
+    textAlign: 'center',
+    color: '#666',
+    fontStyle: 'italic',
   },
   list: {
-    listStyle: "none",
+    listStyle: 'none',
     padding: 0,
   },
   listItem: {
-    display: "flex",
-    justifyContent: "space-between",
-    padding: "0.5rem",
-    border: "1px solid #ddd",
-    borderRadius: "4px",
-    marginBottom: "0.5rem",
-  },
-  cartButton: {
-    background: "green",
-    color: "white",
-    border: "none",
-    borderRadius: "4px",
-    padding: "0.3rem 0.5rem",
-    marginRight: "0.5rem",
-    cursor: "pointer",
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '10px',
+    margin: '5px 0',
+    backgroundColor: '#f8f9fa',
+    borderRadius: '4px',
   },
   removeButton: {
-    background: "red",
-    color: "white",
-    border: "none",
-    borderRadius: "4px",
-    padding: "0.3rem 0.5rem",
-    cursor: "pointer",
+    backgroundColor: '#dc3545',
+    color: 'white',
+    border: 'none',
+    padding: '5px 10px',
+    borderRadius: '4px',
+    cursor: 'pointer',
   },
   addSection: {
-    marginTop: "1rem",
-    display: "flex",
-    gap: "0.5rem",
+    marginTop: '20px',
+    display: 'flex',
+    gap: '10px',
   },
   input: {
     flex: 1,
-    padding: "0.5rem",
-    border: "1px solid #ddd",
-    borderRadius: "4px",
+    padding: '8px',
+    borderRadius: '4px',
+    border: '1px solid #ddd',
   },
   addButton: {
-    background: "#0078d7",
-    color: "white",
-    border: "none",
-    borderRadius: "4px",
-    padding: "0.5rem",
-    cursor: "pointer",
+    backgroundColor: '#28a745',
+    color: 'white',
+    border: 'none',
+    padding: '8px 15px',
+    borderRadius: '4px',
+    cursor: 'pointer',
   },
 };
 
-export default Wishlist;
+export default WishlistPage;
 

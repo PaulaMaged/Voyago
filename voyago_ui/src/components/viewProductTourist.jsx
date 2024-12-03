@@ -132,6 +132,17 @@ export default function ViewProductTourist() {
     }
   };
 
+  const addToWishlist = async (productId) => {
+    try {
+      await axios.post("/api/wishlist/add", { productId });
+      // Show success message
+      alert("Product added to wishlist!");
+    } catch (err) {
+      // Show error message
+      alert(err.response?.data?.message || "Failed to add product to wishlist");
+    }
+  };
+
   if (loading) return <div className="loading">Loading products...</div>;
   if (error) return <div className="error">{error}</div>;
 
@@ -246,6 +257,12 @@ export default function ViewProductTourist() {
                     Order
                   </button>
                 </div>
+                <button
+                  onClick={() => addToWishlist(product._id)}
+                  className="wishlist-button"
+                >
+                  Add to Wishlist
+                </button>
               </div>
             </div>
           ))}

@@ -21,7 +21,6 @@ import ViewItineraryGuest from "./components/viewItineraryGuest";
 import ViewItineraryGuide from "./components/ViewItineraryGuide";
 import GuideSales from "./components/Sales/GuideSales"
 
-
 import GovernorLandmarks from "./components/GovernorLandmarks";
 import ViewLandmarks from "./components/viewLandmarks";
 
@@ -41,6 +40,7 @@ import Bookmarks from './pages/Bookmarks';
 import Notifications from './components/Notifications';
 
 import Cart from "./components/Cart"; // Import Cart
+import WishlistPage from "./pages/WishlistPage";
 
 function App() {
   return (
@@ -122,6 +122,7 @@ function App() {
           <Route path="createReview" element={<CreateReview />} />
           <Route path="/bookmarks" element={<Bookmarks />} />
           <Route path="/notifications" element={<Notifications />} />
+          <Route path="/wishlist" element={<WishlistPage />} />
         </Routes>
         <Routes>
         <Route index element={<Home />} />
@@ -153,6 +154,7 @@ function App() {
         <Route path="/crudCategory" element={<CrudCategory />} />
         <Route path="/createReview" element={<CreateReview />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/wishlist" element={<WishlistPage />} />
       </Routes>
     </BrowserRouter>
   );
