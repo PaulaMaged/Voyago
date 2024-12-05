@@ -19,27 +19,25 @@
 }
 
 .btn-book-itinerary {
-  background-color: #2ecc71;
-  color: white;
-  flex: 2;
+  background-color: var(--secondary);
+  color: var(--surface);
 }
 
 .btn-book-itinerary:hover {
-  background-color: #27ae60;
+  background-color: var(--secondaryLight);
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(46, 204, 113, 0.3);
+  box-shadow: 0 4px 8px var(--shadow);
 }
 
 .btn-feedback-itinerary {
-  background-color: #3498db;
-  color: white;
-  flex: 1;
+  background-color: var(--primary);
+  color: var(--surface);
 }
 
 .btn-feedback-itinerary:hover {
-  background-color: #2980b9;
+  background-color: var(--primaryLight);
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+  box-shadow: 0 4px 8px var(--shadow);
 }
 
 .btn-feedback-guide {
@@ -92,4 +90,41 @@
 .btn-copy-link::before {
   content: "📋";
   font-size: 0.9rem;
+}
+
+.itinerary-viewer {
+  background-color: var(--background);
+  color: var(--textPrimary);
+}
+
+.itinerary-card {
+  background-color: var(--surface);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+}
+
+.itinerary-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+}
+
+.itinerary-card h2 {
+  color: var(--textPrimary);
+}
+
+.itinerary-card p {
+  color: var(--textSecondary);
+}
+
+.filters input,
+.filters select {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--textPrimary);
+}
+
+.filters input:focus,
+.filters select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primaryLight);
 } 

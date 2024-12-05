@@ -1,0 +1,36 @@
+:root {
+  /* Color Palette */
+  --primary: #3498db;
+  --primary-dark: #2980b9;
+  --secondary: #2ecc71;
+  --secondary-dark: #27ae60;
+  --accent: #9b59b6;
+  --accent-dark: #8e44ad;
+  --background: #f8f9fa;
+  --surface: #ffffff;
+  --text-primary: #2c3e50;
+  --text-secondary: #7f8c8d;
+  --border: #e0e0e0;
+  --shadow: rgba(0, 0, 0, 0.1);
+
+  /* Animation Timings */
+  --transition-quick: 0.2s;
+  --transition-normal: 0.3s;
+  --transition-slow: 0.4s;
+  
+  /* Animation Curves */
+  --ease-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* Spring Theme */
+  --spring-primary: #FF9EAA;    /* Cherry Blossom Pink */
+  --spring-primary-dark: #FF7B8B;
+  --spring-secondary: #98D8AA;  /* Fresh Leaf Green */
+  --spring-secondary-dark: #7BC68C;
+  --spring-accent: #FFB07F;     /* Soft Peach */
+  --spring-accent-dark: #FF9B61;
+  --spring-background: #FFF8F0; /* Warm White */
+  --spring-surface: #ffffff;
+  --spring-text-primary: #4A4E69;
+  --spring-text-secondary: #9A8C98;
+} 

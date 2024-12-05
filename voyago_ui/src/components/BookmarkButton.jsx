@@ -1,8 +1,12 @@
+import React from 'react';
 import axios from 'axios';
 import { useState, useEffect } from 'react';
+import { FaBookmark, FaRegBookmark } from 'react-icons/fa';
+import '../styles/Bookmarks.css';
 
 const BookmarkButton = ({ activityId }) => {
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [count, setCount] = useState(0);
   const touristId = localStorage.getItem("roleId");
 
   const handleBookmark = async () => {
@@ -31,14 +35,19 @@ const BookmarkButton = ({ activityId }) => {
     }
   };
 
-  // Check if activity is bookmarked on component mount
   useEffect(() => {
     const checkBookmarkStatus = async () => {
       try {
         const response = await axios.get(`http://localhost:8000/api/tourist/get-bookmarks/${touristId}`);
         setIsBookmarked(response.data.some(bookmark => bookmark.activity._id === activityId));
+        
+        // Temporarily comment out bookmark count fetch until endpoint is ready
+        // const activityResponse = await axios.get(`http://localhost:8000/api/tourist/activity-bookmark-count/${activityId}`);
+        // setCount(activityResponse.data.count);
+        setCount(0); // Default to 0 for now
       } catch (error) {
         console.error('Error checking bookmark status:', error);
+        setCount(0); // Ensure count is set even on error
       }
     };
 
@@ -49,10 +58,18 @@ const BookmarkButton = ({ activityId }) => {
 
   return (
     <button 
+      className={`bookmark-button ${isBookmarked ? 'active' : ''}`}
       onClick={handleBookmark}
-      className={`bookmark-button ${isBookmarked ? 'bookmarked' : ''}`}
+      aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
     >
-      {isBookmarked ? '★ Bookmarked' : '☆ Bookmark'}
+      <span className="bookmark-icon">
+        {isBookmarked ? <FaBookmark /> : <FaRegBookmark />}
+      </span>
+      {count > 0 && (
+        <span className="bookmark-count">
+          {count}
+        </span>
+      )}
     </button>
   );
 };

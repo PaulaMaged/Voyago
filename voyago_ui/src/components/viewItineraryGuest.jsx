@@ -219,7 +219,7 @@ const ViewItineraryGuest = () => {
           onChange={(e) => setSelectedTag(e.target.value)}
           className="filter-select"
         >
-          <option value="">All Tags</option>
+          <option key="tag-default" value="">All Tags</option>
           {getAllTags().map((tag) => (
             <option key={tag._id} value={tag._id}>
               {tag.tag_name}
@@ -232,7 +232,7 @@ const ViewItineraryGuest = () => {
           onChange={(e) => setSelectedCategory(e.target.value)}
           className="filter-select"
         >
-          <option value="">All Categories</option>
+          <option key="category-default" value="">All Categories</option>
           {categories.map((category) => (
             <option key={category._id} value={category._id}>
               {category.category}
@@ -245,9 +245,9 @@ const ViewItineraryGuest = () => {
           onChange={(e) => setSelectedLanguage(e.target.value)}
           className="filter-select"
         >
-          <option value="">All Languages</option>
+          <option key="language-default" value="">All Languages</option>
           {getAllLanguages().map((language) => (
-            <option key={language} value={language}>
+            <option key={`lang-${language}`} value={language}>
               {language}
             </option>
           ))}
@@ -281,9 +281,11 @@ const ViewItineraryGuest = () => {
           onChange={(e) => setSortCriteria(e.target.value)}
           className="filter-select"
         >
-          <option value="">Sort By</option>
-          <option value="price_asc">Price: Low to High</option>
-          <option value="price_desc">Price: High to Low</option>
+          <option key="sort-default" value="">Sort By</option>
+          <option key="sort-price-asc" value="price_asc">Price: Low to High</option>
+          <option key="sort-price-desc" value="price_desc">Price: High to Low</option>
+          <option key="sort-date-asc" value="date_asc">Date: Earliest First</option>
+          <option key="sort-date-desc" value="date_desc">Date: Latest First</option>
         </select>
       </div>
 
