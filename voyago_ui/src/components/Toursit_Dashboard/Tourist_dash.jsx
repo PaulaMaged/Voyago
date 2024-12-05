@@ -175,6 +175,7 @@ import Notifications from '../Notifications';
 import Cart from '../Cart';
 import ThemeSwitcher from '../ThemeSwitcher';
 import { applyTheme } from '../../utils/themeManager';
+import Bookmarks from '../../pages/Bookmarks';
 
 export default function TouristDashboard() {
   const [activeSection, setActiveSection] = useState("profile");
@@ -239,6 +240,8 @@ export default function TouristDashboard() {
         return <Notifications />;
       case "cart":
         return <Cart />;
+      case "bookmarks":
+        return <Bookmarks />;
       default:
         return <Profile userId={userId} touristId={touristId} />;
     }
@@ -267,6 +270,9 @@ export default function TouristDashboard() {
     ],
     cart: [
       { key: "cart", label: "Shopping Cart", icon: <FaShoppingCart /> },
+    ],
+    bookmarks: [
+      { key: "bookmarks", label: "Bookmarks", icon: <FaStar /> },
     ],
   };
 
