@@ -1059,7 +1059,7 @@ const getUpcomingBookings = async (req, res) => {
     })
     .populate({
       path: 'activity',
-      select: 'title description start_time duration price location'
+      select: 'title description start_time duration price location booking_open flag_inapproperiate'
     });
 
     // Get upcoming itinerary bookings
@@ -1070,17 +1070,27 @@ const getUpcomingBookings = async (req, res) => {
     })
     .populate({
       path: 'itinerary',
-      select: 'name description start_date end_date price location'
+      select: 'name description start_date end_date price location activities tour_guide'
     });
 
-    // Filter for only upcoming events
+    // Filter after population
     const upcomingActivities = activityBookings.filter(booking => 
-      new Date(booking.activity.start_time) > currentDate
+      booking.activity && 
+      new Date(booking.activity.start_time) > currentDate &&
+      booking.activity.booking_open &&
+      !booking.activity.flag_inapproperiate
     );
 
     const upcomingItineraries = itineraryBookings.filter(booking => 
+      booking.itinerary && 
       new Date(booking.itinerary.start_date) > currentDate
     );
+
+    // Debug logs
+    console.log('Raw Activity Bookings:', JSON.stringify(activityBookings, null, 2));
+    console.log('Raw Itinerary Bookings:', JSON.stringify(itineraryBookings, null, 2));
+    console.log('Filtered Activities:', JSON.stringify(upcomingActivities, null, 2));
+    console.log('Filtered Itineraries:', JSON.stringify(upcomingItineraries, null, 2));
 
     res.status(200).json({
       activities: upcomingActivities,
@@ -1088,6 +1098,7 @@ const getUpcomingBookings = async (req, res) => {
     });
 
   } catch (error) {
+    console.error('Error in getUpcomingBookings:', error);
     res.status(500).json({ error: error.message });
   }
 };
