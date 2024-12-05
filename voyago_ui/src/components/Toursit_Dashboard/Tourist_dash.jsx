@@ -157,6 +157,8 @@ import {
   FaStar,
   FaChevronDown,
   FaChevronUp,
+  FaBell,
+  FaShoppingCart,
 } from "react-icons/fa";
 import React, { useState, useEffect } from "react";
 import Profile from "../Profiles/Tourist_profile";
@@ -169,15 +171,14 @@ import ViewLandmarks from "../viewLandmarks";
 import ViewProductTourist from "../viewProductTourist";
 import ViewPurchasedProducts from "../viewPurchasedProducts";
 import LoyaltySystem from "./Loyalty_points";
-
+import Notifications from '../Notifications';
+import Cart from '../Cart';
 export default function TouristDashboard() {
   const [activeSection, setActiveSection] = useState("profile");
   const [userId, setUserId] = useState(null);
   const [touristId, setTouristId] = useState(null);
-  const [isProfileOpen, setIsProfileOpen] = useState(true);
-  const [isExploreOpen, setIsExploreOpen] = useState(true);
-  const [isAccountOpen, setIsAccountOpen] = useState(true);
-  const [isProductsOpen, setIsProductsOpen] = useState(true); // Added state for Products section
+  const [expandedSections, setExpandedSections] = useState([]);
+  const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -219,6 +220,10 @@ export default function TouristDashboard() {
         return <ViewPurchasedProducts userId={userId} touristId={touristId} />;
       case "loyalty":
         return <LoyaltySystem userId={userId} touristId={touristId} />;
+      case "notifications":
+        return <Notifications />;
+      case "cart":
+        return <Cart />;
       default:
         return <Profile userId={userId} touristId={touristId} />;
     }
@@ -231,11 +236,7 @@ export default function TouristDashboard() {
     ],
     complaints: [
       { key: "complaint", label: "Make a Complaint", icon: <FaFileAlt /> },
-      {
-        key: "viewComplaints",
-        label: "View My Complaints",
-        icon: <FaClipboardList />,
-      },
+      { key: "viewComplaints", label: "View My Complaints", icon: <FaClipboardList /> },
     ],
     explore: [
       { key: "activities", label: "View Activities", icon: <FaMapSigns /> },
@@ -244,183 +245,90 @@ export default function TouristDashboard() {
     ],
     products: [
       { key: "products", label: "View Products", icon: <FaProductHunt /> },
-      {
-        key: "purchasedProducts",
-        label: "View Purchased Products",
-        icon: <FaProductHunt />,
-      },
+      { key: "purchasedProducts", label: "View Purchased Products", icon: <FaProductHunt /> },
+    ],
+    notifications: [
+      { key: "notifications", label: "Notifications", icon: <FaBell /> },
+    ],
+    cart: [
+      { key: "cart", label: "Shopping Cart", icon: <FaShoppingCart /> },
     ],
   };
 
   const toggleSection = (section) => {
-    switch (section) {
-      case "profile":
-        setIsProfileOpen(!isProfileOpen);
-        break;
-      case "complaints":
-        setIsAccountOpen(!isAccountOpen);
-        break;
-      case "explore":
-        setIsExploreOpen(!isExploreOpen);
-        break;
-      case "products": // Toggle products section visibility
-        setIsProductsOpen(!isProductsOpen);
-        break;
-      default:
-        break;
+    if (expandedSections.includes(section)) {
+      setExpandedSections(expandedSections.filter((item) => item !== section));
+    } else {
+      setExpandedSections([...expandedSections, section]);
     }
   };
 
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
-      <aside className="w-64 bg-blue-900 text-white shadow-xl p-6 space-y-4 fixed top-0 left-0 h-screen">
-        <h2 className="text-2xl font-semibold text-center border-b border-blue-700 pb-4">
-          Tourist Dashboard
-        </h2>
-        <nav>
-          {/* Profile Section */}
-          <div>
-            <button
-              onClick={() => toggleSection("profile")}
-              className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-blue-700 text-lg transition duration-200"
-            >
-              <span className="flex items-center">
-                <FaUser className="mr-4 text-xl" />
-                Profile
-              </span>
-              {isProfileOpen ? <FaChevronDown /> : <FaChevronUp />}
-            </button>
-            {isProfileOpen && (
-              <div className="space-y-2 pl-8">
-                {navItems.profile.map((item) => (
-                  <button
-                    key={item.key}
-                    onClick={() => setActiveSection(item.key)}
-                    className={`w-full flex items-center p-3 rounded-lg hover:bg-blue-700 text-lg transition duration-200 ${
-                      activeSection === item.key ? "bg-blue-600" : ""
-                    }`}
-                  >
-                    <span className="mr-4 text-xl">{item.icon}</span>
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+      <aside 
+        className={`transition-all duration-300 bg-blue-900 text-white shadow-xl p-4 fixed top-0 left-0 h-screen ${
+          isHovered ? 'w-64' : 'w-16'
+        }`}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <div className={`sidebar-header mb-6 ${isHovered ? 'text-center' : 'text-center'}`}>
+          {isHovered ? (
+            <h2 className="text-xl font-semibold">Tourist Dashboard</h2>
+          ) : (
+            <div className="text-2xl">🏷️</div>
+          )}
+        </div>
 
-          {/* Complaints Section */}
-          <div>
-            <button
-              onClick={() => toggleSection("complaints")}
-              className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-blue-700 text-lg transition duration-200"
-            >
-              <span className="flex items-center">
-                <FaFileAlt className="mr-4 text-xl" />
-                Complaints
-              </span>
-              {isAccountOpen ? <FaChevronDown /> : <FaChevronUp />}
-            </button>
-            {isAccountOpen && (
-              <div className="space-y-2 pl-8">
-                {navItems.complaints.map((item) => (
-                  <button
-                    key={item.key}
-                    onClick={() => setActiveSection(item.key)}
-                    className={`w-full flex items-center p-3 rounded-lg hover:bg-blue-700 text-lg transition duration-200 ${
-                      activeSection === item.key ? "bg-blue-600" : ""
-                    }`}
-                  >
-                    <span className="mr-4 text-xl">{item.icon}</span>
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+        <nav className="space-y-2">
+          {Object.entries(navItems).map(([section, items]) => (
+            <div key={section} className="relative group">
+              <button
+                onClick={() => toggleSection(section)}
+                className={`w-full flex items-center justify-${isHovered ? 'between' : 'center'} p-3 rounded-lg hover:bg-blue-700 transition duration-200`}
+              >
+                <span className="flex items-center">
+                  {items[0].icon}
+                  {isHovered && (
+                    <span className="ml-3">{section.replace(/([A-Z])/g, ' $1').trim()}</span>
+                  )}
+                </span>
+                {isHovered && (
+                  <span className="transition-transform duration-200">
+                    {expandedSections.includes(section) ? <FaChevronDown /> : <FaChevronUp />}
+                  </span>
+                )}
+              </button>
 
-          {/* Explore Section */}
-          <div>
-            <button
-              onClick={() => toggleSection("explore")}
-              className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-blue-700 text-lg transition duration-200"
-            >
-              <span className="flex items-center">
-                <FaMapSigns className="mr-4 text-xl" />
-                Explore
-              </span>
-              {isExploreOpen ? <FaChevronDown /> : <FaChevronUp />}
-            </button>
-            {isExploreOpen && (
-              <div className="space-y-2 pl-8">
-                {navItems.explore.map((item) => (
-                  <button
-                    key={item.key}
-                    onClick={() => setActiveSection(item.key)}
-                    className={`w-full flex items-center p-3 rounded-lg hover:bg-blue-700 text-lg transition duration-200 ${
-                      activeSection === item.key ? "bg-blue-600" : ""
-                    }`}
-                  >
-                    <span className="mr-4 text-xl">{item.icon}</span>
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Products Section */}
-          <div>
-            <button
-              onClick={() => toggleSection("products")}
-              className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-blue-700 text-lg transition duration-200"
-            >
-              <span className="flex items-center">
-                <FaProductHunt className="mr-4 text-xl" />
-                Products
-              </span>
-              {isProductsOpen ? <FaChevronDown /> : <FaChevronUp />}
-            </button>
-            {isProductsOpen && (
-              <div className="space-y-2 pl-8">
-                {navItems.products.map((item) => (
-                  <button
-                    key={item.key}
-                    onClick={() => setActiveSection(item.key)}
-                    className={`w-full flex items-center p-3 rounded-lg hover:bg-blue-700 text-lg transition duration-200 ${
-                      activeSection === item.key ? "bg-blue-600" : ""
-                    }`}
-                  >
-                    <span className="mr-4 text-xl">{item.icon}</span>
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Loyalty System Section (New standalone section) */}
-          <div>
-            <button
-              onClick={() => setActiveSection("loyalty")}
-              className={`w-full flex items-center p-3 rounded-lg hover:bg-blue-700 text-lg transition duration-200 ${
-                activeSection === "loyalty" ? "bg-blue-600" : ""
-              }`}
-            >
-              <span className="mr-4 text-xl">
-                <FaStar />
-              </span>
-              Loyalty System
-            </button>
-          </div>
+              {expandedSections.includes(section) && isHovered && (
+                <div className="pl-4 mt-1 space-y-1">
+                  {items.map((item) => (
+                    <button
+                      key={item.key}
+                      onClick={() => setActiveSection(item.key)}
+                      className={`w-full flex items-center p-2 rounded-lg hover:bg-blue-700 text-sm transition duration-200 ${
+                        activeSection === item.key ? 'bg-blue-600' : ''
+                      }`}
+                    >
+                      <span className="mr-3">{item.icon}</span>
+                      <span>{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
         </nav>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 bg-white p-8 ml-64 overflow-y-auto">
+      <main className={`flex-1 p-8 transition-all duration-300 ${
+        isHovered ? 'ml-64' : 'ml-16'
+      }`}>
         <header className="mb-6">
           <h1 className="text-3xl font-bold text-blue-900 capitalize">
-            {activeSection.charAt(0).toUpperCase() + activeSection.slice(1)}
+            {activeSection.replace(/([A-Z])/g, ' $1').trim()}
           </h1>
         </header>
         <div className="bg-white shadow-lg p-6 rounded-lg">

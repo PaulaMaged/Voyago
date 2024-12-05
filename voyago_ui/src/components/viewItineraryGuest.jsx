@@ -4,7 +4,7 @@ import check from "../helpers/checks";
 import axios from "axios";
 import currencyConversions from "../helpers/currencyConversions";
 import "./viewItinerary.css";
-
+import './viewItineraryGuest.css';
 const ViewItineraryGuest = () => {
   const [itineraries, setItineraries] = useState([]);
   const [filteredItineraries, setFilteredItineraries] = useState([]);
@@ -297,10 +297,8 @@ const ViewItineraryGuest = () => {
           return (
             <div key={itinerary._id} className="itinerary-card">
               <button
-                className="copy"
-                onClick={() =>
-                  navigator.clipboard.writeText(window.location.href)
-                }
+                className="btn-copy-link"
+                onClick={() => navigator.clipboard.writeText(window.location.href)}
               >
                 Copy Link
               </button>
@@ -350,26 +348,27 @@ const ViewItineraryGuest = () => {
                 </p>
               )}
               <ActivitiesSection activities={itinerary.activities} />
-              <button
-                id="bookItin"
-                onClick={() => handleBookItinerary(itinerary._id)}
-              >
-                Book Itinerary
-              </button>
-              <button
-                onClick={() => {
-                  handleFeedbackItinerary(itinerary);
-                }}
-              >
-                Itinerary Feedback
-              </button>
-              <button
-                onClick={() => {
-                  handleFeedbackTourGuide(itinerary);
-                }}
-              >
-                Tour Guide Feedback
-              </button>
+              <div className="itinerary-actions">
+                <button
+                  id="bookItin"
+                  className="itinerary-btn btn-book-itinerary"
+                  onClick={() => handleBookItinerary(itinerary._id)}
+                >
+                  Book Itinerary
+                </button>
+                <button
+                  className="itinerary-btn btn-feedback-itinerary"
+                  onClick={() => handleFeedbackItinerary(itinerary)}
+                >
+                  Itinerary Feedback
+                </button>
+                <button
+                  className="itinerary-btn btn-feedback-guide"
+                  onClick={() => handleFeedbackTourGuide(itinerary)}
+                >
+                  Guide Feedback
+                </button>
+              </div>
             </div>
           );
         })}
