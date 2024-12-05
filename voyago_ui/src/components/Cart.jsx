@@ -2,38 +2,27 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './Cart.css';
+import currencyConversions from '../helpers/currencyConversions';
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [addresses, setAddresses] = useState([]);
-  const [selectedAddress, setSelectedAddress] = useState('');
   const navigate = useNavigate();
-  const userId = localStorage.getItem('userId');
+  const touristId = localStorage.getItem('roleId');
 
   useEffect(() => {
-    if (userId) {
+    if (touristId) {
       fetchCartItems();
-      fetchDeliveryAddresses();
     }
-  }, [userId]);
+  }, [touristId]);
 
   const fetchCartItems = async () => {
     try {
-      const cart = await axios.get(`http://localhost:8000/api/cart/${userId}`);
-      const itemsWithDetails = await Promise.all(
-        cart.data.items.map(async (item) => {
-          const productResponse = await axios.get(
-            `http://localhost:8000/api/product/retrieve-product-by-id/${item.product}`
-          );
-          return {
-            ...item,
-            productDetails: productResponse.data
-          };
-        })
-      );
-      setCartItems(itemsWithDetails);
+      const response = await axios.get(`http://localhost:8000/api/cart/${touristId}`);
+      if (response.data && response.data.items) {
+        setCartItems(response.data.items);
+      }
       setLoading(false);
     } catch (err) {
       setError('Failed to fetch cart items');
@@ -41,74 +30,72 @@ const Cart = () => {
     }
   };
 
-  const fetchDeliveryAddresses = async () => {
-    try {
-      const response = await axios.get(`http://localhost:8000/api/orders/address/${userId}`);
-      setAddresses(response.data);
-      if (response.data.length > 0) {
-        const defaultAddress = response.data.find(addr => addr.isDefault) || response.data[0];
-        setSelectedAddress(defaultAddress._id);
-      }
-    } catch (err) {
-      console.error('Failed to fetch delivery addresses:', err);
-    }
-  };
-
   const handleQuantityChange = async (productId, newQuantity) => {
     try {
-      await axios.post('http://localhost:8000/api/cart/update', {
-        userId,
-        productId,
-        quantity: newQuantity
-      });
+      // First, find the item in the cart
+      const item = cartItems.find(item => item.product._id === productId);
+      
+      // Validate quantity against available stock
+      if (newQuantity > item.product.available_quantity) {
+        setError(`Only ${item.product.available_quantity} items available in stock`);
+        return;
+      }
+      
+      if (newQuantity < 1) {
+        setError('Quantity cannot be less than 1');
+        return;
+      }
+
+      // Calculate the quantity difference
+      const quantityDifference = newQuantity - item.quantity;
+      
+      await axios.post(
+        `http://localhost:8000/api/cart/${touristId}/${productId}`,
+        { quantity: quantityDifference }  // Send the difference in quantity
+      );
+      
+      // Update local state immediately for better UX
+      setCartItems(prevItems => 
+        prevItems.map(item => 
+          item.product._id === productId 
+            ? { ...item, quantity: newQuantity }
+            : item
+        )
+      );
+
+      // Clear any previous errors
+      setError(null);
+      
+      // Fetch updated cart data
       fetchCartItems();
     } catch (err) {
-      setError('Failed to update quantity');
+      setError(err.response?.data?.message || 'Failed to update quantity');
     }
   };
 
   const handleRemoveItem = async (productId) => {
     try {
-      await axios.post('http://localhost:8000/api/cart/remove', {
-        userId,
-        productId
-      });
+      const touristId = localStorage.getItem('roleId');
+      await axios.delete(`http://localhost:8000/api/cart/${touristId}/${productId}`);
       fetchCartItems();
     } catch (err) {
       setError('Failed to remove item');
+      console.error('Error removing item:', err);
     }
   };
 
   const calculateTotal = () => {
     return cartItems.reduce((total, item) => {
-      return total + (item.productDetails.price * item.quantity);
+      return total + (item.product.price * item.quantity);
     }, 0);
   };
 
-  const handleCheckout = async () => {
-    if (!selectedAddress) {
-      setError('Please select a delivery address');
-      return;
-    }
-
-    try {
-      await axios.post('http://localhost:8000/api/orders/checkout', {
-        userId,
-        addressId: selectedAddress
-      });
-      setCartItems([]);
-      navigate('/orders');
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to checkout');
-    }
+  const handleCheckout = () => {
+    navigate('/checkout');
   };
 
-  const handleAddAddress = () => {
-    navigate('/add-address');
-  };
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div className="error">{error}</div>;
+  if (loading) return <div className="cart-loading">Loading your cart...</div>;
+  if (error) return <div className="cart-error">{error}</div>;
 
   return (
     <div className="cart-container">
@@ -117,40 +104,47 @@ const Cart = () => {
       {cartItems.length === 0 ? (
         <div className="empty-cart">
           <p>Your cart is empty</p>
+          <button onClick={() => navigate('/products')} className="continue-shopping">
+            Continue Shopping
+          </button>
         </div>
       ) : (
         <>
           <div className="cart-items">
             {cartItems.map((item) => (
-              <div key={item.product} className="cart-item">
+              <div key={item.product._id} className="cart-item">
                 <img 
-                  src={item.productDetails.picture || 'default-product-image.jpg'} 
-                  alt={item.productDetails.name} 
+                  src={item.product.picture || '/placeholder.svg'} 
+                  alt={item.product.name} 
                   className="item-image"
                 />
                 <div className="item-details">
-                  <h3>{item.productDetails.name}</h3>
-                  <p className="price">${item.productDetails.price}</p>
+                  <h3>{item.product.name}</h3>
+                  <p className="price">
+                    {currencyConversions.formatPrice(item.product.price)}
+                  </p>
                 </div>
                 <div className="item-actions">
                   <div className="quantity-controls">
                     <button 
-                      onClick={() => handleQuantityChange(item.product, Math.max(1, item.quantity - 1))}
+                      onClick={() => handleQuantityChange(item.product._id, item.quantity - 1)}
                       disabled={item.quantity <= 1}
+                      className="quantity-button"
                     >
                       -
                     </button>
-                    <span>{item.quantity}</span>
+                    <span className="quantity-display">{item.quantity}</span>
                     <button 
-                      onClick={() => handleQuantityChange(item.product, item.quantity + 1)}
-                      disabled={item.quantity >= item.productDetails.available_quantity}
+                      onClick={() => handleQuantityChange(item.product._id, item.quantity + 1)}
+                      disabled={item.quantity >= item.product.available_quantity}
+                      className="quantity-button"
                     >
                       +
                     </button>
                   </div>
                   <button 
                     className="remove-button"
-                    onClick={() => handleRemoveItem(item.product)}
+                    onClick={() => handleRemoveItem(item.product._id)}
                   >
                     Remove
                   </button>
@@ -158,38 +152,12 @@ const Cart = () => {
               </div>
             ))}
           </div>
-
-          <div className="delivery-section">
-            <h3>Delivery Address</h3>
-            {addresses.length > 0 ? (
-              <select 
-                value={selectedAddress} 
-                onChange={(e) => setSelectedAddress(e.target.value)}
-              >
-                {addresses.map(address => (
-                  <option key={address._id} value={address._id}>
-                    {address.street}, {address.city}, {address.state}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <p>No delivery addresses found</p>
-            )}
-            <button onClick={handleAddAddress} className="add-address-button">
-              Add New Address
-            </button>
-          </div>
-
           <div className="cart-summary">
             <div className="total">
-              <span>Total:</span>
-              <span>${calculateTotal().toFixed(2)}</span>
+              Total: {currencyConversions.convertFromDB(calculateTotal()).toFixed(2)} 
+              {" "}{localStorage.getItem("currency")}
             </div>
-            <button 
-              className="checkout-button"
-              onClick={handleCheckout}
-              disabled={!selectedAddress}
-            >
+            <button onClick={handleCheckout} className="checkout-button">
               Proceed to Checkout
             </button>
           </div>

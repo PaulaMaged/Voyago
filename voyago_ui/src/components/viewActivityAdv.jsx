@@ -362,11 +362,9 @@ export default function ViewActivityAdv() {
               <p>
                 <strong>Duration:</strong> {activity.duration} minutes
               </p>
-              <p>
-                <strong>Price:</strong>
-                {currencyConversions.convertFromDB(activity.price).toFixed(2) +
-                  " " +
-                  localStorage.getItem("currency")}
+              <p className="activity-price">
+                <strong>Price:</strong>{" "}
+                {currencyConversions.formatPrice(activity.price)}
               </p>
               <p>
                 <strong>Category:</strong> {activity.category?.category}

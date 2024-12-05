@@ -210,11 +210,7 @@ export default function ViewPurchasedProducts() {
                 <h2 className="product-name">{product.name}</h2>
                 <p className="product-description">{product.description}</p>
                 <p className="product-price">
-                  {currencyConversions
-                    .convertFromDB(product.price)
-                    .toFixed(2) +
-                    " " +
-                    localStorage.getItem("currency")}
+                  {currencyConversions.formatPrice(product.price)}
                 </p>
                 <p className="product-seller">
                   Seller: {product.seller.store_name || "Unknown Seller"}

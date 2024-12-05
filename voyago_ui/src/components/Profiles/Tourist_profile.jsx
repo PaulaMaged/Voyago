@@ -481,7 +481,7 @@ function Tourist_profile({ userId, touristId }) {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
             >
               <option value="USD">USD</option>
-              <option value="EGY">EGY</option>
+              <option value="EGP">EGP</option>
             </select>
           </div>
           <div>

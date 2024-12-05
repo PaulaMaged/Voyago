@@ -2,6 +2,7 @@ import mongoose, { Schema } from "mongoose";
 
 const deliveryAddressSchema = new Schema({
   tourist: { type: Schema.Types.ObjectId, ref: "Tourist", required: true },
+  location: { type: Schema.Types.ObjectId, ref: "Location", required: true },
   street: { type: String, required: true },
   city: { type: String, required: true },
   state: { type: String, required: true },

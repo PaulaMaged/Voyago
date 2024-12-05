@@ -1,6 +1,7 @@
 import Order from "../models/Order.js";
 import DeliveryAddress from "../models/DeliveryAddress.js";
 import Cart from "../models/Cart.js";
+import Tourist from "../models/Tourist.js";
 
 const getOrdersByTourist = async (req, res) => {
   try {
@@ -58,9 +59,20 @@ const cancelOrder = async (req, res) => {
 const addDeliveryAddress = async (req, res) => {
   try {
     const { touristId } = req.params;
-    const addressData = { ...req.body, tourist: touristId };
+    const { location, ...addressData } = req.body;
     
-    if (addressData.isDefault) {
+    // Validate location ID
+    if (!location) {
+      return res.status(400).json({ message: "Location reference is required" });
+    }
+
+    const addressWithRefs = { 
+      ...addressData,
+      tourist: touristId,
+      location: location // This is the location ID from the location reference
+    };
+    
+    if (addressWithRefs.isDefault) {
       // If this is a default address, remove default status from other addresses
       await DeliveryAddress.updateMany(
         { tourist: touristId },
@@ -68,7 +80,7 @@ const addDeliveryAddress = async (req, res) => {
       );
     }
     
-    const newAddress = new DeliveryAddress(addressData);
+    const newAddress = new DeliveryAddress(addressWithRefs);
     await newAddress.save();
     res.status(201).json(newAddress);
   } catch (error) {
@@ -88,28 +100,51 @@ const getDeliveryAddresses = async (req, res) => {
 
 const checkoutOrder = async (req, res) => {
   try {
-    const { touristId, addressId } = req.body;
+    const { touristId, addressId, paymentMethod } = req.body;
     
     // Get cart items
-    const cart = await Cart.findOne({ user: touristId }).populate('items.product');
+    const cart = await Cart.findOne({ tourist: touristId }).populate('items.product');
     if (!cart || cart.items.length === 0) {
       return res.status(400).json({ message: "Cart is empty" });
     }
     
-    // Verify delivery address
-    const deliveryAddress = await DeliveryAddress.findById(addressId);
+    // Calculate total price
+    const totalPrice = cart.items.reduce((total, item) => {
+      return total + (item.product.price * item.quantity);
+    }, 0);
+
+    // Get tourist and check wallet balance if payment method is wallet
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    if (paymentMethod === 'wallet') {
+      if (tourist.wallet < totalPrice) {
+        return res.status(400).json({ message: "Insufficient wallet balance" });
+      }
+      // Deduct from wallet
+      tourist.wallet -= totalPrice;
+      await tourist.save();
+    }
+    
+    // Verify delivery address and get location
+    const deliveryAddress = await DeliveryAddress.findById(addressId).populate('location');
     if (!deliveryAddress) {
       return res.status(404).json({ message: "Delivery address not found" });
     }
 
-    // Create orders for each cart item
+    // Create orders with location reference
     const orders = await Promise.all(cart.items.map(async (item) => {
       const order = new Order({
         tourist: touristId,
         product: item.product._id,
         quantity: item.quantity,
-        arrival_location: addressId,
-        description: `Order for ${item.product.name}`
+        arrival_location: deliveryAddress.location._id,
+        payment_method: paymentMethod,
+        arrival_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        description: `Order for ${item.product.name}`,
+        total_price: item.product.price * item.quantity
       });
       return order.save();
     }));
@@ -118,7 +153,18 @@ const checkoutOrder = async (req, res) => {
     cart.items = [];
     await cart.save();
 
-    res.status(201).json(orders);
+    // Prepare receipt data
+    const receipt = {
+      orders,
+      totalAmount: totalPrice,
+      paymentMethod,
+      deliveryAddress,
+      updatedWalletBalance: tourist.wallet,
+      orderDate: new Date(),
+      estimatedDelivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+    };
+
+    res.status(201).json(receipt);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

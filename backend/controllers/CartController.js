@@ -1,12 +1,21 @@
 import Cart from "../models/Cart.js";
 import Product from "../models/Product.js";
+import Tourist from "../models/Tourist.js";
 
 /**
  * Add an item to the cart.
+ * @route POST /api/cart/:touristId/:productId
  */
 const addItemToCart = async (req, res) => {
   try {
-    const { userId, productId, quantity } = req.body;
+    const { touristId, productId } = req.params;
+    const { quantity } = req.body;
+
+    // Validate tourist existence
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
 
     // Validate product existence
     const product = await Product.findById(productId);
@@ -14,14 +23,17 @@ const addItemToCart = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    // Find or create a cart for the user
-    let cart = await Cart.findOne({ user: userId });
+    // Find or create a cart for the tourist
+    let cart = await Cart.findOne({ tourist: touristId });
     if (!cart) {
-      cart = new Cart({ user: userId, items: [] });
+      cart = new Cart({ tourist: touristId, items: [] });
     }
 
     // Check if the product is already in the cart
-    const itemIndex = cart.items.findIndex(item => item.product.toString() === productId);
+    const itemIndex = cart.items.findIndex(item => 
+      item.product.toString() === productId
+    );
+
     if (itemIndex > -1) {
       // Update quantity if product exists in cart
       cart.items[itemIndex].quantity += quantity;
@@ -32,6 +44,9 @@ const addItemToCart = async (req, res) => {
 
     // Save the cart
     await cart.save();
+    
+    // Populate the product details before sending response
+    await cart.populate('items.product');
     res.status(200).json(cart);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -40,22 +55,34 @@ const addItemToCart = async (req, res) => {
 
 /**
  * Remove an item from the cart.
+ * @route DELETE /api/cart/:touristId/:productId
  */
 const removeItemFromCart = async (req, res) => {
   try {
-    const { userId, productId } = req.body;
+    const { touristId, productId } = req.params;
 
-    // Find the user's cart
-    const cart = await Cart.findOne({ user: userId });
+    // Validate tourist existence
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    // Find the tourist's cart
+    const cart = await Cart.findOne({ tourist: touristId });
     if (!cart) {
       return res.status(404).json({ message: "Cart not found" });
     }
 
     // Remove the product from the cart
-    cart.items = cart.items.filter(item => item.product.toString() !== productId);
+    cart.items = cart.items.filter(item => 
+      item.product.toString() !== productId
+    );
 
     // Save the updated cart
     await cart.save();
+    
+    // Populate the product details before sending response
+    await cart.populate('items.product');
     res.status(200).json(cart);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -63,27 +90,54 @@ const removeItemFromCart = async (req, res) => {
 };
 
 /**
- * Change the quantity of an item in the cart.
+ * Get cart contents
+ * @route GET /api/cart/:touristId
  */
-const updateItemQuantityInCart = async (req, res) => {
+const getCart = async (req, res) => {
   try {
-    const { userId, productId, quantity } = req.body;
+    const { touristId } = req.params;
 
-    // Find the user's cart
-    const cart = await Cart.findOne({ user: userId });
+    // Validate tourist existence
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    // Find the cart and populate product details
+    const cart = await Cart.findOne({ tourist: touristId })
+      .populate('items.product');
+
+    if (!cart) {
+      return res.status(200).json({ tourist: touristId, items: [] });
+    }
+
+    res.status(200).json(cart);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const clearCart = async (req, res) => {
+  try {
+    const { touristId } = req.params;
+
+    // Validate tourist existence
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    // Find and update the cart
+    const cart = await Cart.findOne({ tourist: touristId });
     if (!cart) {
       return res.status(404).json({ message: "Cart not found" });
     }
 
-    // Find the product in the cart and update its quantity
-    const itemIndex = cart.items.findIndex(item => item.product.toString() === productId);
-    if (itemIndex > -1) {
-      cart.items[itemIndex].quantity = quantity;
-      await cart.save();
-      res.status(200).json(cart);
-    } else {
-      res.status(404).json({ message: "Product not found in cart" });
-    }
+    // Clear all items
+    cart.items = [];
+    await cart.save();
+    
+    res.status(200).json({ message: "Cart cleared successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -92,5 +146,6 @@ const updateItemQuantityInCart = async (req, res) => {
 export default {
   addItemToCart,
   removeItemFromCart,
-  updateItemQuantityInCart,
+  getCart,
+  clearCart
 }; 

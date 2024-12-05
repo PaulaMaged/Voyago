@@ -318,12 +318,8 @@ const ViewItineraryGuest = () => {
                 <strong>Language:</strong> {itinerary.language}
               </p>
               <p>
-                <strong>Price:</strong>
-                {currencyConversions
-                  .convertFromDB(itinerary.price)
-                  ?.toFixed(2) +
-                  " " +
-                  localStorage.getItem("currency")}
+                <strong>Price:</strong>{" "}
+                {currencyConversions.formatPrice(itinerary.price)}
               </p>
               <p>
                 <strong>Start Date:</strong>{" "}

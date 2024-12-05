@@ -205,9 +205,7 @@ export default function ViewProductTourist() {
                 <h2 className="product-name">{product.name}</h2>
                 <p className="product-description">{product.description}</p>
                 <p className="product-price">
-                  {currencyConversions.convertFromDB(product.price).toFixed(2) +
-                    " " +
-                    localStorage.getItem("currency")}
+                  {currencyConversions.formatPrice(product.price)}
                 </p>
                 <p className="product-availability">
                   Available: {product.available_quantity}
@@ -275,6 +273,41 @@ export default function ViewProductTourist() {
                   }}
                 >
                   Add to Wishlist
+                </button>
+                <button
+                  onClick={() => {
+                    const touristId = localStorage.getItem("roleId");
+                    if (!touristId) {
+                      alert("Please log in to add items to your cart");
+                      return;
+                    }
+                    
+                    const quantity = orderQuantities[product._id] || 1;
+                    
+                    axios.post(
+                      `http://localhost:8000/api/cart/${touristId}/${product._id}`,
+                      { quantity }
+                    )
+                    .then(() => {
+                      alert("Product added to cart successfully!");
+                    })
+                    .catch((err) => {
+                      alert(err.response?.data?.message || "Failed to add product to cart");
+                    });
+                  }}
+                  className="cart-button"
+                  style={{
+                    backgroundColor: '#4CAF50',
+                    color: 'white',
+                    border: 'none',
+                    padding: '8px 15px',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    marginTop: '10px',
+                    marginLeft: '10px'
+                  }}
+                >
+                  <i className="fas fa-shopping-cart"></i> Add to Cart
                 </button>
               </div>
             </div>

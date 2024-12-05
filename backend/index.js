@@ -15,9 +15,10 @@ import axios from "axios";
 import cors from "cors";
 import cron from 'node-cron';
 import { createUpcomingActivityNotifications, checkBookmarkedActivities } from './controllers/NotificationController.js';
-import CartRoutes from "./routes/cartRoutes.js";
-import OrderRoutes from "./routes/OrderRoutes.js";
+import CartRoutes from "./routes/CartRoutes.js";
+import OrderRoutes from "./routes/orderRoutes.js";
 import wishlistRoutes from './routes/WishlistRoutes.js';
+import locationRoutes from './routes/LocationRoutes.js';
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -216,6 +217,7 @@ app.use("/api/user", UserRoutes);
 app.use("/api/tourism-governor", TourismGovernorRoutes);
 app.use("/api/seller", SellerRoutes);
 app.use("/api/cart", CartRoutes);
+app.use('/api/locations', locationRoutes);
 app.use("/api/orders", OrderRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 // Root route for testing
