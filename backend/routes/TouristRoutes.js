@@ -1,7 +1,22 @@
 import express from "express";
 import TouristController from "../controllers/TouristController.js";
 import BookmarkController from "../controllers/BookmarkController.js";
+import multer from 'multer';
+import path from 'path';
 const router = express.Router();
+
+// Configure multer for file upload
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/');
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ storage: storage });
 
 /**
  *********************************************
@@ -129,10 +144,13 @@ router.post("/book-activties", TouristController.bookActivity );
 router.post("/create-bookmark", BookmarkController.createBookmark);
 router.get("/get-bookmarks/:touristId", BookmarkController.getTouristBookmarks);
 router.delete("/remove-bookmark/:touristId/:bookmarkId", BookmarkController.removeBookmark);
+router.post('/upload-profile-picture/:touristId', upload.single('profile_picture'), TouristController.uploadProfilePicture);
 
 router.get(
   "/get-tourist-notifications/:touristId",
   TouristController.getTouristNotifications
 );
+
+router.get('/profile-picture/:touristId', TouristController.getTouristProfilePicture);
 
 export default router;
