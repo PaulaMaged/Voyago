@@ -132,44 +132,55 @@ const deleteSeller = async (req, res) => {
 };
 
 const createProduct = async (req, res) => {
-  const {
-    seller,
-    name,
-    description,
-    price,
-    available_quantity,
-    picture,
-    archived,
-  } = req.body;
-
-  // Ensure all required fields are provided
-  if (!seller || !name || !price || !available_quantity) {
-    return res.status(400).json({ error: "Missing required fields" });
-  }
-
   try {
-    // Ensure the seller exists
-    const sellerExists = await Seller.findById(seller);
-    if (!sellerExists) {
-      return res.status(400).json({ error: "Seller not found" });
+    const {
+      seller,
+      name,
+      description,
+      price,
+      available_quantity,
+      archived,
+    } = req.body;
+
+    // Validate required fields
+    if (!seller || !name || !price || !available_quantity) {
+      return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // Create the new product
+    // Create new product
     const newProduct = new Product({
       seller,
       name,
-      description: description || "", // Default to an empty string if not provided
+      description: description || "",
       price,
       available_quantity,
-      picture: picture || "", // Default to an empty string if not provided
-      archived: archived || false, // Default to false if not provided
+      archived: archived === 'true',
     });
 
-    // Save the product to the database
+    // Save the product
     const savedProduct = await newProduct.save();
 
-    // Return the saved product
-    res.status(201).json(savedProduct);
+    // Handle image uploads if any
+    if (req.files && req.files.length > 0) {
+      const imagePromises = req.files.map(async (file) => {
+        const productImage = new ProductImage({
+          product: savedProduct._id,
+          filename: file.filename
+        });
+        return await productImage.save();
+      });
+
+      await Promise.all(imagePromises);
+    }
+
+    // Fetch the product with images
+    const productWithImages = await Product.findById(savedProduct._id);
+    const images = await ProductImage.find({ product: savedProduct._id });
+
+    res.status(201).json({
+      ...productWithImages.toObject(),
+      images
+    });
   } catch (error) {
     console.error("Error creating product:", error);
     res.status(500).json({ error: error.message });

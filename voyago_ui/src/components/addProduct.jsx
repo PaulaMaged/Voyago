@@ -45,18 +45,19 @@ const AddProduct = ({ fetchProducts }) => {
       const sellerId = localStorage.getItem('roleId');
       const formData = new FormData();
       
-      Object.keys(productData).forEach(key => {
-        formData.append(key, productData[key]);
-      });
+      formData.append('seller', sellerId);
+      formData.append('name', productData.name);
+      formData.append('description', productData.description);
+      formData.append('price', productData.price);
+      formData.append('available_quantity', productData.available_quantity);
+      formData.append('archived', false);
       
       images.forEach(image => {
         formData.append('images', image);
       });
-      
-      formData.append('seller', sellerId);
 
-      await axios.post(
-        'http://localhost:8000/api/seller/add-product',
+      const response = await axios.post(
+        'http://localhost:8000/api/seller/create-product',
         formData,
         {
           headers: {
@@ -65,9 +66,11 @@ const AddProduct = ({ fetchProducts }) => {
         }
       );
 
-      fetchProducts();
-      setIsFormOpen(false);
-      resetForm();
+      if (response.status === 201) {
+        fetchProducts();
+        setIsFormOpen(false);
+        resetForm();
+      }
     } catch (error) {
       setError(error.response?.data?.message || 'Error adding product');
     } finally {
