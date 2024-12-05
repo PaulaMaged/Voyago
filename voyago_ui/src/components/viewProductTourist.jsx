@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import currencyConversions from "../helpers/currencyConversions";
 import "./viewProductTourist.css";
+import { FaStar, FaStarHalf, FaRegStar } from 'react-icons/fa';
 
 export default function ViewProductTourist() {
   const [products, setProducts] = useState([]);
@@ -11,7 +12,6 @@ export default function ViewProductTourist() {
   const [sortRating, setSortRating] = useState("none");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [orderQuantities, setOrderQuantities] = useState({});
   const [walletBalance, setWalletBalance] = useState(0);
 
   useEffect(() => {
@@ -80,58 +80,6 @@ export default function ViewProductTourist() {
     return 0;
   });
 
-  const handleQuantityChange = (productId, quantity) => {
-    setOrderQuantities({
-      ...orderQuantities,
-      [productId]: quantity,
-    });
-  };
-
-  const handleCreateOrder = async (product) => {
-    const touristId = localStorage.getItem("roleId");
-    const quantity = orderQuantities[product._id] || 1;
-    const totalPrice = product.price * quantity;
-
-    if (walletBalance < totalPrice) {
-      alert(
-        "Insufficient balance in your wallet. Please add funds to continue."
-      );
-      return;
-    }
-
-    try {
-      const response = await axios.post(
-        "http://localhost:8000/api/product/create-order",
-        {
-          touristId,
-          productId: product._id,
-          quantity,
-          arrival_date: new Date(),
-          arrival_location: null,
-          description: `Order for ${product.name}`,
-        }
-      );
-
-      if (response.status === 201) {
-        const { order, tourist } = response.data;
-        setWalletBalance(tourist.wallet);
-        alert(
-          `Order created successfully! Total price: ${currencyConversions
-            .convertFromDB(totalPrice)
-            .toFixed(2)} ${localStorage.getItem("currency")}`
-        );
-        fetchProducts(); // Refresh the product list
-      }
-    } catch (error) {
-      console.error("Error creating order:", error);
-      if (error.response) {
-        alert(`Failed to create order: ${error.response.data.message}`);
-      } else {
-        alert("Failed to create order. Please try again.");
-      }
-    }
-  };
-
   const addToWishlist = async (productId) => {
     try {
       const touristId = localStorage.getItem("roleId");
@@ -145,6 +93,24 @@ export default function ViewProductTourist() {
     } catch (err) {
       alert(err.response?.data?.message || "Failed to add product to wishlist");
     }
+  };
+
+  const RatingStars = ({ rating }) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+
+    for (let i = 0; i < 5; i++) {
+      if (i < fullStars) {
+        stars.push(<FaStar key={i} className="text-yellow-400" />);
+      } else if (i === fullStars && hasHalfStar) {
+        stars.push(<FaStarHalf key={i} className="text-yellow-400" />);
+      } else {
+        stars.push(<FaRegStar key={i} className="text-yellow-400" />);
+      }
+    }
+
+    return <div className="flex gap-1">{stars}</div>;
   };
 
   if (loading) return <div className="loading">Loading products...</div>;
@@ -193,133 +159,120 @@ export default function ViewProductTourist() {
       </div>
 
       {sortedProducts.length > 0 ? (
-        <div className="product-grid">
+        <div className="product-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr">
           {sortedProducts.map((product) => (
-            <div key={product._id} className="product-card">
-              <img
-                src={
-                  product.images && 
-                  Array.isArray(product.images) && 
-                  product.images.length > 0
-                    ? `http://localhost:8000/${product.images[0].image_url}`
-                    : "https://via.placeholder.com/200"
-                }
-                alt={product.name}
-                className="product-image"
-                onError={(e) => {
-                  console.log('Image failed to load:', e.target.src);
-                  console.log('Product images:', product.images);
-                  e.target.src = "https://via.placeholder.com/200";
-                }}
-              />
-              <div className="product-details">
-                <h2 className="product-name">{product.name}</h2>
-                <p className="product-description">{product.description}</p>
-                <p className="product-price">
-                  {currencyConversions.formatPrice(product.price)}
-                </p>
-                <p className="product-availability">
-                  Available: {product.available_quantity}
-                </p>
-                <p className="product-seller">
-                  Seller: {product.seller.store_name || "Unknown Seller"}
-                </p>
-                <p className="product-rating">
-                  Rating: {product.rating.toFixed(1)} stars
-                </p>
-                <p className="product-reviews">
-                  Reviews: {product.reviews.length}
-                </p>
-                {product.reviews.length > 0 && (
-                  <div className="product-reviews-section">
-                    <h3 className="reviews-title">Recent Reviews:</h3>
-                    <ul className="reviews-list">
-                      {product.reviews.slice(0, 3).map((review) => (
-                        <li key={review._id} className="review-item">
-                          <span className="reviewer-name">
-                            {review.reviewer && review.reviewer.user
-                              ? review.reviewer.user.username
-                              : "Anonymous"}
-                            :
-                          </span>{" "}
-                          {review.comment}
-                        </li>
-                      ))}
-                    </ul>
+            <div key={product._id} className="product-card group h-[600px] flex flex-col">
+              <div className="relative w-full h-[240px] overflow-hidden">
+                <img
+                  src={
+                    product.images && 
+                    Array.isArray(product.images) && 
+                    product.images.length > 0
+                      ? `http://localhost:8000/${product.images[0].image_url}`
+                      : "https://via.placeholder.com/200"
+                  }
+                  alt={product.name}
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  onError={(e) => {
+                    e.target.src = "https://via.placeholder.com/200";
+                  }}
+                />
+              </div>
+              
+              <div className="flex flex-col flex-grow p-4">
+                <div className="flex-grow">
+                  <h2 className="product-name text-xl font-bold mb-2 line-clamp-1">{product.name}</h2>
+                  <p className="product-description text-gray-600 mb-3 line-clamp-2">{product.description}</p>
+                  <p className="product-price text-2xl font-bold text-accent mb-3">
+                    {currencyConversions.formatPrice(product.price)}
+                  </p>
+                  
+                  <div className="flex items-center gap-2 mb-3">
+                    <RatingStars rating={product.rating} />
+                    <span className="text-sm text-gray-600">({product.reviews.length})</span>
                   </div>
-                )}
-                <div className="order-section">
-                  <label>Quantity:</label>
-                  <input
-                    type="number"
-                    min="1"
-                    max={product.available_quantity}
-                    value={orderQuantities[product._id] || 1}
-                    onChange={(e) =>
-                      handleQuantityChange(
-                        product._id,
-                        parseInt(e.target.value)
-                      )
-                    }
-                    className="quantity-input"
-                  />
+
+                  {/* Hidden details section */}
+                  <div className="overflow-hidden transition-all duration-300 max-h-0 opacity-0 group-hover:max-h-[200px] group-hover:opacity-100">
+                    <div className="flex flex-col gap-2 text-sm text-gray-600 p-3 bg-gray-50 rounded-lg">
+                      <div className="flex justify-between">
+                        <span className="font-medium">Available:</span>
+                        <span>{product.available_quantity}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium">Seller:</span>
+                        <span className="truncate ml-2">{product.seller.store_name || "Unknown Seller"}</span>
+                      </div>
+                      
+                      {product.reviews.length > 0 && (
+                        <div className="mt-2 border-t border-gray-200 pt-2">
+                          <h3 className="font-medium mb-1">Recent Reviews:</h3>
+                          <ul className="space-y-1">
+                            {product.reviews.slice(0, 1).map((review) => (
+                              <li key={review._id} className="text-sm line-clamp-2">
+                                <span className="font-medium">
+                                  {review.reviewer && review.reviewer.user
+                                    ? review.reviewer.user.username
+                                    : "Anonymous"}
+                                </span>
+                                : {review.comment}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action buttons in a fixed position at the bottom */}
+                <div className="mt-auto pt-4 space-y-2">
                   <button
-                    onClick={() => handleCreateOrder(product)}
-                    className="order-button"
+                    onClick={() => addToWishlist(product._id)}
+                    className="wishlist-button w-full py-2 px-4 rounded-lg bg-accent text-white font-semibold
+                               transform transition-all duration-300 hover:-translate-y-1 hover:shadow-lg
+                               relative overflow-hidden group/btn"
                   >
-                    Order
+                    <span className="relative z-10">Add to Wishlist</span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-accent to-accentLight 
+                                  transform scale-x-0 group-hover/btn:scale-x-100 
+                                  transition-transform duration-300 origin-left">
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      const touristId = localStorage.getItem("roleId");
+                      if (!touristId) {
+                        alert("Please log in to add items to your cart");
+                        return;
+                      }
+                      
+                      axios.post(
+                        `http://localhost:8000/api/cart/${touristId}/${product._id}`,
+                        { quantity: 1 }
+                      )
+                      .then(() => {
+                        alert("Product added to cart successfully!");
+                      })
+                      .catch((err) => {
+                        alert(err.response?.data?.message || "Failed to add product to cart");
+                      });
+                    }}
+                    className="cart-button w-full py-2 px-4 rounded-lg bg-primary text-white font-semibold
+                               transform transition-all duration-300 hover:-translate-y-1 hover:shadow-lg
+                               relative overflow-hidden group/btn"
+                  >
+                    <span className="relative z-10 flex items-center justify-center gap-2">
+                      <i className="fas fa-shopping-cart"></i>
+                      Add to Cart
+                    </span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary to-primaryLight 
+                                  transform scale-x-0 group-hover/btn:scale-x-100 
+                                  transition-transform duration-300 origin-left">
+                    </div>
                   </button>
                 </div>
-                <button
-                  onClick={() => addToWishlist(product._id)}
-                  className="wishlist-button"
-                  style={{
-                    backgroundColor: '#ff69b4',
-                    color: 'white',
-                    border: 'none',
-                    padding: '8px 15px',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    marginTop: '10px'
-                  }}
-                >
-                  Add to Wishlist
-                </button>
-                <button
-                  onClick={() => {
-                    const touristId = localStorage.getItem("roleId");
-                    if (!touristId) {
-                      alert("Please log in to add items to your cart");
-                      return;
-                    }
-                    
-                    const quantity = orderQuantities[product._id] || 1;
-                    
-                    axios.post(
-                      `http://localhost:8000/api/cart/${touristId}/${product._id}`,
-                      { quantity }
-                    )
-                    .then(() => {
-                      alert("Product added to cart successfully!");
-                    })
-                    .catch((err) => {
-                      alert(err.response?.data?.message || "Failed to add product to cart");
-                    });
-                  }}
-                  className="cart-button"
-                  style={{
-                    backgroundColor: '#4CAF50',
-                    color: 'white',
-                    border: 'none',
-                    padding: '8px 15px',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    marginTop: '10px',
-                    marginLeft: '10px'
-                  }}
-                >
-                  <i className="fas fa-shopping-cart"></i> Add to Cart
-                </button>
               </div>
             </div>
           ))}
