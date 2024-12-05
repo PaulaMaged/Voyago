@@ -53,7 +53,7 @@ export default function ViewProductTourist() {
   };
 
   const calculateAverageRating = (reviews) => {
-    if (reviews.length === 0) return 0;
+    if (!reviews || reviews.length === 0) return 0;
     const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
     return sum / reviews.length;
   };
@@ -189,7 +189,9 @@ export default function ViewProductTourist() {
                   
                   <div className="flex items-center gap-2 mb-3">
                     <RatingStars rating={product.rating} />
-                    <span className="text-sm text-gray-600">({product.reviews.length})</span>
+                    <span className="text-sm text-gray-600">
+                      ({product.reviews && Array.isArray(product.reviews) ? product.reviews.length : 0})
+                    </span>
                   </div>
 
                   {/* Hidden details section */}
