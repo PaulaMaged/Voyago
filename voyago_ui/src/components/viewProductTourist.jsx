@@ -197,9 +197,20 @@ export default function ViewProductTourist() {
           {sortedProducts.map((product) => (
             <div key={product._id} className="product-card">
               <img
-                src={product.picture || "/placeholder.svg?height=200&width=200"}
+                src={
+                  product.images && 
+                  Array.isArray(product.images) && 
+                  product.images.length > 0
+                    ? `http://localhost:8000/${product.images[0].image_url}`
+                    : "https://via.placeholder.com/200"
+                }
                 alt={product.name}
                 className="product-image"
+                onError={(e) => {
+                  console.log('Image failed to load:', e.target.src);
+                  console.log('Product images:', product.images);
+                  e.target.src = "https://via.placeholder.com/200";
+                }}
               />
               <div className="product-details">
                 <h2 className="product-name">{product.name}</h2>

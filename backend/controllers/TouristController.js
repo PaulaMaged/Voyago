@@ -1051,7 +1051,7 @@ const getUpcomingBookings = async (req, res) => {
     const touristId = req.params.touristId;
     const currentDate = new Date();
 
-    // Get upcoming activity bookings
+    // Get upcoming activity bookings with proper population
     const activityBookings = await ActivityBooking.find({
       tourist: touristId,
       active: true,
@@ -1059,10 +1059,11 @@ const getUpcomingBookings = async (req, res) => {
     })
     .populate({
       path: 'activity',
+      match: { start_time: { $gt: currentDate } },
       select: 'title description start_time duration price location booking_open flag_inapproperiate'
     });
 
-    // Get upcoming itinerary bookings
+    // Get upcoming itinerary bookings with proper population
     const itineraryBookings = await ItineraryBooking.find({
       tourist: touristId,
       active: true,
@@ -1070,27 +1071,19 @@ const getUpcomingBookings = async (req, res) => {
     })
     .populate({
       path: 'itinerary',
+      match: { start_date: { $gt: currentDate } },
       select: 'name description start_date end_date price location activities tour_guide'
     });
 
-    // Filter after population
-    const upcomingActivities = activityBookings.filter(booking => 
-      booking.activity && 
-      new Date(booking.activity.start_time) > currentDate &&
-      booking.activity.booking_open &&
-      !booking.activity.flag_inapproperiate
-    );
+    // Filter out any bookings where the populated activity/itinerary is null
+    const upcomingActivities = activityBookings.filter(booking => booking.activity !== null);
+    const upcomingItineraries = itineraryBookings.filter(booking => booking.itinerary !== null);
 
-    const upcomingItineraries = itineraryBookings.filter(booking => 
-      booking.itinerary && 
-      new Date(booking.itinerary.start_date) > currentDate
-    );
-
-    // Debug logs
-    console.log('Raw Activity Bookings:', JSON.stringify(activityBookings, null, 2));
-    console.log('Raw Itinerary Bookings:', JSON.stringify(itineraryBookings, null, 2));
-    console.log('Filtered Activities:', JSON.stringify(upcomingActivities, null, 2));
-    console.log('Filtered Itineraries:', JSON.stringify(upcomingItineraries, null, 2));
+    // Log for debugging
+    console.log('Tourist ID:', touristId);
+    console.log('Current Date:', currentDate);
+    console.log('Activity Bookings:', JSON.stringify(activityBookings, null, 2));
+    console.log('Itinerary Bookings:', JSON.stringify(itineraryBookings, null, 2));
 
     res.status(200).json({
       activities: upcomingActivities,

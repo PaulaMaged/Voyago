@@ -1,12 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { FaStar } from "react-icons/fa";
 import axios from "axios";
+import "./CreateReview.css";
+import { useTheme } from '../context/ThemeContext';
 
 const CreateReview = () => {
   const [rating, setRating] = useState(0);
+  const [hover, setHover] = useState(0);
   const [comment, setComment] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
+  const { theme } = useTheme();
 
   let reviewee;
   let entityName;
@@ -52,34 +57,58 @@ const CreateReview = () => {
   };
 
   return (
-    <div className="createReview">
-      <h2 className="review-header">{displayName} Feedback</h2>
-      <form className="review-form" onSubmit={handleSubmit}>
-        <label>
-          Rating:
-          <input
-            type="number"
-            min="1"
-            max="5"
-            required
-            value={rating}
-            onChange={(e) => setRating(e.target.value)}
-          />
-        </label>
+    <div className={`review-container ${theme}`}>
+      <div className="review-card">
+        <h2 className="review-title">{displayName} Feedback</h2>
+        <form className="review-form" onSubmit={handleSubmit}>
+          <div className="rating-container">
+            <label>Rating:</label>
+            <div className="star-rating">
+              {[...Array(5)].map((_, index) => {
+                const ratingValue = index + 1;
+                return (
+                  <FaStar
+                    key={index}
+                    className="star"
+                    color={ratingValue <= (hover || rating) ? "#ffc107" : theme === 'dark' ? '#666' : '#e4e5e9'}
+                    size={32}
+                    onClick={() => setRating(ratingValue)}
+                    onMouseEnter={() => setHover(ratingValue)}
+                    onMouseLeave={() => setHover(rating)}
+                  />
+                );
+              })}
+            </div>
+          </div>
 
-        <label>
-          {" "}
-          comment:
-          <textarea
-            rows="4"
-            cols="50"
-            required
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-          />
-        </label>
-        <button>Submit</button>
-      </form>
+          <div className="comment-container">
+            <label>Comment:</label>
+            <textarea
+              required
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder="Share your experience..."
+              className={theme}
+            />
+          </div>
+
+          <div className="button-container">
+            <button 
+              type="button" 
+              className={`cancel-btn ${theme}`} 
+              onClick={() => navigate(-1)}
+            >
+              Cancel
+            </button>
+            <button 
+              type="submit" 
+              className={`submit-btn ${theme}`}
+            >
+              Submit Review
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

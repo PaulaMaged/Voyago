@@ -58,7 +58,7 @@ router.get("/get-all-seller-products/:sellerId",SellerController.getAllProductsB
 router.get("/get-product/:productId", SellerController.getProduct);
 
 // Update Product by ID
-router.put("/update-product/:productId", SellerController.updateProduct);
+router.put("/update-product/:productId", upload.array('images'), SellerController.updateProduct);
 
 // Delete Product by ID
 router.delete("/delete-product/:productId", SellerController.deleteProduct);

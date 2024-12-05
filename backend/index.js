@@ -19,6 +19,8 @@ import CartRoutes from "./routes/CartRoutes.js";
 import OrderRoutes from "./routes/orderRoutes.js";
 import wishlistRoutes from './routes/WishlistRoutes.js';
 import locationRoutes from './routes/LocationRoutes.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -207,7 +209,11 @@ let tokenExpiration = null;
 //   }
 // });
 // Routes
-app.use('/uploads', express.static('uploads'));
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use("/api/advertiser", AdvertiserRoutes);
 app.use("/api/tourist", TouristRoutes);
 app.use("/api/public", PublicRoutes);

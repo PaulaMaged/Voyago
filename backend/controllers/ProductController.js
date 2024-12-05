@@ -6,6 +6,7 @@ import User from "../models/User.js"
 import Notification from "../models/Notification.js"
 import Tourist from "../models/Tourist.js";
 import { updateTouristData } from "./TouristController.js";
+import ProductImage from "../models/ProductImage.js";
 
 /**
  * Retrieves sales and quantity data for all products in the database.
@@ -171,60 +172,35 @@ const unarchiveProduct = async (req, res) => {
  */
 const uploadProductImage = async (req, res) => {
   try {
-    // Check if a file was provided
     if (!req.file) {
-      // If no file was provided, return a 400 error
-      res.status(400).send({ error: "No image file provided" });
-      return;
+      return res.status(400).json({ error: "No image file provided" });
     }
 
-    // Get the product ID from the request parameters
+    console.log('Debug - File received:', req.file); // Debug log
+
     const productId = req.params.productId;
-
-    // Check if a product ID was provided
-    if (!productId) {
-      // If no product ID was provided, return a 400 error
-      res.status(400).send({ error: "Product ID is required" });
-      return;
-    }
-
-    // Retrieve the product from the database
     const product = await Product.findById(productId);
 
-    // Check if the product exists
     if (!product) {
-      // If the product does not exist, return a 404 error
-      res.status(404).send({ error: "Product not found" });
-      return;
+      return res.status(404).json({ error: "Product not found" });
     }
 
-    // Set the product picture to the uploaded file name
-    product.picture = req.file.filename;
+    // Create new product image
+    const productImage = new ProductImage({
+      product: productId,
+      filename: req.file.filename
+    });
 
-    try {
-      // Save the updated product
-      await product.save();
+    await productImage.save();
+    console.log('Debug - Saved image:', productImage); // Debug log
 
-      // Return a success message
-      res.status(200).send({ message: "Image uploaded successfully" });
-    } catch (error) {
-      // If a validation error occurs, return a 400 error
-      if (error.name === "ValidationError") {
-        res.status(400).send({ error: "Invalid image filename" });
-      } else {
-        // Log any other errors that occur during execution
-        console.error(error);
-
-        // Return a 500 error if an error occurs
-        res.status(500).send({ error: "Failed to save product" });
-      }
-    }
+    res.status(200).json({ 
+      message: "Image uploaded successfully",
+      image: productImage
+    });
   } catch (error) {
-    // Log any errors that occur during execution
-    console.error(error);
-
-    // Return a 500 error if an error occurs
-    res.status(500).send({ error: "Failed to upload image" });
+    console.error('Error uploading product image:', error);
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -285,9 +261,25 @@ const createProduct = async (req, res) => {
 
 const getProductById = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
-    if (!product) return res.status(404).json({ message: "Product not found" });
-    res.json(product);
+    const product = await Product.findById(req.params.id)
+      .populate('seller')
+      .populate('reviews')
+      .lean();
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    // Get images for the product, sorted by creation date
+    const images = await ProductImage.find({ product: product._id })
+      .sort({ created_at: -1 }); // Sort by creation date, newest first
+    
+    const productWithImages = {
+      ...product,
+      images: images
+    };
+
+    res.json(productWithImages);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -295,10 +287,22 @@ const getProductById = async (req, res) => {
 
 const getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find().populate(
-      "seller".populate("reviews")
-    );
-    res.json(products);
+    const products = await Product.find()
+      .populate('seller')
+      .populate('reviews')
+      .lean();
+
+    // Get images for each product, sorted by creation date
+    const productsWithImages = await Promise.all(products.map(async (product) => {
+      const images = await ProductImage.find({ product: product._id })
+        .sort({ created_at: -1 }); // Sort by creation date, newest first
+      return {
+        ...product,
+        images: images
+      };
+    }));
+
+    res.json(productsWithImages);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

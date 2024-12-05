@@ -45,93 +45,97 @@ import WishlistPage from "./pages/WishlistPage";
 import Checkout from './components/Checkout';
 import AddAddress from "./components/AddAddress";
 import OrderConfirmation from "./components/OrderConfirmation";
+import { ThemeProvider } from './context/ThemeContext';
+
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route index element={<Home />}></Route>
-        <Route path="/home" element={<Home />}></Route>
-        <Route path="/signUp" element={<SignUpAll />}></Route>
-        <Route path="/login" element={<Login />}></Route>
-        {/* <Route path="/Change" element={<ChangePassword />}></Route> */}
-        <Route path="/nav" element={<NavigationPage />}></Route>
-        <Route
-          path="/Tourist_Dashboard"
-          element={<TouristDashboard />}
-        ></Route>
-        <Route path="/Admin_Dashboard" element={<AdminDash />}></Route>
-        <Route
-          path="/addTourismGovenor"
-          element={<AddTourismGovenor />}
-        ></Route>
-        <Route path="/order-confirmation" element={<OrderConfirmation />}></Route>
-        <Route path="/addAdmin" element={<AddAdmin />}></Route>
-        <Route path="/hotelBooking" element={<HotelSearch />}></Route>
-        <Route path="/FlightSearch" element={<FlightSearch />}></Route>
-        <Route path="/FlightBooking" element={<FlightBooking />}></Route>
+    <ThemeProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route index element={<Home />}></Route>
+          <Route path="/home" element={<Home />}></Route>
+          <Route path="/signUp" element={<SignUpAll />}></Route>
+          <Route path="/login" element={<Login />}></Route>
+          {/* <Route path="/Change" element={<ChangePassword />}></Route> */}
+          <Route path="/nav" element={<NavigationPage />}></Route>
+          <Route
+            path="/Tourist_Dashboard"
+            element={<TouristDashboard />}
+          ></Route>
+          <Route path="/Admin_Dashboard" element={<AdminDash />}></Route>
+          <Route
+            path="/addTourismGovenor"
+            element={<AddTourismGovenor />}
+          ></Route>
+          <Route path="/order-confirmation" element={<OrderConfirmation />}></Route>
+          <Route path="/addAdmin" element={<AddAdmin />}></Route>
+          <Route path="/hotelBooking" element={<HotelSearch />}></Route>
+          <Route path="/FlightSearch" element={<FlightSearch />}></Route>
+          <Route path="/FlightBooking" element={<FlightBooking />}></Route>
 
-        <Route
-          path="/ViewAdvertiserProfile"
-          element={<ViewAdvertiserProfile />}
-        ></Route>
-        <Route
-          path="ViewTourGuideProfile"
-          element={<ViewTourGuideProfile />}
-        ></Route>
-        <Route
-          path="/ViewSellerProfile"
-          element={<ViewSellerProfile />}
-        ></Route>
+          <Route
+            path="/ViewAdvertiserProfile"
+            element={<ViewAdvertiserProfile />}
+          ></Route>
+          <Route
+            path="ViewTourGuideProfile"
+            element={<ViewTourGuideProfile />}
+          ></Route>
+          <Route
+            path="/ViewSellerProfile"
+            element={<ViewSellerProfile />}
+          ></Route>
 
-        {/* <Route path="/ViewTourist" element={<ViewTouristProfile />}></Route> */}
+          {/* <Route path="/ViewTourist" element={<ViewTouristProfile />}></Route> */}
 
-        <Route path="/viewActivityAdv" element={<ViewActivityAdv />}></Route>
-        <Route
-          path="/viewActivityGuest"
-          element={<ViewActivityGuest />}
-        ></Route>
-        <Route path="/advSales" element={<AdvSales />}></Route>
+          <Route path="/viewActivityAdv" element={<ViewActivityAdv />}></Route>
+          <Route
+            path="/viewActivityGuest"
+            element={<ViewActivityGuest />}
+          ></Route>
+          <Route path="/advSales" element={<AdvSales />}></Route>
 
-        <Route
-          path="/viewItineraryGuest"
-          element={<ViewItineraryGuest />}
-        ></Route>
-        <Route
-          path="/viewItineraryGuide"
-          element={<ViewItineraryGuide />}
-        ></Route>
-        <Route path="/guideSales" element={<GuideSales />}></Route>
+          <Route
+            path="/viewItineraryGuest"
+            element={<ViewItineraryGuest />}
+          ></Route>
+          <Route
+            path="/viewItineraryGuide"
+            element={<ViewItineraryGuide />}
+          ></Route>
+          <Route path="/guideSales" element={<GuideSales />}></Route>
 
 
-        <Route path="/viewLandmarks" element={<ViewLandmarks />}></Route>
-        <Route path="/GovernorLandmarks" element={<GovernorLandmarks />}></Route>
+          <Route path="/viewLandmarks" element={<ViewLandmarks />}></Route>
+          <Route path="/GovernorLandmarks" element={<GovernorLandmarks />}></Route>
 
-        <Route
-          path="/viewProductAdmin"
-          element={<ViewProductAdmin />}
-        ></Route>
-        <Route
-          path="/viewProductSeller"
-          element={<ViewProductSeller />}
-        ></Route>
-        <Route
-          path="/viewProductTourist"
-          element={<ViewProductTourist />}
-        ></Route>
-        <Route path="/editProduct" element={<EditProduct />}></Route>
-        <Route path="/sellerSales" element={<SellerSales />}></Route>
+          <Route
+            path="/viewProductAdmin"
+            element={<ViewProductAdmin />}
+          ></Route>
+          <Route
+            path="/viewProductSeller"
+            element={<ViewProductSeller />}
+          ></Route>
+          <Route
+            path="/viewProductTourist"
+            element={<ViewProductTourist />}
+          ></Route>
+          <Route path="/editProduct" element={<EditProduct />}></Route>
+          <Route path="/sellerSales" element={<SellerSales />}></Route>
 
-        <Route path="/crudCategory" element={<CrudCategory />}></Route>
-        <Route path="createReview" element={<CreateReview />} />
-        <Route path="/bookmarks" element={<Bookmarks />} />
-        <Route path="/notifications" element={<Notifications />} />
-        <Route path="/checkout" element={<Checkout />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/wishlist" element={<WishlistPage />} />
-        <Route path="/checkout" element={<Checkout />} />
-        <Route path="/add-address" element={<AddAddress />} />
-      </Routes>
-    </BrowserRouter>
+          <Route path="/crudCategory" element={<CrudCategory />}></Route>
+          <Route path="createReview" element={<CreateReview />} />
+          <Route path="/bookmarks" element={<Bookmarks />} />
+          <Route path="/notifications" element={<Notifications />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/wishlist" element={<WishlistPage />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/add-address" element={<AddAddress />} />
+        </Routes>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }
 
