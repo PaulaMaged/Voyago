@@ -14,6 +14,22 @@ import Product from "../models/Product.js"; // Added
 import Complain from "../models/Complaint.js";
 import Notification from "../models/Notification.js";
 import Bookmark from "../models/Bookmark.js";
+import multer from 'multer';
+import path from 'path';
+import TouristImage from '../models/TouristImage.js';
+
+// Set up multer storage
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/');
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ storage: storage });
+
 /**
  * Create a new tourist.
  * @param {Object} req - Express request object.
@@ -1158,6 +1174,61 @@ const getTouristNotifications = async (req, res) => {
   }
 };
 
+const getTouristProfilePicture = async (req, res) => {
+  try {
+    const touristId = req.params.touristId;
+    const touristImage = await TouristImage.findOne({ tourist: touristId });
+    
+    if (!touristImage) {
+      return res.status(404).json({ message: "No profile picture found" });
+    }
+
+    res.status(200).json({ image_url: touristImage.image_url });
+  } catch (error) {
+    console.error("Error getting profile picture:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const uploadProfilePicture = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    const touristId = req.params.touristId;
+    const tourist = await Tourist.findById(touristId);
+
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    // Check if tourist already has an image
+    let touristImage = await TouristImage.findOne({ tourist: touristId });
+
+    if (touristImage) {
+      // Update existing image
+      touristImage.image_url = req.file.filename;
+      await touristImage.save();
+    } else {
+      // Create new image record
+      touristImage = new TouristImage({
+        tourist: touristId,
+        image_url: req.file.filename
+      });
+      await touristImage.save();
+    }
+
+    res.status(200).json({ 
+      message: "Profile picture uploaded successfully",
+      image_url: req.file.filename 
+    });
+  } catch (error) {
+    console.error("Error uploading profile picture:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 // Export the controllers
 export default {
   createTourist,
@@ -1190,4 +1261,6 @@ export default {
   getUpcomingBookings,
   getBookingHistory,
   getTouristNotifications,
+  uploadProfilePicture,
+  getTouristProfilePicture
 };
