@@ -46,6 +46,7 @@ import Checkout from './components/Checkout';
 import AddAddress from "./components/AddAddress";
 import OrderConfirmation from "./components/OrderConfirmation";
 import { ThemeProvider } from './context/ThemeContext';
+import SellerDashboard from './components/Seller_Dashboard/Seller_dash';
 
 function App() {
   return (
@@ -133,7 +134,7 @@ function App() {
           <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/add-address" element={<AddAddress />} />
-        </Routes>
+          <Route path="/seller-dashboard" element={<SellerDashboard />} />        </Routes>
       </BrowserRouter>
     </ThemeProvider>
   );

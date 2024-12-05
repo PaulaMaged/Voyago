@@ -159,6 +159,7 @@ import {
   FaChevronUp,
   FaBell,
   FaShoppingCart,
+  FaBookmark,
 } from "react-icons/fa";
 import React, { useState, useEffect } from "react";
 import Profile from "../Profiles/Tourist_profile";
@@ -215,6 +216,18 @@ export default function TouristDashboard() {
       );
     }
 
+    if (activeSection === "loyalty") {
+      return (
+        <div className="dashboard-container">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="col-span-1 md:col-span-2 lg:col-span-1">
+              <LoyaltySystem userId={userId} touristId={touristId} />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     switch (activeSection) {
       case "profile":
         return <Profile userId={userId} touristId={touristId} />;
@@ -265,6 +278,9 @@ export default function TouristDashboard() {
       { key: "products", label: "View Products", icon: <FaProductHunt /> },
       { key: "purchasedProducts", label: "View Purchased Products", icon: <FaProductHunt /> },
     ],
+    rewards: [
+      { key: "loyalty", label: "Loyalty Points", icon: <FaStar /> },
+    ],
     notifications: [
       { key: "notifications", label: "Notifications", icon: <FaBell /> },
     ],
@@ -272,7 +288,7 @@ export default function TouristDashboard() {
       { key: "cart", label: "Shopping Cart", icon: <FaShoppingCart /> },
     ],
     bookmarks: [
-      { key: "bookmarks", label: "Bookmarks", icon: <FaStar /> },
+      { key: "bookmarks", label: "Bookmarks", icon: <FaBookmark /> },
     ],
   };
 

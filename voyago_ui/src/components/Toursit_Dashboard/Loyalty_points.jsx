@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { AlertCircle } from "lucide-react";
 import axios from "axios";
-import propTypes from "prop-types";
 
 const badges = [
   { level: 1, name: "Bronze", icon: "🥉" },
@@ -9,25 +8,35 @@ const badges = [
   { level: 3, name: "Gold", icon: "🥇" },
 ];
 
-const get_tourist_loyalty = async (setLoyaltyData, touristId) => {
-  try {
-    const response = await axios.get(
-      `http://localhost:8000/api/tourist/get-tourist/${touristId}`
-    );
-    if (response.status === 200) {
-      const data = response.data;
-      setLoyaltyData(data);
-    }
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-export default function LoyaltySystem({ touristId }) {
-  const [loyaltyData, setLoyaltyData] = useState([]);
+export default function LoyaltySystem() {
+  const [loyaltyData, setLoyaltyData] = useState({
+    points: 0,
+    wallet: 0,
+    level: 1,
+    maxLevel: 3
+  });
   const [isRedeeming, setIsRedeeming] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
-  get_tourist_loyalty(setLoyaltyData, touristId);
+  const touristId = localStorage.getItem("roleId");
+
+  useEffect(() => {
+    if (touristId) {
+      fetchLoyaltyData();
+    }
+  }, [touristId]);
+
+  const fetchLoyaltyData = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8000/api/tourist/get-tourist/${touristId}`
+      );
+      if (response.status === 200) {
+        setLoyaltyData(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching loyalty data:", error);
+    }
+  };
 
   const currentBadge = (() => {
     if (loyaltyData.points <= 100000) {
@@ -299,7 +308,3 @@ export default function LoyaltySystem({ touristId }) {
     </div>
   );
 }
-
-LoyaltySystem.propTypes = {
-  touristId: propTypes.string.isRequired,
-};

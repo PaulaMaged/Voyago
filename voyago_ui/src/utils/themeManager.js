@@ -19,6 +19,26 @@ const themes = {
     selection: 'rgba(52, 152, 219, 0.2)',
     selectionText: '#2c3e50'
   },
+  rainyDrops: {
+    primary: '#6C5CE7',         // Soft Purple
+    primaryDark: '#4C3F91',     // Darker Purple
+    primaryLight: '#A29BFE',    // Lighter Purple
+    secondary: '#00CEC9',       // Bright Teal
+    secondaryDark: '#008B8B',   // Darker Teal
+    secondaryLight: '#81ECEC',  // Lighter Teal
+    accent: '#74B9FF',          // Light Blue
+    accentDark: '#0984E3',      // Darker Blue
+    accentLight: '#D6EAF8',     // Very Light Blue
+    background: '#2D3436',      // Dark Gray
+    surface: '#353B48',         // Slightly Lighter Gray
+    textPrimary: '#DFF9FB',     // Very Light Gray
+    textSecondary: '#B2BEC3',   // Medium Gray
+    shadow: 'rgba(0, 0, 0, 0.3)', // Darker Shadow
+    hover: 'rgba(108, 92, 231, 0.2)', // Semi-transparent Soft Purple
+    hoverActive: 'rgba(76, 63, 145, 0.3)', // Semi-transparent Darker Purple
+    selection: 'rgba(0, 206, 201, 0.2)', // Semi-transparent Bright Teal
+    selectionText: '#DFF9FB'    // Very Light Gray
+  },
   spring: {
     primary: '#FF9EAA',
     primaryDark: '#FF8B99',
