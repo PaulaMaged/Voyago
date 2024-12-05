@@ -207,6 +207,7 @@ let tokenExpiration = null;
 //   }
 // });
 // Routes
+app.use('/uploads', express.static('uploads'));
 app.use("/api/advertiser", AdvertiserRoutes);
 app.use("/api/tourist", TouristRoutes);
 app.use("/api/public", PublicRoutes);
