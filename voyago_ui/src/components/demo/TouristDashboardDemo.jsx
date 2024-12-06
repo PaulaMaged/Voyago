@@ -2,10 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ViewProductTourist from '../viewProductTourist';
 import ViewPurchasedProducts from '../viewPurchasedProducts';
+import ViewActivityGuest from '../viewActivityGuest';
+import ViewItineraryGuest from '../viewItineraryGuest';
 import '../viewProductTourist.css';
 import '../viewPurchasedProducts.css';
 import './TouristDashboardDemo.css';
-import { FaArrowRight, FaLightbulb, FaInfoCircle, FaShoppingCart, FaHeart, FaHistory, FaStar } from 'react-icons/fa';
+import { 
+  FaArrowRight, 
+  FaLightbulb, 
+  FaInfoCircle, 
+  FaShoppingCart, 
+  FaHeart, 
+  FaHistory, 
+  FaStar,
+  FaMapMarkedAlt,
+  FaRoute,
+  FaCalendarAlt
+} from 'react-icons/fa';
 
 export default function TouristDashboardDemo() {
   const navigate = useNavigate();
@@ -27,6 +40,20 @@ export default function TouristDashboardDemo() {
       tip: "Try using filters and search to find specific items",
       icon: <FaHeart className="text-2xl text-accent" />,
       section: 'products'
+    },
+    {
+      title: "Explore Activities",
+      content: "Discover exciting local activities and events.",
+      tip: "Browse through various activities offered by local guides",
+      icon: <FaMapMarkedAlt className="text-2xl text-green-500" />,
+      section: 'activities'
+    },
+    {
+      title: "Plan Your Journey",
+      content: "Check out curated itineraries for your trip.",
+      tip: "View detailed itineraries created by experienced guides",
+      icon: <FaRoute className="text-2xl text-blue-500" />,
+      section: 'itineraries'
     },
     {
       title: "Purchase History",
@@ -86,13 +113,13 @@ export default function TouristDashboardDemo() {
         return <ViewProductTourist />;
       case 'purchases':
         return <ViewPurchasedProducts />;
+      case 'activities':
+        return <ViewActivityGuest />;
+      case 'itineraries':
+        return <ViewItineraryGuest />;
       default:
         return <ViewProductTourist />;
     }
-  };
-
-  const handleFinishTutorial = () => {
-    navigate('/Tourist_Dashboard');
   };
 
   return (
@@ -148,14 +175,56 @@ export default function TouristDashboardDemo() {
             onClick={() => handleSectionChange('products')}
             className={`demo-button ${activeSection === 'products' ? 'active' : ''}`}
           >
-            Available Products
+            <FaShoppingCart className="mr-2" />
+            Products
+          </button>
+          <button 
+            onClick={() => handleSectionChange('activities')}
+            className={`demo-button ${activeSection === 'activities' ? 'active' : ''}`}
+          >
+            <FaMapMarkedAlt className="mr-2" />
+            Activities
+          </button>
+          <button 
+            onClick={() => handleSectionChange('itineraries')}
+            className={`demo-button ${activeSection === 'itineraries' ? 'active' : ''}`}
+          >
+            <FaRoute className="mr-2" />
+            Itineraries
           </button>
           <button 
             onClick={() => handleSectionChange('purchases')}
             className={`demo-button ${activeSection === 'purchases' ? 'active' : ''}`}
           >
+            <FaHistory className="mr-2" />
             My Purchases
           </button>
+        </div>
+
+        {/* Feature Preview */}
+        <div className="feature-preview mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="feature-card">
+              <FaShoppingCart className="text-3xl mb-2 text-primary" />
+              <h3 className="font-semibold">Local Products</h3>
+              <p className="text-sm text-gray-600">Discover unique local items</p>
+            </div>
+            <div className="feature-card">
+              <FaMapMarkedAlt className="text-3xl mb-2 text-green-500" />
+              <h3 className="font-semibold">Activities</h3>
+              <p className="text-sm text-gray-600">Join exciting local events</p>
+            </div>
+            <div className="feature-card">
+              <FaRoute className="text-3xl mb-2 text-blue-500" />
+              <h3 className="font-semibold">Itineraries</h3>
+              <p className="text-sm text-gray-600">Follow curated travel plans</p>
+            </div>
+            <div className="feature-card">
+              <FaCalendarAlt className="text-3xl mb-2 text-accent" />
+              <h3 className="font-semibold">Bookings</h3>
+              <p className="text-sm text-gray-600">Manage your reservations</p>
+            </div>
+          </div>
         </div>
 
         {/* Main Content */}
@@ -183,7 +252,7 @@ export default function TouristDashboardDemo() {
             </button>
           ) : (
             <button
-              onClick={handleFinishTutorial}
+              onClick={() => navigate('/Tourist_Dashboard')}
               className="nav-button primary"
             >
               Go to Dashboard
