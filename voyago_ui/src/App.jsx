@@ -47,6 +47,7 @@ import AddAddress from "./components/AddAddress";
 import OrderConfirmation from "./components/OrderConfirmation";
 import { ThemeProvider } from './context/ThemeContext';
 import SellerDashboard from './components/Seller_Dashboard/Seller_dash';
+import TouristDashboardDemo from './components/demo/TouristDashboardDemo';
 
 function App() {
   return (
@@ -134,7 +135,9 @@ function App() {
           <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/add-address" element={<AddAddress />} />
-          <Route path="/seller-dashboard" element={<SellerDashboard />} />        </Routes>
+          <Route path="/seller-dashboard" element={<SellerDashboard />} />
+          <Route path="/demo/tourist-dashboard" element={<TouristDashboardDemo />} />
+        </Routes>
       </BrowserRouter>
     </ThemeProvider>
   );
