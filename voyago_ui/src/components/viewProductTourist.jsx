@@ -3,7 +3,7 @@ import axios from "axios";
 import currencyConversions from "../helpers/currencyConversions";
 import "./viewProductTourist.css";
 import { FaStar, FaStarHalf, FaRegStar } from 'react-icons/fa';
-
+import "./product.css";
 export default function ViewProductTourist() {
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");

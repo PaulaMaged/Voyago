@@ -170,9 +170,9 @@ export default function ViewPurchasedProducts() {
           <p className="text-secondary italic">You haven't made any purchases yet</p>
         </div>
       ) : (
-        <div className="product-grid">
+        <div className="purchased-grid">
           {purchasedProducts.map((product) => (
-            <div key={product._id} className="product-card">
+            <div key={product._id} className="purchased-card">
               <img
                 src={
                   product.product.images?.length > 0
@@ -180,31 +180,31 @@ export default function ViewPurchasedProducts() {
                     : product.product.picture || "/placeholder.svg?height=200&width=200"
                 }
                 alt={product.product.name}
-                className="product-image"
+                className="purchased-image"
                 onError={(e) => {
                   e.target.onerror = null;
                   e.target.src = "/placeholder.svg?height=200&width=200";
                 }}
               />
-              <div className="product-details">
-                <h2 className="product-name">{product.product.name}</h2>
-                <p className="product-description">{product.product.description}</p>
-                <p className="product-price">
+              <div className="purchased-details">
+                <h2 className="purchased-name">{product.product.name}</h2>
+                <p className="purchased-description">{product.product.description}</p>
+                <p className="purchased-price">
                   {currencyConversions.formatPrice(product.product.price)}
                 </p>
-                <p className="product-seller">
+                <p className="purchased-seller">
                   Seller: {product.product.seller?.store_name || "Unknown Seller"}
                 </p>
-                <p className="product-rating">
+                <p className="purchased-rating">
                   Rating: {calculateAverageRating(product.product.reviews).toFixed(1)} stars
                 </p>
-                <p className="product-reviews">
+                <p className="purchased-reviews">
                   Reviews: {product.product.reviews?.length || 0}
                 </p>
-                <p className="product-order-date">
+                <p className="purchased-order-date">
                   Arrival Date: {new Date(product.arrival_date).toLocaleDateString()}
                 </p>
-                <p className="product-quantity">Quantity: {product.quantity}</p>
+                <p className="purchased-quantity">Quantity: {product.quantity}</p>
                 {product.userReview ? (
                   <div className="user-review">
                     <p>Your review: {product.userReview.rating} stars</p>
