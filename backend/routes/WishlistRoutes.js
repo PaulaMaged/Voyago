@@ -12,28 +12,35 @@ router.get("/:touristId", async (req, res) => {
     let wishlist = await Wishlist.findOne({ tourist: touristId })
       .populate({
         path: 'items.itemId',
-        populate: {
-          path: 'seller',
-          model: 'Seller'
-        }
+        populate: [
+          {
+            path: 'seller',
+            model: 'Seller'
+          },
+          {
+            path: 'images',
+            model: 'ProductImage',
+            options: { sort: { created_at: -1 } }
+          }
+        ]
       });
       
     if (!wishlist) {
       return res.json({ items: [] });
     }
 
-    // Transform the data to make it easier to use in frontend
+    // Transform the data to include images
     const transformedItems = wishlist.items.map(item => ({
       _id: item.itemId._id,
       name: item.itemId.name,
       description: item.itemId.description,
       price: item.itemId.price,
-      picture: item.itemId.picture,
+      picture: item.itemId.images?.[0]?.image_url || item.itemId.picture,
+      images: item.itemId.images,
       seller: item.itemId.seller,
       itemType: item.itemType
     }));
 
-    // Only send the transformed items array
     res.json({ items: transformedItems });
   } catch (error) {
     res.status(500).json({ message: "Server Error", error: error.message });

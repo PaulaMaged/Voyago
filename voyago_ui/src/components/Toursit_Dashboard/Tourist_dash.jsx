@@ -160,6 +160,7 @@ import {
   FaBell,
   FaShoppingCart,
   FaBookmark,
+  FaHeart,
 } from "react-icons/fa";
 import React, { useState, useEffect } from "react";
 import Profile from "../Profiles/Tourist_profile";
@@ -177,6 +178,7 @@ import Cart from '../Cart';
 import ThemeSwitcher from '../ThemeSwitcher';
 import { applyTheme } from '../../utils/themeManager';
 import Bookmarks from '../../pages/Bookmarks';
+import WishlistPage from '../../pages/WishlistPage';
 
 export default function TouristDashboard() {
   const [activeSection, setActiveSection] = useState("profile");
@@ -255,6 +257,8 @@ export default function TouristDashboard() {
         return <Cart />;
       case "bookmarks":
         return <Bookmarks />;
+      case "wishlist":
+        return <WishlistPage />;
       default:
         return <Profile userId={userId} touristId={touristId} />;
     }
@@ -289,6 +293,9 @@ export default function TouristDashboard() {
     ],
     bookmarks: [
       { key: "bookmarks", label: "Bookmarks", icon: <FaBookmark /> },
+    ],
+    wishlist: [
+      { key: "wishlist", label: "Wishlist", icon: <FaHeart /> },
     ],
   };
 
