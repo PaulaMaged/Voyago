@@ -48,6 +48,7 @@ import OrderConfirmation from "./components/OrderConfirmation";
 import { ThemeProvider } from './context/ThemeContext';
 import SellerDashboard from './components/Seller_Dashboard/Seller_dash';
 import TouristDashboardDemo from './components/demo/TouristDashboardDemo';
+import SellerDashboardDemo from './components/demo/SellerDashboardDemo';
 
 function App() {
   return (
@@ -137,6 +138,7 @@ function App() {
           <Route path="/add-address" element={<AddAddress />} />
           <Route path="/seller-dashboard" element={<SellerDashboard />} />
           <Route path="/demo/tourist-dashboard" element={<TouristDashboardDemo />} />
+          <Route path="/demo/seller-dashboard" element={<SellerDashboardDemo />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

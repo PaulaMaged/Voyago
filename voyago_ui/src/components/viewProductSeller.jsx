@@ -49,12 +49,20 @@ const ViewProducts = () => {
 
   const toggleArchiveStatus = async (productId, currentStatus) => {
     try {
-      await axios.put(`http://localhost:8000/api/seller/update-product/${productId}`, {
-        archived: !currentStatus
-      });
-      fetchProducts(); // Refresh the product list
+      const endpoint = currentStatus 
+        ? `http://localhost:8000/api/product/unarchive-product/${productId}/unarchive`
+        : `http://localhost:8000/api/product/archive-product/${productId}`;
+
+      const response = await axios.patch(endpoint);
+      
+      if (response.status === 200) {
+        fetchProducts(); // Refresh the product list
+      } else {
+        throw new Error('Failed to update archive status');
+      }
     } catch (error) {
       console.error('Error toggling archive status:', error);
+      alert('Failed to update product archive status');
     }
   };
 

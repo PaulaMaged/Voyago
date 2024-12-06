@@ -14,7 +14,8 @@ import {
   FaCog,
   FaUserCog,
   FaClipboardList,
-  FaChartLine
+  FaChartLine,
+  FaFlask
 } from "react-icons/fa";
 import React, { useState, useEffect } from "react";
 import Profile from "../Profiles/Seller_profile";
@@ -24,6 +25,7 @@ import ViewProducts from "../viewProductSeller";
 import SellerSales from "../Sales/SellerSales";
 import ThemeSwitcher from '../ThemeSwitcher';
 import { applyTheme } from '../../utils/themeManager';
+import { Link } from 'react-router-dom';
 
 export default function SellerDashboard() {
   const [activeSection, setActiveSection] = useState("profile");
@@ -203,6 +205,28 @@ export default function SellerDashboard() {
               </div>
             ))}
           </nav>
+
+          <Link
+            to="/demo/seller-dashboard"
+            className={`
+              flex items-center gap-3 px-4 py-3 
+              text-[var(--textPrimary)] hover:bg-[var(--primaryLight)] 
+              transition-all duration-300 group
+              ${isHovered ? 'justify-between' : 'justify-center'}
+            `}
+          >
+            <span className="flex items-center gap-2 min-w-0">
+              <FaFlask className="text-xl group-hover:scale-110 transition-transform" />
+              {isHovered && (
+                <span className="font-medium truncate">Try Demo</span>
+              )}
+            </span>
+            {isHovered && (
+              <span className="bg-[var(--accent)] text-[var(--surface)] text-xs px-2 py-1 rounded-full shrink-0">
+                New
+              </span>
+            )}
+          </Link>
 
           <div className="mt-auto pb-4">
             <ThemeSwitcher 
