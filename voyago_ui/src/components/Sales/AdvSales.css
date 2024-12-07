@@ -36,7 +36,7 @@
     min-width: 200px;
   }
   
-  .filter-button {
+  .filter-controls .filter-button {
     padding: 8px 16px;
     background-color: #007bff;
     color: white;
@@ -44,10 +44,12 @@
     border-radius: 4px;
     cursor: pointer;
     height: 35px;
+    transition: all 0.3s ease;
   }
   
-  .filter-button:hover {
+  .filter-controls .filter-button:hover {
     background-color: #0056b3;
+    color: white;
   }
   
   .revenue-summary {
@@ -62,6 +64,10 @@
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
   
   .summary-card.total {
@@ -80,10 +86,11 @@
     margin: 0;
     font-size: 16px;
     color: #666;
+    margin-bottom: 10px;
   }
   
   .summary-card p {
-    margin: 10px 0 0;
+    margin: 0;
     font-size: 24px;
     font-weight: bold;
     color: #333;

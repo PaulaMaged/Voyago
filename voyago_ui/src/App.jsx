@@ -17,10 +17,14 @@ import AddAdmin from "./components/Admin_/add_admin";
 import ViewActivityAdv from "./components/viewActivityAdv";
 import ViewActivityGuest from "./components/viewActivityGuest";
 import AdvSales from "./components/Sales/AdvSales"
+import AdvTouristStats from './components/Statistics/AdvTouristStats';
+import AdvertiserNotifications from "./components/Notifications/AdvertiserNotifications";
 
 import ViewItineraryGuest from "./components/viewItineraryGuest";
 import ViewItineraryGuide from "./components/ViewItineraryGuide";
 import GuideSales from "./components/Sales/GuideSales"
+import GuideTouristStats from './components/Statistics/GuideTouristStats';
+import TourGuideNotifications from "./components/Notifications/TourGuideNotifications";
 
 import GovernorLandmarks from "./components/GovernorLandmarks";
 import ViewLandmarks from "./components/viewLandmarks";
@@ -95,7 +99,8 @@ function App() {
             element={<ViewActivityGuest />}
           ></Route>
           <Route path="/advSales" element={<AdvSales />}></Route>
-
+          <Route path="/advTouristStats" element={<AdvTouristStats />}></Route>
+          <Route path="/advertiserNotifications" element={<AdvertiserNotifications />}></Route>
           <Route
             path="/viewItineraryGuest"
             element={<ViewItineraryGuest />}
@@ -105,7 +110,8 @@ function App() {
             element={<ViewItineraryGuide />}
           ></Route>
           <Route path="/guideSales" element={<GuideSales />}></Route>
-
+          <Route path="/guideTouristStats" element={<GuideTouristStats />}></Route>
+          <Route path="/tourGuideNotifications" element={<TourGuideNotifications />}></Route>
 
           <Route path="/viewLandmarks" element={<ViewLandmarks />}></Route>
           <Route path="/GovernorLandmarks" element={<GovernorLandmarks />}></Route>

@@ -6,16 +6,11 @@ const GuideSales = () => {
   const [salesData, setSalesData] = useState({
     totalRevenue: 0,
     itineraries: [],
+    allItineraries: [],
     filteredRevenue: 0,
     itineraryStats: {},
     totalBookings: 0,
     totalAttendees: 0
-  });
-
-  const [touristData, setTouristData] = useState({
-    totalTourists: 0,
-    itineraryStats: {},
-    monthlyTourists: 0
   });
 
   const [loading, setLoading] = useState(true);
@@ -31,7 +26,7 @@ const GuideSales = () => {
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'Usd'
+      currency: 'USD'
     }).format(amount || 0);
   };
 
@@ -42,13 +37,16 @@ const GuideSales = () => {
       return;
     }
     fetchSalesData();
-    fetchTouristData();
   }, [tourGuideId]);
 
   const fetchSalesData = async () => {
     try {
       setLoading(true);
       let endpoint = `http://localhost:8000/api/tour-guide/sales-report/${tourGuideId}`;
+      
+       // Fetch all itineraries first
+       const allItinerariesResponse = await axios.get(`http://localhost:8000/api/tour-guide/get-tourguide-itineraries/${tourGuideId}`);
+       const allItineraries = allItinerariesResponse.data || [];
       
       if (filter.date) {
         endpoint = `${endpoint}/by-date?date=${filter.date}`;
@@ -59,10 +57,10 @@ const GuideSales = () => {
       }
 
       const response = await axios.get(endpoint);
-      
       setSalesData({
         totalRevenue: response.data.totalRevenue || 0,
         itineraries: response.data.itineraries || [],
+        allItineraries: allItineraries,
         itineraryStats: response.data.itineraryStats || {},
         totalBookings: Object.values(response.data.itineraryStats || {})
           .reduce((sum, stat) => sum + (stat.bookingCount || 0), 0),
@@ -77,25 +75,9 @@ const GuideSales = () => {
     }
   };
 
-  const fetchTouristData = async () => {
-    try {
-      let endpoint = `http://localhost:8000/api/tour-guide/tourist-count/${tourGuideId}`;
-      
-      if (filter.month) {
-        endpoint = `${endpoint}/by-month?month=${filter.month}`;
-      }
-
-      const response = await axios.get(endpoint);
-      setTouristData(response.data);
-    } catch (err) {
-      console.error('Error fetching tourist data:', err);
-    }
-  };
-
   const handleFilterChange = (type, value) => {
     setFilter(prev => {
       const newFilter = { ...prev, [type]: value };
-      
       if (type === 'date') {
         newFilter.month = '';
         newFilter.selectedItinerary = '';
@@ -106,16 +88,12 @@ const GuideSales = () => {
         newFilter.date = '';
         newFilter.month = '';
       }
-      
       return newFilter;
     });
   };
 
-  const handleApplyFilter = async () => {
-    await Promise.all([
-      fetchSalesData(),
-      fetchTouristData()
-    ]);
+  const handleApplyFilter = () => {
+    fetchSalesData();
   };
 
   if (loading) {
@@ -128,7 +106,7 @@ const GuideSales = () => {
 
   return (
     <div className="sales-report">
-      <h1 className="title">My Sales Report</h1>
+      <h1 className="title">Sales Report</h1>
 
       <div className="filter-controls">
         <div className="filter-item">
@@ -160,7 +138,7 @@ const GuideSales = () => {
             onChange={(e) => handleFilterChange('selectedItinerary', e.target.value)}
           >
             <option value="">All Itineraries</option>
-            {salesData.itineraries.map(itinerary => (
+            {salesData.allItineraries.map(itinerary => (
               <option key={itinerary._id} value={itinerary._id}>
                 {itinerary.name}
               </option>
@@ -177,7 +155,6 @@ const GuideSales = () => {
           <h2>Total Revenue</h2>
           <p>{formatCurrency(salesData.totalRevenue)}</p>
         </div>
-
         <div className="summary-card filtered">
           <h2>Total Bookings</h2>
           <p>{salesData.totalBookings}</p>
@@ -216,50 +193,6 @@ const GuideSales = () => {
                     <td>{stats.bookingCount}</td>
                     <td>{stats.attendedCount}</td>
                     <td>{formatCurrency(stats.totalSales)}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div className="tourist-statistics">
-        <h2>Tourist Statistics</h2>
-        <div className="stats-cards">
-          <div className="stat-card">
-            <h3>Total Tourists</h3>
-            <p>{touristData.totalTourists}</p>
-          </div>
-          {filter.month && (
-            <div className="stat-card">
-              <h3>Tourists This Month</h3>
-              <p>{touristData.totalTourists}</p>
-            </div>
-          )}
-        </div>
-
-        <div className="tourist-details">
-          <h3>Breakdown by {filter.month ? 'Month' : 'All Time'}</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Itinerary Name</th>
-                <th>Total Bookings</th>
-                <th>Attended Tourists</th>
-              </tr>
-            </thead>
-            <tbody>
-              {salesData.itineraries.map((itinerary) => {
-                const stats = touristData.itineraryStats[itinerary._id] || {
-                  totalBookings: 0,
-                  attendedCount: 0
-                };
-                return (
-                  <tr key={itinerary._id}>
-                    <td>{itinerary.name}</td>
-                    <td>{stats.totalBookings}</td>
-                    <td>{stats.attendedCount}</td>
                   </tr>
                 );
               })}

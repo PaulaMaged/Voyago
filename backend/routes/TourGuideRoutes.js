@@ -117,4 +117,5 @@ router.get("/sales-report/:tourGuideId/by-itinerary/:itineraryId", TourGuideCont
 //tourist count 
 router.get("/tourist-count/:tourGuideId", TourGuideController.getTotalTourists);
 router.get("/tourist-count/:tourGuideId/by-month", TourGuideController.getTouristsByMonth);
+router.get('/notifications/:tourGuideId', TourGuideController.getTourGuideNotifications);
 export default router;

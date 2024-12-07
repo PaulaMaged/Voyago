@@ -2,6 +2,7 @@ import Activity from "../models/Activity.js";
 import Advertiser from "../models/Advertiser.js";
 import ActivityBooking from "../models/ActivityBooking.js";
 import User from "../models/User.js";
+import Notification from "../models/Notification.js";
 
 //create Advertiser
 const createAdvertiser = async (req, res) => {
@@ -500,7 +501,49 @@ const getAllNotificationsByType = async (req, res) => {
   }
 };
 
+const getAdvertiserNotifications = async (req, res)=> {
+  try {
+    const advertiserId = req.params.advertiserId;
+    const advertiser = await Advertiser.findById(advertiserId).populate('user');
+    
+    if (!advertiser) {
+      return res.status(404).json({ message: "Advertiser not found" });
+    }
 
+    const notifications = await Notification.find({ 
+      recipient: advertiser.user._id,
+      type: "ACTIVITY_FLAG"
+    }).sort({ created_at: -1 });
+
+    res.status(200).json(notifications);
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const createActivityFlagNotification = async (advertiserId, activityTitle) => {
+  try {
+    const advertiser = await Advertiser.findById(advertiserId).populate('user');
+    if (!advertiser) {
+      throw new Error('Advertiser not found');
+    }
+
+    const notification = new Notification({
+      recipient: advertiser.user._id,
+      type: "ACTIVITY_FLAG",
+      message: `Your activity "${activityTitle}" has been flagged as inappropriate by an admin.`,
+      is_read: false,
+      created_at: new Date()
+    });
+
+    await notification.save();
+    return notification;
+  } catch (error) {
+    console.error('Error creating activity flag notification:', error);
+    throw error;
+  }
+};
 
 //export all functions
 export default {
@@ -523,4 +566,6 @@ export default {
   getAllRevenueByMonth,
   getTotalTourists,
   getTouristsByMonth,
+  getAdvertiserNotifications,
+  createActivityFlagNotification,
 };

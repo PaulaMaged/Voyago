@@ -8,7 +8,7 @@ const notificationSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ["WARNING", "NORMAL", "PROMOTION"],
+    enum: ["WARNING", "NORMAL", "PROMOTION", 'ACTIVITY_FLAG', 'ITINERARY_FLAG'],
     default: "NORMAL",
   },
   message: {

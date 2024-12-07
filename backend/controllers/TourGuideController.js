@@ -3,6 +3,7 @@ import ItineraryBooking from "../models/ItineraryBooking.js";
 import TourGuide from "../models/TourGuide.js";
 import ActivityReview from "../models/ActivityReview.js";
 import TourGuideReview from "../models/TourGuideReview.js";
+import Notification from "../models/Notification.js";
 //create Tour Guide
 const createTourGuide = async (req, res) => {
   try {
@@ -574,6 +575,50 @@ const getAllNotificationsByType = async (req, res) => {
   }
 };
 
+const getTourGuideNotifications = async (req, res) => {
+  try {
+    const tourGuideId = req.params.tourGuideId;
+    const tourGuide = await TourGuide.findById(tourGuideId).populate('user');
+    
+    if (!tourGuide) {
+      return res.status(404).json({ message: "Tour Guide not found" });
+    }
+
+    const notifications = await Notification.find({ 
+      recipient: tourGuide.user._id,
+      type: "ITINERARY_FLAG"
+    }).sort({ created_at: -1 });
+
+    res.status(200).json(notifications);
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const createItineraryFlagNotification = async (tourGuideId, itineraryName) => {
+  try {
+    const tourGuide = await TourGuide.findById(tourGuideId).populate('user');
+    if (!tourGuide) {
+      throw new Error('Tour Guide not found');
+    }
+
+    const notification = new Notification({
+      recipient: tourGuide.user._id,
+      type: "ITINERARY_FLAG",
+      message: `Your itinerary "${itineraryName}" has been flagged as inappropriate by an admin.`,
+      is_read: false,
+      created_at: new Date()
+    });
+
+    await notification.save();
+    return notification;
+  } catch (error) {
+    console.error('Error creating itinerary flag notification:', error);
+    throw error;
+  }
+};
+
 export default {
   createItinerary,
   getItinerary,
@@ -595,5 +640,6 @@ export default {
   getAllRevenueByItinerary,
   getTotalTourists,
   getTouristsByMonth,
-
+  getTourGuideNotifications,
+  createItineraryFlagNotification,
 };

@@ -15,6 +15,8 @@ import Order from "../models/Order.js";
 import { startOfMonth, endOfMonth } from "date-fns";
 import { sendNotificationEmail } from "./mailer.js";
 import nodemailer from "nodemailer";
+import AdvertiserController from "./AdvertiserController.js";
+import TourGuideController from "./TourGuideController.js";
 
 //create Activity Category
 const createActivityCategory = async (req, res) => {
@@ -525,7 +527,6 @@ const getAdminByUserId = async (req, res) => {
 const setInapproperiateFlagActivity = async (req, res) => {
   try {
     const { activityId } = req.params;
-
     const activity = await Activity.findByIdAndUpdate(activityId, req.body, {
       new: true,
       runValidators: true,
@@ -533,6 +534,14 @@ const setInapproperiateFlagActivity = async (req, res) => {
 
     if (!activity) {
       return res.status(404).json({ message: "activity not found" });
+    }
+
+    // Send flag notification first
+    if (req.body.flag_inapproperiate) {
+      await AdvertiserController.createActivityFlagNotification(
+        activity.advertiser._id,
+        activity.title
+      );
     }
 
     if (req.body.flag_inapproperiate == false)
@@ -548,7 +557,7 @@ const setInapproperiateFlagActivity = async (req, res) => {
 
     await ActivityBooking.deleteMany({ activity: activityId });
 
-    // Create a notification for the advertiser
+    // Create a warning notification about the cancellations
     const notification = new Notification({
       recipient: activity.advertiser.user, // Access user ID after populating
       message: `Your activity "${activity.title}" has been flagged as inappropriate and removed. All bookings have been cancelled and tourists refunded.`,
@@ -580,6 +589,14 @@ const setInapproperiateFlagItinerary = async (req, res) => {
       return res.status(404).json({ message: "itinerary not found" });
     }
 
+    // Send flag notification first
+    if (req.body.flag_inapproperiate) {
+      await TourGuideController.createItineraryFlagNotification(
+        itinerary.tour_guide._id,
+        itinerary.name
+      );
+    }
+
     if (req.body.flag_inapproperiate == false)
       return res.status(200).json(itinerary);
 
@@ -593,10 +610,10 @@ const setInapproperiateFlagItinerary = async (req, res) => {
 
     await ItineraryBooking.deleteMany({ itinerary: itineraryId });
 
-    // Create a notification for the tour guide
+    // Create a warning notification about the cancellations
     const notification = new Notification({
-      recipient: itinerary.tour_guide.user, // Access user ID after populating
-      message: `Your itinerary "${itinerary.title}" has been flagged as inappropriate and removed. All bookings have been cancelled and tourists refunded.`,
+      recipient: itinerary.tour_guide.user,
+      message: `Your itinerary "${itinerary.name}" has been flagged as inappropriate and removed. All bookings have been cancelled and tourists refunded.`,
       type: "WARNING",
     });
     await notification.save();

@@ -13,12 +13,6 @@ const AdvSales = () => {
     totalAttendees: 0
   });
 
-  const [touristData, setTouristData] = useState({
-    totalTourists: 0,
-    activityStats: {},
-    monthlyTourists: 0
-  });
-
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState({
@@ -43,7 +37,6 @@ const AdvSales = () => {
       return;
     }
     fetchSalesData();
-    fetchTouristData();
   }, [advertiserId]);
 
   const fetchSalesData = async () => {
@@ -51,13 +44,11 @@ const AdvSales = () => {
       setLoading(true);
       let endpoint = `http://localhost:8000/api/advertiser/sales-report/${advertiserId}`;
       
-      // First, get all activities for the dropdown if we don't have them
-      let allActivities = salesData.allActivities;
-      if (allActivities.length === 0) {
-        const allActivitiesResponse = await axios.get(`http://localhost:8000/api/advertiser/sales-report/${advertiserId}`);
-        allActivities = allActivitiesResponse.data.activities || [];
-      }
+      // Fetch all activities first
+      const allActivitiesResponse = await axios.get(`http://localhost:8000/api/advertiser/get-advertiser-activities/${advertiserId}`);
+      const allActivities = allActivitiesResponse.data || [];
       
+      // Then fetch filtered data
       if (filter.date) {
         endpoint = `${endpoint}/by-date?date=${filter.date}`;
       } else if (filter.month) {
@@ -65,11 +56,12 @@ const AdvSales = () => {
       } else if (filter.selectedActivity) {
         endpoint = `${endpoint}/by-activity/${filter.selectedActivity}`;
       }
-
+  
       const response = await axios.get(endpoint);
       
+      // Handle different response structures based on filter type
       if (filter.selectedActivity) {
-        // Find the selected activity from our full list
+        // Structure for activity-specific data
         const selectedActivity = allActivities.find(act => act._id === filter.selectedActivity);
         
         setSalesData({
@@ -87,6 +79,7 @@ const AdvSales = () => {
           totalAttendees: response.data.attendedCount || 0
         });
       } else {
+        // Structure for general data
         setSalesData({
           totalRevenue: response.data.totalRevenue || 0,
           activities: response.data.activities || [],
@@ -106,25 +99,9 @@ const AdvSales = () => {
     }
   };
 
-  const fetchTouristData = async () => {
-    try {
-      let endpoint = `http://localhost:8000/api/advertiser/tourist-count/${advertiserId}`;
-      
-      if (filter.month) {
-        endpoint = `${endpoint}/by-month?month=${filter.month}`;
-      }
-
-      const response = await axios.get(endpoint);
-      setTouristData(response.data);
-    } catch (err) {
-      console.error('Error fetching tourist data:', err);
-    }
-  };
-
   const handleFilterChange = (type, value) => {
     setFilter(prev => {
       const newFilter = { ...prev, [type]: value };
-      
       if (type === 'date') {
         newFilter.month = '';
         newFilter.selectedActivity = '';
@@ -135,16 +112,12 @@ const AdvSales = () => {
         newFilter.date = '';
         newFilter.month = '';
       }
-      
       return newFilter;
     });
   };
 
-  const handleApplyFilter = async () => {
-    await Promise.all([
-      fetchSalesData(),
-      fetchTouristData()
-    ]);
+  const handleApplyFilter = () => {
+    fetchSalesData();
   };
 
   if (loading) {
@@ -157,7 +130,7 @@ const AdvSales = () => {
 
   return (
     <div className="sales-report">
-      <h1 className="title">My Sales Report</h1>
+      <h1 className="title">Sales Report</h1>
 
       <div className="filter-controls">
         <div className="filter-item">
@@ -189,7 +162,7 @@ const AdvSales = () => {
             onChange={(e) => handleFilterChange('selectedActivity', e.target.value)}
           >
             <option value="">All Activities</option>
-            {salesData.allActivities?.map(activity => (
+            {salesData.allActivities.map(activity => (
               <option key={activity._id} value={activity._id}>
                 {activity.title}
               </option>
@@ -206,12 +179,10 @@ const AdvSales = () => {
           <h2>Total Revenue</h2>
           <p>{formatCurrency(salesData.totalRevenue)}</p>
         </div>
-
         <div className="summary-card filtered">
           <h2>Total Bookings</h2>
           <p>{salesData.totalBookings}</p>
         </div>
-
         <div className="summary-card activities">
           <h2>Total Attendees</h2>
           <p>{salesData.totalAttendees}</p>
@@ -245,50 +216,6 @@ const AdvSales = () => {
                     <td>{stats.bookingCount}</td>
                     <td>{stats.attendedCount}</td>
                     <td>{formatCurrency(stats.totalSales)}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div className="tourist-statistics">
-        <h2>Tourist Statistics</h2>
-        <div className="stats-cards">
-          <div className="stat-card">
-            <h3>Total Tourists</h3>
-            <p>{touristData.totalTourists}</p>
-          </div>
-          {filter.month && (
-            <div className="stat-card">
-              <h3>Tourists This Month</h3>
-              <p>{touristData.totalTourists}</p>
-            </div>
-          )}
-        </div>
-
-        <div className="tourist-details">
-          <h3>Breakdown by {filter.month ? 'Month' : 'All Time'}</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Activity Title</th>
-                <th>Total Bookings</th>
-                <th>Attended Tourists</th>
-              </tr>
-            </thead>
-            <tbody>
-              {salesData.activities.map((activity) => {
-                const stats = touristData.activityStats[activity._id] || {
-                  totalBookings: 0,
-                  attendedCount: 0
-                };
-                return (
-                  <tr key={activity._id}>
-                    <td>{activity.title}</td>
-                    <td>{stats.totalBookings}</td>
-                    <td>{stats.attendedCount}</td>
                   </tr>
                 );
               })}

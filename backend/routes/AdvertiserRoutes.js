@@ -92,4 +92,7 @@ router.get("/sales-report/:advertiserId/by-month", AdvertiserController.getAllRe
 
 router.get("/tourist-count/:advertiserId", AdvertiserController.getTotalTourists);
 router.get("/tourist-count/:advertiserId/by-month", AdvertiserController.getTouristsByMonth);
+
+router.get('/notifications/:advertiserId', AdvertiserController.getAdvertiserNotifications);
+
 export default router;
