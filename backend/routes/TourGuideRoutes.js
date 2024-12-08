@@ -118,4 +118,9 @@ router.get("/sales-report/:tourGuideId/by-itinerary/:itineraryId", TourGuideCont
 router.get("/tourist-count/:tourGuideId", TourGuideController.getTotalTourists);
 router.get("/tourist-count/:tourGuideId/by-month", TourGuideController.getTouristsByMonth);
 router.get('/notifications/:tourGuideId', TourGuideController.getTourGuideNotifications);
+
+// Add these new routes
+router.get('/itinerary-bookings/:tourGuideId', TourGuideController.getItineraryBookings);
+router.patch('/mark-attendance/:tourGuideId/:bookingId', TourGuideController.markAttendance);
+
 export default router;

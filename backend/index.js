@@ -22,7 +22,7 @@ import CartRoutes from "./routes/CartRoutes.js";
 import OrderRoutes from "./routes/orderRoutes.js";
 import wishlistRoutes from "./routes/WishlistRoutes.js";
 import locationRoutes from "./routes/LocationRoutes.js";
-import stripeRoutes from "./routes/StripeRoutes.js";
+// import stripeRoutes from "./routes/StripeRoutes.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -231,7 +231,7 @@ app.use("/api/cart", CartRoutes);
 app.use("/api/locations", locationRoutes);
 app.use("/api/orders", OrderRoutes);
 app.use("/api/wishlist", wishlistRoutes);
-app.use("/api/stripe", stripeRoutes);
+// app.use("/api/stripe", stripeRoutes);
 // Root route for testing
 app.get("/", (req, res) => {
   res.send("Hello World!");
