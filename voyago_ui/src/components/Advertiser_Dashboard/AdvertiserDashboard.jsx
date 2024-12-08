@@ -12,6 +12,7 @@ import {
   FaMoneyBillWave,
   FaUserCog,
   FaUserCheck,
+  FaTasks,
   FaBell,
   FaChartBar,
 } from "react-icons/fa";
@@ -58,6 +59,7 @@ export default function AdvertiserDashboard() {
     ],
     activities: [
       { key: "viewActivities", label: "View Activities", icon: <FaClipboardList /> },
+      { key: "manageActivities", label: "Manage Activities", icon: <FaTasks /> },
       { key: "attendance", label: "Activity Attendance", icon: <FaUserCheck /> },
     ],
     analytics: [

@@ -21,7 +21,7 @@ const BookmarkButton = ({ activityId }) => {
       } else {
         // Find the bookmark ID first
         const bookmarks = await axios.get(`http://localhost:8000/api/tourist/get-bookmarks/${touristId}`);
-        const bookmark = bookmarks.data.find(b => b.activity._id === activityId);
+        const bookmark = bookmarks.data.find(b => b.activity && b.activity._id === activityId);
         
         if (bookmark) {
           await axios.delete(`http://localhost:8000/api/tourist/remove-bookmark/${touristId}/${bookmark._id}`);
@@ -39,7 +39,9 @@ const BookmarkButton = ({ activityId }) => {
     const checkBookmarkStatus = async () => {
       try {
         const response = await axios.get(`http://localhost:8000/api/tourist/get-bookmarks/${touristId}`);
-        setIsBookmarked(response.data.some(bookmark => bookmark.activity._id === activityId));
+        setIsBookmarked(response.data.some(bookmark => 
+          bookmark.activity && bookmark.activity._id === activityId
+        ));
         
         // Temporarily comment out bookmark count fetch until endpoint is ready
         // const activityResponse = await axios.get(`http://localhost:8000/api/tourist/activity-bookmark-count/${activityId}`);

@@ -129,7 +129,7 @@ export default function AdminDashboard() {
         <div className="flex flex-col h-full">
           <div className={`sidebar-header mb-6 ${isHovered ? 'text-center' : 'text-center'}`}>
             {isHovered ? (
-              <h2 className="text-xl font-semibold">Admin Dashboard</h2>
+              <h2 className="text-xl font-semibold text-[var(--surface)]">Admin Dashboard</h2>
             ) : (
               <div className="text-2xl">🏷️</div>
             )}
@@ -178,11 +178,12 @@ export default function AdminDashboard() {
                           text-sm
                           ${
                             activeSection === item.key 
-                            ? 'bg-[var(--secondary)] hover:bg-[var(--secondaryLight)] active:bg-[var(--secondaryDark)]' 
-                            : 'bg-[var(--primary)] hover:bg-[var(--primaryLight)] active:bg-[var(--primaryDark)]'
+                            ? 'bg-[var(--secondary)] text-[var(--surface)] hover:bg-[var(--secondaryLight)] active:bg-[var(--secondaryDark)]' 
+                            : 'bg-[var(--primary)] text-[var(--surface)] hover:bg-[var(--primaryLight)] active:bg-[var(--primaryDark)]'
                           }
                           hover:translate-x-1
                           hover:shadow-md
+                          border-none
                         `}
                       >
                         <span className="mr-3">{item.icon}</span>
@@ -207,7 +208,7 @@ export default function AdminDashboard() {
             to="/demo/admin-dashboard"
             className={`
               flex items-center gap-3 px-4 py-3 
-              text-[var(--textPrimary)] hover:bg-[var(--primaryLight)] 
+              text-[var(--surface)] hover:bg-[var(--primaryLight)] 
               transition-all duration-300 group
               ${isHovered ? 'justify-between' : 'justify-center'}
             `}
@@ -215,7 +216,7 @@ export default function AdminDashboard() {
             <span className="flex items-center gap-2 min-w-0">
               <FaFlask className="text-xl group-hover:scale-110 transition-transform" />
               {isHovered && (
-                <span className="font-medium truncate">Try Demo</span>
+                <span className="font-medium truncate text-[var(--surface)]">Try Demo</span>
               )}
             </span>
             {isHovered && (
@@ -232,7 +233,7 @@ export default function AdminDashboard() {
         ${isHovered ? 'ml-64' : 'ml-16'}
       `}>
         <header className="mb-6">
-          <h1 className="text-3xl font-bold text-blue-900 capitalize">
+          <h1 className="text-3xl font-bold text-[var(--textPrimary)] capitalize">
             {activeSection.replace(/([A-Z])/g, ' $1').trim()}
           </h1>
         </header>

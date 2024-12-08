@@ -13,7 +13,8 @@ const Bookmarks = () => {
     const fetchBookmarks = async () => {
       try {
         const response = await axios.get(`http://localhost:8000/api/tourist/get-bookmarks/${touristId}`);
-        setBookmarks(response.data);
+        const validBookmarks = response.data.filter(bookmark => bookmark.activity !== null);
+        setBookmarks(validBookmarks);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching bookmarks:', error);
@@ -65,60 +66,32 @@ const Bookmarks = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-[60vh] text-[var(--textPrimary)]">
-        Loading bookmarks...
-      </div>
-    );
+    return <div>Loading...</div>;
   }
 
   return (
-    <div className="p-6 bg-[var(--background)] min-h-screen">
-      <h1 className="text-2xl font-bold mb-6 text-[var(--textPrimary)]">
-        My Bookmarks
-      </h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {bookmarks.map((bookmark) => (
-          <div 
-            key={bookmark._id} 
-            className="bg-[var(--surface)] rounded-lg shadow-md p-6 
-                     transition-all duration-300 hover:shadow-lg
-                     border border-[var(--border)]"
-          >
-            <h2 className="text-xl font-semibold mb-3 text-[var(--textPrimary)]">
-              {bookmark.activity.title}
-            </h2>
-            <p className="text-[var(--textSecondary)] mb-4">
-              {bookmark.activity.description}
-            </p>
-            
-            <div className="flex justify-between items-center mt-4">
-              <button
-                onClick={() => handleRemoveBookmark(bookmark._id)}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg
-                         bg-[var(--error)] text-[var(--surface)]
-                         hover:bg-[var(--errorLight)] transition-colors"
-              >
-                <FaTrash /> Remove
-              </button>
-              
-              <button
-                onClick={() => handleBookActivity(bookmark.activity._id)}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg
-                         bg-[var(--primary)] text-[var(--surface)]
-                         hover:bg-[var(--primaryLight)] transition-colors"
-              >
-                <FaShoppingCart /> Book Now
-              </button>
+    <div className="bookmarks-container">
+      <h2>My Bookmarks</h2>
+      {bookmarks.length === 0 ? (
+        <p>No bookmarks found.</p>
+      ) : (
+        <div className="bookmarks-grid">
+          {bookmarks.map((bookmark) => (
+            <div key={bookmark._id} className="bookmark-card">
+              <h3>{bookmark.activity.title}</h3>
+              <p>{bookmark.activity.description}</p>
+              <p>Price: ${bookmark.activity.price}</p>
+              <p>Date: {new Date(bookmark.activity.start_time).toLocaleDateString()}</p>
+              <div className="bookmark-actions">
+                <button onClick={() => handleBookActivity(bookmark.activity._id)}>
+                  Book Activity
+                </button>
+                <button onClick={() => handleRemoveBookmark(bookmark._id)}>
+                  Remove Bookmark
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
-      
-      {bookmarks.length === 0 && (
-        <div className="text-center text-[var(--textSecondary)] mt-8">
-          No bookmarks yet. Start exploring activities to bookmark them!
+          ))}
         </div>
       )}
     </div>

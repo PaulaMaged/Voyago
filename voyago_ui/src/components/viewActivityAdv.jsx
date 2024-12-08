@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import currencyConversions from "../helpers/currencyConversions";
 import axios from "axios";
 import { FaSearch, FaEdit, FaTrash, FaSave, FaTimes, FaPlus, FaChevronDown, 
-         FaClock, FaTag, FaDollarSign, FaCalendarAlt } from 'react-icons/fa';
+         FaClock, FaTag, FaDollarSign, FaCalendarAlt, FaLayerGroup, FaSpinner } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ViewActivityAdv() {
@@ -16,10 +16,10 @@ export default function ViewActivityAdv() {
   const [categories, setCategories] = useState([]);
   const [tags, setTags] = useState([]);
   const [editingActivity, setEditingActivity] = useState(null);
-  const [newActivity, setNewActivity] = useState({
+  const [formInputs, setFormInputs] = useState({
     title: "",
     description: "",
-    start_time: "",
+    start_time: new Date().toISOString().slice(0, 16),
     duration: 30,
     price: 0,
     category: "",
@@ -27,20 +27,39 @@ export default function ViewActivityAdv() {
     tags: [],
     booking_open: true,
   });
-  const [isFormExpanded, setIsFormExpanded] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [hoveredCard, setHoveredCard] = useState(null);
+  const [isFormExpanded, setIsFormExpanded] = useState(false);
 
   const formVariants = {
     hidden: { 
-      height: 0,
-      opacity: 0
+      opacity: 0,
+      y: -20,
+      scale: 0.95
     },
     visible: { 
-      height: "auto",
       opacity: 1,
+      y: 0,
+      scale: 1,
       transition: {
         duration: 0.3,
-        ease: "easeInOut"
+        ease: "easeOut",
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const sectionVariants = {
+    hidden: { 
+      opacity: 0,
+      x: -10
+    },
+    visible: { 
+      opacity: 1,
+      x: 0,
+      transition: {
+        duration: 0.2
       }
     }
   };
@@ -86,6 +105,12 @@ export default function ViewActivityAdv() {
           "http://localhost:8000/api/admin/get-all-activity-categories"
         );
         setCategories(response.data);
+        if (response.data.length > 0) {
+          setFormInputs(prev => ({
+            ...prev,
+            category: response.data[0]._id
+          }));
+        }
       } catch (error) {
         console.error("Error fetching categories:", error);
       }
@@ -148,10 +173,17 @@ export default function ViewActivityAdv() {
   // Handle Form Inputs
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNewActivity((prev) => ({
+    setFormInputs(prev => ({
       ...prev,
-      [name]: value,
+      [name]: value
     }));
+    // Clear error for this field when user types
+    if (formErrors[name]) {
+      setFormErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
   };
 
   // Handle Tag Selection
@@ -160,48 +192,90 @@ export default function ViewActivityAdv() {
       e.target.selectedOptions,
       (option) => option.value
     );
-    setNewActivity((prev) => ({
+    setFormInputs(prev => ({
       ...prev,
       tags: selectedOptions,
     }));
   };
 
   // Handle Create Activity
-  const handleCreateActivity = async () => {
+  const handleCreateActivity = async (activityData) => {
     try {
-      const advertiserId = localStorage.getItem("roleId");
-      const activityData = {
-        ...newActivity,
-        advertiser: advertiserId,
+      // Validate required fields before sending
+      const requiredFields = ['title', 'description', 'start_time', 'duration', 'price', 'category'];
+      const missingFields = requiredFields.filter(field => !activityData[field]);
+      
+      if (missingFields.length > 0) {
+        throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+      }
+
+      // Format the data
+      const formattedData = {
+        ...activityData,
+        price: Number(activityData.price),
+        duration: Number(activityData.duration),
+        discount: Number(activityData.discount),
+        start_time: new Date(activityData.start_time).toISOString()
       };
 
-      activityData.price = currencyConversions.convertToDB(activityData.price);
+      console.log('Sending formatted activity data:', formattedData);
+
       const response = await axios.post(
-        "http://localhost:8000/api/advertiser/create-activity",
-        activityData
+        'http://localhost:8000/api/advertiser/create-activity',
+        formattedData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            // Add auth token if required
+            // 'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          // Add timeout
+          timeout: 5000
+        }
       );
 
-      setActivities([...activities, response.data]);
-      setNewActivity({
-        title: "",
-        description: "",
-        start_time: "",
-        duration: 30,
-        price: 0,
-        category: "",
-        discount: 0,
-        tags: [],
-        booking_open: true,
-      });
+      if (response.data) {
+        console.log('Activity created successfully:', response.data);
+        setActivities(prev => [...prev, response.data]);
+        setFormInputs({
+          title: "",
+          description: "",
+          start_time: "",
+          duration: 30,
+          price: 0,
+          category: "",
+          discount: 0,
+          tags: [],
+          booking_open: true,
+        });
+        setIsFormExpanded(false);
+      }
     } catch (error) {
-      console.error("Error creating activity:", error);
+      // Detailed error logging
+      console.error('Create Activity Error:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        data: error.response?.data,
+        config: error.config,
+      });
+
+      // User-friendly error message
+      const errorMessage = error.response?.data?.message 
+        || error.message 
+        || 'Failed to create activity. Please try again.';
+      
+      alert(`Error creating activity: ${errorMessage}`);
+      
+      // Re-throw for any error boundary handling
+      throw error;
     }
   };
 
   // Handle Edit Activity
   const handleEditActivity = (activity) => {
     setEditingActivity(activity);
-    setNewActivity({
+    setFormInputs({
       ...activity,
       tags: activity.tags.map((tag) => tag._id),
     });
@@ -210,7 +284,7 @@ export default function ViewActivityAdv() {
   // Handle Update Activity
   const handleUpdateActivity = async () => {
     try {
-      const activityData = { ...newActivity };
+      const activityData = { ...formInputs };
 
       const response = await axios.put(
         `http://localhost:8000/api/advertiser/update-activity/${editingActivity._id}`,
@@ -222,7 +296,7 @@ export default function ViewActivityAdv() {
         )
       );
       setEditingActivity(null);
-      setNewActivity({
+      setFormInputs({
         title: "",
         description: "",
         start_time: "",
@@ -247,6 +321,58 @@ export default function ViewActivityAdv() {
       setActivities(activities.filter((activity) => activity._id !== id));
     } catch (error) {
       console.error("Error deleting activity:", error);
+    }
+  };
+
+  // Validate form before submission
+  const validateForm = () => {
+    const errors = {};
+    const requiredFields = ['title', 'description', 'start_time', 'price', 'category'];
+    
+    requiredFields.forEach(field => {
+      if (!formInputs[field]) {
+        errors[field] = `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
+      }
+    });
+
+    if (formInputs.price <= 0) {
+      errors.price = 'Price must be greater than 0';
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  // Update the handleSubmit function
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    if (!validateForm()) {
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      await handleCreateActivity(formInputs);
+      // Clear form after successful submission
+      setFormInputs({
+        title: "",
+        description: "",
+        start_time: new Date().toISOString().slice(0, 16),
+        duration: 30,
+        price: 0,
+        category: "",
+        discount: 0,
+        tags: [],
+        booking_open: true,
+      });
+      setFormErrors({});
+      setIsFormExpanded(false);
+    } catch (error) {
+      console.error('Form submission failed:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -330,7 +456,7 @@ export default function ViewActivityAdv() {
           </div>
         </motion.div>
 
-        {/* Collapsible Create/Edit Form */}
+        {/* Updated Form Section */}
         <motion.div 
           className="bg-[var(--foreground)] rounded-lg shadow-lg mb-8 overflow-hidden"
           initial={{ y: 20, opacity: 0 }}
@@ -368,35 +494,46 @@ export default function ViewActivityAdv() {
                       <input
                         type="text"
                         name="title"
-                        value={newActivity.title}
+                        value={formInputs.title}
                         onChange={handleInputChange}
                         placeholder="Enter activity title"
-                        className="w-full px-4 py-2 rounded-md border border-[var(--border)]
-                                 bg-[var(--background)] text-[var(--textPrimary)]
-                                 focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent
-                                 transition-all duration-200"
+                        className={`w-full px-4 py-2 rounded-md border 
+                                  ${formErrors.title ? 'border-red-500' : 'border-[var(--border)]'}
+                                  bg-[var(--background)] text-[var(--textPrimary)]
+                                  focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent
+                                  transition-all duration-200`}
                       />
+                      {formErrors.title && (
+                        <p className="text-red-500 text-sm mt-1">{formErrors.title}</p>
+                      )}
                     </FormField>
 
                     <FormField label="Start Date & Time" icon={FaCalendarAlt}>
                       <input
                         type="datetime-local"
                         name="start_time"
-                        value={newActivity.start_time}
+                        value={formInputs.start_time}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-2 rounded-md border border-[var(--border)]
-                                 bg-[var(--background)] text-[var(--textPrimary)]
-                                 focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent
-                                 transition-all duration-200"
+                        className={`w-full px-4 py-2 rounded-md border 
+                                  ${formErrors.start_time ? 'border-red-500' : 'border-[var(--border)]'}
+                                  bg-[var(--background)] text-[var(--textPrimary)]
+                                  focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent
+                                  transition-all duration-200`}
                       />
+                      {formErrors.start_time && (
+                        <p className="text-red-500 text-sm mt-1">{formErrors.start_time}</p>
+                      )}
                     </FormField>
 
                     <FormField label="Duration (minutes)" icon={FaClock}>
                       <input
                         type="number"
                         name="duration"
-                        value={newActivity.duration}
-                        onChange={handleInputChange}
+                        value={formInputs.duration}
+                        onChange={(e) => setFormInputs(prev => ({
+                          ...prev,
+                          duration: e.target.value
+                        }))}
                         placeholder="Enter duration in minutes"
                         min="0"
                         className="w-full px-4 py-2 rounded-md border border-[var(--border)]
@@ -410,8 +547,11 @@ export default function ViewActivityAdv() {
                       <input
                         type="number"
                         name="price"
-                        value={newActivity.price}
-                        onChange={handleInputChange}
+                        value={formInputs.price}
+                        onChange={(e) => setFormInputs(prev => ({
+                          ...prev,
+                          price: e.target.value
+                        }))}
                         placeholder="Enter price"
                         min="0"
                         step="0.01"
@@ -425,12 +565,13 @@ export default function ViewActivityAdv() {
                     <FormField label="Category" icon={FaTag}>
                       <select
                         name="category"
-                        value={newActivity.category}
+                        value={formInputs.category}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-2 rounded-md border border-[var(--border)]
-                                 bg-[var(--background)] text-[var(--textPrimary)]
-                                 focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent
-                                 transition-all duration-200"
+                        className={`w-full px-4 py-2 rounded-md border 
+                                  ${formErrors.category ? 'border-red-500' : 'border-[var(--border)]'}
+                                  bg-[var(--background)] text-[var(--textPrimary)]
+                                  focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent
+                                  transition-all duration-200`}
                       >
                         <option value="">Select a category</option>
                         {categories.map((category) => (
@@ -439,14 +580,20 @@ export default function ViewActivityAdv() {
                           </option>
                         ))}
                       </select>
+                      {formErrors.category && (
+                        <p className="text-red-500 text-sm mt-1">{formErrors.category}</p>
+                      )}
                     </FormField>
 
                     <FormField label="Discount (%)" icon={FaTag}>
                       <input
                         type="number"
                         name="discount"
-                        value={newActivity.discount}
-                        onChange={handleInputChange}
+                        value={formInputs.discount}
+                        onChange={(e) => setFormInputs(prev => ({
+                          ...prev,
+                          discount: e.target.value
+                        }))}
                         placeholder="Enter discount percentage"
                         min="0"
                         max="100"
@@ -461,7 +608,7 @@ export default function ViewActivityAdv() {
                       <FormField label="Description" icon={FaEdit}>
                         <textarea
                           name="description"
-                          value={newActivity.description}
+                          value={formInputs.description}
                           onChange={handleInputChange}
                           placeholder="Enter activity description"
                           rows="4"
@@ -478,7 +625,7 @@ export default function ViewActivityAdv() {
                         <select
                           multiple
                           name="tags"
-                          value={newActivity.tags}
+                          value={formInputs.tags}
                           onChange={handleTagChange}
                           className="w-full px-4 py-2 rounded-md border border-[var(--border)]
                                    bg-[var(--background)] text-[var(--textPrimary)]
@@ -503,9 +650,9 @@ export default function ViewActivityAdv() {
                           <input
                             type="checkbox"
                             name="booking_open"
-                            checked={newActivity.booking_open}
+                            checked={formInputs.booking_open}
                             onChange={(e) => 
-                              setNewActivity(prev => ({
+                              setFormInputs(prev => ({
                                 ...prev,
                                 booking_open: e.target.checked
                               }))
@@ -525,10 +672,7 @@ export default function ViewActivityAdv() {
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      onClick={() => {
-                        editingActivity ? handleUpdateActivity() : handleCreateActivity();
-                        setIsFormExpanded(false);
-                      }}
+                      onClick={handleSubmit}
                       className="flex items-center gap-2 px-6 py-2 bg-[var(--primary)]
                                hover:bg-[var(--primaryHover)] text-white rounded-md
                                transition-colors duration-200"
@@ -541,7 +685,7 @@ export default function ViewActivityAdv() {
                         whileTap={{ scale: 0.98 }}
                         onClick={() => {
                           setEditingActivity(null);
-                          setNewActivity({
+                          setFormInputs({
                             title: "",
                             description: "",
                             start_time: "",
@@ -568,82 +712,110 @@ export default function ViewActivityAdv() {
           </AnimatePresence>
         </motion.div>
 
-        {/* Activities Grid */}
+        {/* Activities Grid - New Styled Version */}
         <motion.div 
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8"
           layout
         >
           {filteredActivities.map((activity) => (
             <motion.div
               key={activity._id}
               layout
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              whileHover={{ scale: 1.02, y: -5 }}
-              onHoverStart={() => setHoveredCard(activity._id)}
-              onHoverEnd={() => setHoveredCard(null)}
-              className="bg-[var(--foreground)] p-6 rounded-lg shadow-lg
-                       transition-shadow duration-200 hover:shadow-xl"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              whileHover={{ 
+                y: -8,
+                transition: { duration: 0.2 }
+              }}
+              className="relative bg-gradient-to-br from-[var(--surface)] to-[var(--background)]
+                         rounded-2xl overflow-hidden shadow-lg border border-[var(--border)]
+                         transition-all duration-300 hover:shadow-2xl"
             >
-              <motion.h3 
-                className="text-xl font-semibold mb-4 text-[var(--textPrimary)]"
-                layout
+              {/* Activity Status Badge */}
+              <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-sm font-medium
+                            ${activity.booking_open 
+                              ? 'bg-green-100 text-green-800' 
+                              : 'bg-red-100 text-red-800'}`}
               >
-                {activity.title}
-              </motion.h3>
-              
-              <motion.div 
-                className="space-y-2 text-[var(--textSecondary)]"
-                layout
-              >
-                <p className="flex items-center gap-2">
-                  <FaCalendarAlt className="text-[var(--primary)]" />
-                  {new Date(activity.start_time).toLocaleDateString()}
+                {activity.booking_open ? 'Booking Open' : 'Closed'}
+              </div>
+
+              {/* Main Content */}
+              <div className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <h3 className="text-2xl font-bold text-[var(--textPrimary)] line-clamp-2">
+                    {activity.title}
+                  </h3>
+                </div>
+
+                {/* Info Grid */}
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="flex items-center gap-2 text-[var(--textSecondary)]">
+                    <FaCalendarAlt className="text-[var(--primary)]" />
+                    <span>{new Date(activity.start_time).toLocaleDateString()}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[var(--textSecondary)]">
+                    <FaClock className="text-[var(--primary)]" />
+                    <span>{activity.duration} mins</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[var(--textSecondary)]">
+                    <FaLayerGroup className="text-[var(--primary)]" />
+                    <span>{activity.category?.category || 'Uncategorized'}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[var(--primary)] font-semibold">
+                    <FaDollarSign />
+                    <span>{currencyConversions.formatPrice(activity.price)}</span>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <p className="text-[var(--textSecondary)] mb-6 line-clamp-3">
+                  {activity.description}
                 </p>
-                <p className="flex items-center gap-2">
-                  <FaClock className="text-[var(--primary)]" />
-                  {activity.duration} minutes
-                </p>
-                <p className="flex items-center gap-2 text-lg font-semibold text-[var(--primary)]">
-                  <FaDollarSign />
-                  {currencyConversions.formatPrice(activity.price)}
-                </p>
-                <p>
-                  <span className="font-semibold">Category:</span>{" "}
-                  {activity.category?.category}
-                </p>
-                <p>
-                  <span className="font-semibold">Tags:</span>{" "}
-                  {activity.tags.map((tag) => tag.tag_name).join(", ")}
-                </p>
-              </motion.div>
-              
-              <motion.div 
-                className="flex gap-4 mt-6"
-                layout
-              >
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => handleEditActivity(activity)}
-                  className="flex items-center gap-2 px-4 py-2 bg-[var(--primary)]
-                           hover:bg-[var(--primaryHover)] text-white rounded-md
-                           transition-colors duration-200"
-                >
-                  <FaEdit /> Edit
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => handleDeleteActivity(activity._id)}
-                  className="flex items-center gap-2 px-4 py-2 bg-red-500
-                           hover:bg-red-600 text-white rounded-md
-                           transition-colors duration-200"
-                >
-                  <FaTrash /> Delete
-                </motion.button>
-              </motion.div>
+
+                {/* Tags */}
+                {activity.tags && activity.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-6">
+                    {activity.tags.map(tag => (
+                      <span 
+                        key={tag._id}
+                        className="px-3 py-1 text-sm rounded-full bg-[var(--surface)]
+                                 text-[var(--textSecondary)] border border-[var(--border)]"
+                      >
+                        {tag.tag_name}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 mt-auto">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => handleEditActivity(activity)}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5
+                             bg-[var(--primary)] hover:bg-[var(--primaryHover)]
+                             text-white rounded-lg transition-colors duration-200"
+                  >
+                    <FaEdit className="text-sm" />
+                    <span>Edit</span>
+                  </motion.button>
+
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => handleDeleteActivity(activity._id)}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5
+                             bg-red-500 hover:bg-red-600 text-white rounded-lg
+                             transition-colors duration-200"
+                  >
+                    <FaTrash className="text-sm" />
+                    <span>Delete</span>
+                  </motion.button>
+                </div>
+              </div>
             </motion.div>
           ))}
         </motion.div>

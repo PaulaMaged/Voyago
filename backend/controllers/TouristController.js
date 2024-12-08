@@ -1132,56 +1132,61 @@ const getUpcomingBookings = async (req, res) => {
     const touristId = req.params.touristId;
     const currentDate = new Date();
 
-    // Get upcoming activity bookings with proper population
+    // Get all activity bookings first (without filters) to check what exists
+    const allActivityBookings = await ActivityBooking.find({
+      tourist: touristId
+    });
+    console.log('All activity bookings:', allActivityBookings);
+
+    // Get upcoming activity bookings with filters
     const activityBookings = await ActivityBooking.find({
       tourist: touristId,
       active: true,
-      attended: false,
+      attended: false
     }).populate({
-      path: "activity",
-      match: { start_time: { $gt: currentDate } },
-      select:
-        "title description start_time duration price location booking_open flag_inapproperiate",
+      path: 'activity',
+      match: { 
+        start_time: { $gt: currentDate },
+        booking_open: true,
+        flag_inapproperiate: false
+      },
+      select: 'title description start_time duration price location booking_open'
     });
+    
+    console.log('Filtered activity bookings:', activityBookings);
+    console.log('Activity bookings after population:', 
+      activityBookings.map(booking => ({
+        bookingId: booking._id,
+        activityData: booking.activity,
+        active: booking.active,
+        attended: booking.attended
+      }))
+    );
 
-    // Get upcoming itinerary bookings with proper population
+    // Rest of the code remains the same...
     const itineraryBookings = await ItineraryBooking.find({
       tourist: touristId,
       active: true,
-      attended: false,
+      attended: false
     }).populate({
-      path: "itinerary",
+      path: 'itinerary',
       match: { start_date: { $gt: currentDate } },
-      select:
-        "name description start_date end_date price location activities tour_guide",
+      select: 'name description start_date end_date price location activities tour_guide'
     });
 
-    // Filter out any bookings where the populated activity/itinerary is null
     const upcomingActivities = activityBookings.filter(
-      (booking) => booking.activity !== null
+      booking => booking.activity !== null
     );
     const upcomingItineraries = itineraryBookings.filter(
-      (booking) => booking.itinerary !== null
-    );
-
-    // Log for debugging
-    console.log("Tourist ID:", touristId);
-    console.log("Current Date:", currentDate);
-    console.log(
-      "Activity Bookings:",
-      JSON.stringify(activityBookings, null, 2)
-    );
-    console.log(
-      "Itinerary Bookings:",
-      JSON.stringify(itineraryBookings, null, 2)
+      booking => booking.itinerary !== null
     );
 
     res.status(200).json({
       activities: upcomingActivities,
-      itineraries: upcomingItineraries,
+      itineraries: upcomingItineraries
     });
   } catch (error) {
-    console.error("Error in getUpcomingBookings:", error);
+    console.error('Error in getUpcomingBookings:', error);
     res.status(500).json({ error: error.message });
   }
 };
