@@ -9,10 +9,14 @@ import Activity from "../models/Activity.js";
 import ActivityBooking from "../models/ActivityBooking.js";
 import Tourist from "../models/Tourist.js";
 import Itinerary from "../models/Itinerary.js";
+import Notification from "../models/Notification.js";
 import ItineraryBooking from "../models/ItineraryBooking.js";
+import Order from "../models/Order.js";
 import { startOfMonth, endOfMonth } from "date-fns";
 import { sendNotificationEmail } from "./mailer.js";
 import nodemailer from "nodemailer";
+import AdvertiserController from "./AdvertiserController.js";
+import TourGuideController from "./TourGuideController.js";
 
 //create Activity Category
 const createActivityCategory = async (req, res) => {
@@ -516,17 +520,28 @@ const getAdminByUserId = async (req, res) => {
   }
 };
 
+// ┏━┓┏━┓┏━┓╻┏┓╻╺┳╸   ┏━┓     ┏━╸╺┳┓╻╺┳╸┏━╸╺┳┓   ╻┏┓╻   ┏━┓
+// ┗━┓┣━┛┣┳┛┃┃┗┫ ┃    ┏━┛     ┣╸  ┃┃┃ ┃ ┣╸  ┃┃   ┃┃┗┫   ╺━┫
+// ┗━┛╹  ╹┗╸╹╹ ╹ ╹    ┗━╸ ┛   ┗━╸╺┻┛╹ ╹ ┗━╸╺┻┛   ╹╹ ╹   ┗━┛
+
 const setInapproperiateFlagActivity = async (req, res) => {
   try {
     const { activityId } = req.params;
-
     const activity = await Activity.findByIdAndUpdate(activityId, req.body, {
       new: true,
       runValidators: true,
-    });
+    }).populate("advertiser");
 
     if (!activity) {
       return res.status(404).json({ message: "activity not found" });
+    }
+
+    // Send flag notification first
+    if (req.body.flag_inapproperiate) {
+      await AdvertiserController.createActivityFlagNotification(
+        activity.advertiser._id,
+        activity.title
+      );
     }
 
     if (req.body.flag_inapproperiate == false)
@@ -541,6 +556,14 @@ const setInapproperiateFlagActivity = async (req, res) => {
     }
 
     await ActivityBooking.deleteMany({ activity: activityId });
+
+    // Create a warning notification about the cancellations
+    const notification = new Notification({
+      recipient: activity.advertiser.user, // Access user ID after populating
+      message: `Your activity "${activity.title}" has been flagged as inappropriate and removed. All bookings have been cancelled and tourists refunded.`,
+      type: "WARNING",
+    });
+    await notification.save();
 
     return res.status(200).json({
       message:
@@ -560,10 +583,18 @@ const setInapproperiateFlagItinerary = async (req, res) => {
     const itinerary = await Itinerary.findByIdAndUpdate(itineraryId, req.body, {
       new: true,
       runValidators: true,
-    });
+    }).populate("tour_guide"); // Populate the tour_guide field
 
     if (!itinerary) {
       return res.status(404).json({ message: "itinerary not found" });
+    }
+
+    // Send flag notification first
+    if (req.body.flag_inapproperiate) {
+      await TourGuideController.createItineraryFlagNotification(
+        itinerary.tour_guide._id,
+        itinerary.name
+      );
     }
 
     if (req.body.flag_inapproperiate == false)
@@ -578,6 +609,14 @@ const setInapproperiateFlagItinerary = async (req, res) => {
     }
 
     await ItineraryBooking.deleteMany({ itinerary: itineraryId });
+
+    // Create a warning notification about the cancellations
+    const notification = new Notification({
+      recipient: itinerary.tour_guide.user,
+      message: `Your itinerary "${itinerary.name}" has been flagged as inappropriate and removed. All bookings have been cancelled and tourists refunded.`,
+      type: "WARNING",
+    });
+    await notification.save();
 
     return res.status(200).json({
       message:
@@ -619,6 +658,296 @@ const getTotalNewUsersInThismonth = async (req, res) => {
   }
 };
 
+// ┏━┓┏━┓┏━┓╻┏┓╻╺┳╸   ┏━┓
+// ┗━┓┣━┛┣┳┛┃┃┗┫ ┃    ╺━┫
+// ┗━┛╹  ╹┗╸╹╹ ╹ ╹    ┗━┛
+
+async function getTotalItineraryRevenue() {
+  try {
+    const bookings = await ItineraryBooking.find().populate(
+      "itinerary",
+      "price"
+    );
+
+    let totalRevenue = 0;
+    for (const booking of bookings) {
+      if (booking.itinerary && booking.itinerary.price && booking.attended) {
+        totalRevenue += booking.itinerary.price;
+      }
+    }
+
+    return totalRevenue;
+  } catch (error) {
+    console.error("Error calculating total itinerary revenue:", error);
+    throw error;
+  }
+}
+
+async function getTotalActivityRevenue() {
+  try {
+    const bookings = await ActivityBooking.find().populate("activity", "price");
+
+    let totalRevenue = 0;
+    for (const booking of bookings) {
+      if (booking.activity && booking.activity.price && booking.attended) {
+        totalRevenue += booking.activity.price;
+      }
+    }
+
+    return totalRevenue;
+  } catch (error) {
+    console.error("Error calculating total activity revenue:", error);
+    throw error;
+  }
+}
+
+async function getTotalProductRevenue() {
+  try {
+    // Fetch all orders and populate the 'product' field
+    const orders = await Order.find().populate("product", "price");
+
+    // Calculate the total revenue by summing up the prices of all products
+    let totalRevenue = 0;
+    for (const order of orders) {
+      if (order.product && order.product.price) {
+        totalRevenue += order.quantity * order.product.price;
+      }
+    }
+
+    return totalRevenue;
+  } catch (error) {
+    console.error("Error calculating total product revenue:", error);
+    throw error;
+  }
+}
+
+const getTotalRevenue = async (req, res) => {
+  try {
+    const itineraryRevenue = await getTotalItineraryRevenue();
+    const activityRevenue = await getTotalActivityRevenue();
+    const productRevenue = await getTotalProductRevenue();
+
+    const totalRevenue = itineraryRevenue + activityRevenue + productRevenue;
+
+    // Return the data in the expected format
+    return res.status(200).json({
+      itineraryRevenue,
+      activityRevenue,
+      productRevenue
+    });
+  } catch (error) {
+    console.error("Error calculating total revenue:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// ┏┳┓┏━┓┏┓╻╺┳╸╻ ╻   ┏━╸╻╻  ╺┳╸┏━╸┏━┓
+// ┃┃┃┃ ┃┃┗┫ ┃ ┣━┫   ┣╸ ┃┃   ┃ ┣╸ ┣┳┛
+// ╹ ╹┗━┛╹ ╹ ╹ ╹ ╹   ╹  ╹┗━╸ ╹ ┗━╸╹┗╸
+
+async function getTotalItineraryRevenueByMonth(month, year) {
+  try {
+    const bookings = await ItineraryBooking.find({
+      // Filter by month and year
+      booking_date: {
+        $gte: new Date(year, month - 1, 1),
+        $lt: new Date(year, month, 1),
+      },
+      attended: true, // Only include attended bookings
+    }).populate("itinerary", "price");
+
+    let totalRevenue = 0;
+    for (const booking of bookings) {
+      if (booking.itinerary && typeof booking.itinerary.price === "number") {
+        totalRevenue += booking.itinerary.price;
+      }
+    }
+
+    return totalRevenue;
+  } catch (error) {
+    console.error("Error calculating total itinerary revenue by month:", error);
+    throw error;
+  }
+}
+
+async function getTotalActivityRevenueByMonth(month, year) {
+  try {
+    const bookings = await ActivityBooking.find({
+      // Filter by month and year
+      booking_date: {
+        $gte: new Date(year, month - 1, 1),
+        $lt: new Date(year, month, 1),
+      },
+      attended: true, // Only include attended bookings
+    }).populate("activity", "price");
+
+    let totalRevenue = 0;
+    for (const booking of bookings) {
+      if (booking.activity && typeof booking.activity.price === "number") {
+        totalRevenue += booking.activity.price;
+      }
+    }
+
+    return totalRevenue;
+  } catch (error) {
+    console.error("Error calculating total activity revenue by month:", error);
+    throw error;
+  }
+}
+
+async function getTotalProductRevenueByMonth(month, year) {
+  try {
+    const orders = await Order.find({
+      // Filter by month and year
+      createdAt: {
+        $gte: new Date(year, month - 1, 1),
+        $lt: new Date(year, month, 1),
+      },
+    }).populate("product", "price");
+
+    let totalRevenue = 0;
+    for (const order of orders) {
+      if (
+        order.product &&
+        typeof order.product.price === "number" &&
+        typeof order.quantity === "number"
+      ) {
+        totalRevenue += order.quantity * order.product.price;
+      }
+    }
+
+    return totalRevenue;
+  } catch (error) {
+    console.error("Error calculating total product revenue by month:", error);
+    throw error;
+  }
+}
+
+const getProductRevenueByMonth = async (req, res) => {
+  try {
+    const month = parseInt(req.body.month, 10);
+    const year = parseInt(req.body.year, 10);
+
+    // Enhanced input validation
+    if (
+      isNaN(month) ||
+      isNaN(year) ||
+      month < 1 ||
+      month > 12 ||
+      year < 1900 ||
+      year > new Date().getFullYear() + 1
+    ) {
+      return res.status(400).json({ message: "Invalid month or year provided" });
+    }
+
+    const productRevenue = await getTotalProductRevenueByMonth(month, year);
+
+    return res.status(200).json({
+      message: `Total product revenue for ${month}/${year}`,
+      productRevenue,
+    });
+  } catch (error) {
+    console.error("Error calculating total product revenue:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const getItineraryRevenueByMonth = async (req, res) => {
+  try {
+    const month = parseInt(req.body.month, 10);
+    const year = parseInt(req.body.year, 10);
+
+    // Enhanced input validation
+    if (
+      isNaN(month) ||
+      isNaN(year) ||
+      month < 1 ||
+      month > 12 ||
+      year < 1900 ||
+      year > new Date().getFullYear() + 1
+    ) {
+      return res.status(400).json({ message: "Invalid month or year provided" });
+    }
+
+    const itineraryRevenue = await getTotalItineraryRevenueByMonth(month, year);
+
+    return res.status(200).json({
+      message: `Total itinerary revenue for ${month}/${year}`,
+      itineraryRevenue,
+    });
+  } catch (error) {
+    console.error("Error calculating total itinerary revenue:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const getActivityRevenueByMonth = async (req, res) => {
+  try {
+    const month = parseInt(req.body.month, 10);
+    const year = parseInt(req.body.year, 10);
+
+    // Enhanced input validation
+    if (
+      isNaN(month) ||
+      isNaN(year) ||
+      month < 1 ||
+      month > 12 ||
+      year < 1900 ||
+      year > new Date().getFullYear() + 1
+    ) {
+      return res.status(400).json({ message: "Invalid month or year provided" });
+    }
+
+    const activityRevenue = await getTotalActivityRevenueByMonth(month, year);
+
+    return res.status(200).json({
+      message: `Total activity revenue for ${month}/${year}`,
+      activityRevenue,
+    });
+  } catch (error) {
+    console.error("Error calculating total activity revenue:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const getTotalRevenueByMonth = async (req, res) => {
+  try {
+    // Parse month and year from query parameters
+    const month = parseInt(req.body.month, 10);
+    const year = parseInt(req.body.year, 10);
+
+    // Basic input validation
+    if (!month || !year) {
+      return res.status(400).json({ message: "Month and year are required" });
+    }
+
+    // Optionally, add range validation
+    if (month < 1 || month > 12) {
+      return res
+        .status(400)
+        .json({ message: "Month must be between 1 and 12" });
+    }
+
+    // Execute revenue calculations in parallel
+    const [itineraryRevenue, activityRevenue, productRevenue] =
+      await Promise.all([
+        getTotalItineraryRevenueByMonth(month, year),
+        getTotalActivityRevenueByMonth(month, year),
+        getTotalProductRevenueByMonth(month, year),
+      ]);
+
+    const totalRevenue = itineraryRevenue + activityRevenue + productRevenue;
+
+    return res.status(200).json({
+      message: `Total revenue for ${month}/${year}`,
+      revenue: totalRevenue,
+    });
+  } catch (error) {
+    console.error("Error calculating total revenue by month:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 export default {
   getTotalUsers,
   getTotalNewUsersInThismonth,
@@ -641,4 +970,8 @@ export default {
   getAllActivityCategories,
   setInapproperiateFlagActivity,
   setInapproperiateFlagItinerary,
+  getTotalRevenue,
+  getTotalItineraryRevenue,
+  getTotalActivityRevenue,
+  getTotalProductRevenue,
 };

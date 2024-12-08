@@ -172,5 +172,11 @@ router.put(
 router.get("/get-total-users", AdminController.getTotalUsers);
 router.get("/get-total-new-users", AdminController.getTotalNewUsersInThismonth);
 
+
+router.get('/total-revenue', AdminController.getTotalRevenue);
+router.get('/itinerary-revenue', AdminController.getTotalItineraryRevenue);
+router.get('/activity-revenue', AdminController.getTotalActivityRevenue);
+router.get('/product-revenue', AdminController.getTotalProductRevenue);
+
 // Export the router
 export default router;

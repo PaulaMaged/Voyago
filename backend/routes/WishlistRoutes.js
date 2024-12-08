@@ -1,0 +1,105 @@
+// routes/wishlist.js
+import express from "express";
+import Wishlist from "../models/wishlist.js";
+import Product from "../models/Product.js";
+
+const router = express.Router();
+
+// GET /api/wishlist/:touristId
+router.get("/:touristId", async (req, res) => {
+  try {
+    const { touristId } = req.params;
+    let wishlist = await Wishlist.findOne({ tourist: touristId })
+      .populate({
+        path: 'items.itemId',
+        populate: [
+          {
+            path: 'seller',
+            model: 'Seller'
+          },
+          {
+            path: 'images',
+            model: 'ProductImage',
+            options: { sort: { created_at: -1 } }
+          }
+        ]
+      });
+      
+    if (!wishlist) {
+      return res.json({ items: [] });
+    }
+
+    // Transform the data to include images
+    const transformedItems = wishlist.items.map(item => ({
+      _id: item.itemId._id,
+      name: item.itemId.name,
+      description: item.itemId.description,
+      price: item.itemId.price,
+      picture: item.itemId.images?.[0]?.image_url || item.itemId.picture,
+      images: item.itemId.images,
+      seller: item.itemId.seller,
+      itemType: item.itemType
+    }));
+
+    res.json({ items: transformedItems });
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+});
+
+// POST /api/wishlist/:touristId/:productId
+router.post("/:touristId/:productId", async (req, res) => {
+  try {
+    const { touristId, productId } = req.params;
+    
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    let wishlist = await Wishlist.findOne({ tourist: touristId });
+    if (!wishlist) {
+      wishlist = new Wishlist({ 
+        tourist: touristId, 
+        items: [{ itemId: productId, itemType: 'Product' }] 
+      });
+    } else {
+      const itemExists = wishlist.items.some(
+        item => item.itemId.toString() === productId && item.itemType === 'Product'
+      );
+      if (itemExists) {
+        return res.status(400).json({ message: "Product already in wishlist" });
+      }
+      wishlist.items.push({ itemId: productId, itemType: 'Product' });
+    }
+    
+    await wishlist.save();
+    res.json({ message: "Product added to wishlist", wishlist });
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+});
+
+// DELETE /api/wishlist/:touristId/:productId
+router.delete("/:touristId/:productId", async (req, res) => {
+  try {
+    const { touristId, productId } = req.params;
+    
+    let wishlist = await Wishlist.findOne({ tourist: touristId });
+    if (!wishlist) {
+      return res.status(404).json({ message: "Wishlist not found" });
+    }
+
+    wishlist.items = wishlist.items.filter(
+      item => !(item.itemId.toString() === productId && item.itemType === 'Product')
+    );
+    
+    await wishlist.save();
+    res.json({ message: "Product removed from wishlist", wishlist });
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+});
+
+export default router;
+

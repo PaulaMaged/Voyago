@@ -194,7 +194,9 @@ const ViewProductAdmin = () => {
               }}
             >
               <img
-                src={product.picture}
+                src={product.images && product.images.length > 0
+                  ? `http://localhost:8000/${product.images[0].image_url}`
+                  : "/placeholder.svg?height=200&width=200"}
                 alt={product.name}
                 style={{ width: "100%", height: "200px", objectFit: "cover" }}
               />

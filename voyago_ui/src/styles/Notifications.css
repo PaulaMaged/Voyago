@@ -1,0 +1,51 @@
+.notifications-container {
+  background-color: var(--background);
+  color: var(--textPrimary);
+}
+
+.notification-item {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+}
+
+.notification-item:hover {
+  transform: translateX(4px);
+  box-shadow: var(--shadow-md);
+}
+
+.notification-unread {
+  background-color: var(--hover);
+}
+
+.notification-title {
+  color: var(--textPrimary);
+  font-weight: bold;
+}
+
+.notification-message {
+  color: var(--textSecondary);
+}
+
+.notification-time {
+  color: var(--textSecondary);
+  font-size: 0.875rem;
+}
+
+.btn-mark-read {
+  background-color: var(--primary);
+  color: var(--surface);
+  transition: all 0.3s ease;
+}
+
+.btn-mark-read:hover {
+  background-color: var(--primaryLight);
+  transform: translateY(-2px);
+}
+
+.notification-empty {
+  color: var(--textSecondary);
+  text-align: center;
+  padding: 2rem;
+}

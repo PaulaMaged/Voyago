@@ -109,4 +109,18 @@ router.get(
   TourGuideController.getTourGuideReview
 );
 
+// Sales
+router.get("/sales-report/:tourGuideId", TourGuideController.getAllSales);
+router.get("/sales-report/:tourGuideId/by-date", TourGuideController.getTotalRevenueByDate);
+router.get("/sales-report/:tourGuideId/by-month", TourGuideController.getTotalRevenueByMonth);
+router.get("/sales-report/:tourGuideId/by-itinerary/:itineraryId", TourGuideController.getAllRevenueByItinerary);
+//tourist count 
+router.get("/tourist-count/:tourGuideId", TourGuideController.getTotalTourists);
+router.get("/tourist-count/:tourGuideId/by-month", TourGuideController.getTouristsByMonth);
+router.get('/notifications/:tourGuideId', TourGuideController.getTourGuideNotifications);
+
+// Add these new routes
+router.get('/itinerary-bookings/:tourGuideId', TourGuideController.getItineraryBookings);
+router.patch('/mark-attendance/:tourGuideId/:bookingId', TourGuideController.markAttendance);
+
 export default router;

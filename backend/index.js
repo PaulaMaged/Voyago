@@ -8,12 +8,23 @@ import TourismGovernorRoutes from "./routes/TourismGovernorRoutes.js";
 import TouristRoutes from "./routes/TouristRoutes.js";
 import SellerRoutes from "./routes/SellerRoutes.js";
 import AdminRoutes from "./routes/AdminRoutes.js";
-import promoCodeRoutes from "./routes/routes_promoCodeRoutes.js";
 import UserRoutes from "./routes/UserRoutes.js";
 import ProductRoutes from "./routes/ProductRoutes.js";
 import cookieParser from "cookie-parser";
 import axios from "axios";
 import cors from "cors";
+import cron from "node-cron";
+import {
+  createUpcomingActivityNotifications,
+  checkBookmarkedActivities,
+} from "./controllers/NotificationController.js";
+import CartRoutes from "./routes/CartRoutes.js";
+import OrderRoutes from "./routes/orderRoutes.js";
+import wishlistRoutes from "./routes/WishlistRoutes.js";
+import locationRoutes from "./routes/LocationRoutes.js";
+// import stripeRoutes from "./routes/StripeRoutes.js";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -202,6 +213,11 @@ let tokenExpiration = null;
 //   }
 // });
 // Routes
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use(express.static(path.join(__dirname, "public")));
 app.use("/api/advertiser", AdvertiserRoutes);
 app.use("/api/tourist", TouristRoutes);
 app.use("/api/public", PublicRoutes);
@@ -211,13 +227,31 @@ app.use("/api/admin", AdminRoutes);
 app.use("/api/user", UserRoutes);
 app.use("/api/tourism-governor", TourismGovernorRoutes);
 app.use("/api/seller", SellerRoutes);
-app.use("/api/promo-codes", promoCodeRoutes);
+app.use("/api/cart", CartRoutes);
+app.use("/api/locations", locationRoutes);
+app.use("/api/orders", OrderRoutes);
+app.use("/api/wishlist", wishlistRoutes);
+// app.use("/api/stripe", stripeRoutes);
 // Root route for testing
 app.get("/", (req, res) => {
   res.send("Hello World!");
+});
+
+// Schedule automatic notifications (runs every minute)
+cron.schedule("* * * * *", async () => {
+  console.log("Running notification checks...");
+  try {
+    await createUpcomingActivityNotifications();
+    await checkBookmarkedActivities();
+    console.log("Notification checks completed successfully");
+  } catch (error) {
+    console.error("Error in notification checks:", error);
+  }
 });
 
 // Start the server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
+
+export default app;

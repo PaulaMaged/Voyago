@@ -7,6 +7,17 @@ import multer from "multer";
 //                Seller Routes
 // ==============================================
 
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/');
+  },
+  filename: function (req, file, cb) {
+    const uniqueFilename = `${uuidv4()}${path.extname(file.originalname)}`;
+    cb(null, uniqueFilename);
+  }
+});
+
+
 // Create a Seller
 router.post("/create-seller", (req, res) => {
   upload.single("upFile")(req, res, function (err) {
@@ -42,13 +53,13 @@ router.put("/update-seller/:sellerId", SellerController.updateSeller);
 
 // Delete Seller by ID
 router.delete("/delete-seller/:sellerId", SellerController.deleteSeller);
-
+router.post('/add-product', upload.array('images'), SellerController.createProduct);
 // ==============================================
 //                Product Routes
 // ==============================================
 
 // Create a Product
-router.post("/create-product", SellerController.createProduct);
+router.post('/create-product', upload.array('images'), SellerController.createProduct);
 
 // Get All Products
 router.get("/get-all-products", SellerController.getAllProducts);
@@ -58,9 +69,13 @@ router.get("/get-all-seller-products/:sellerId",SellerController.getAllProductsB
 router.get("/get-product/:productId", SellerController.getProduct);
 
 // Update Product by ID
-router.put("/update-product/:productId", SellerController.updateProduct);
+router.put("/update-product/:productId", upload.array('images'), SellerController.updateProduct);
 
 // Delete Product by ID
 router.delete("/delete-product/:productId", SellerController.deleteProduct);
+
+router.get('/product-orders/:productId', SellerController.getProductOrders);
+router.get('/total-revenue/:sellerId', SellerController.getTotalRevenue);
+router.get('/sales-report/:sellerId', SellerController.getSalesReportFiltered);
 
 export default router;

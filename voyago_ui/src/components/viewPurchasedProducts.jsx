@@ -10,42 +10,31 @@ export default function ViewPurchasedProducts() {
   const [maxPrice, setMaxPrice] = useState("");
   const [sortRating, setSortRating] = useState("none");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const touristId = localStorage.getItem("roleId");
 
   useEffect(() => {
-    fetchPurchasedProducts();
-  }, []);
+    if (touristId) {
+      fetchPurchasedProducts();
+    } else {
+      setError("Please log in to view your orders");
+      setLoading(false);
+    }
+  }, [touristId]);
 
   const fetchPurchasedProducts = async () => {
     try {
       setLoading(true);
-      let touristId = localStorage.getItem("roleId");
-      if (!touristId) {
-        throw new Error("Tourist ID not found");
-      }
       const response = await axios.get(
-        `http://localhost:8000/api/product/retrieve-all-orders-by-touristid/${touristId}`
+        `http://localhost:8000/api/orders/${touristId}`
       );
 
-      // Modify how we process the orders
-      const productsWithDetails = response.data.map((order) => ({
-        orderId: order._id,
-        orderDate: new Date(order.arrival_date).toLocaleDateString(),
-        quantity: order.quantity,
-        rating: calculateAverageRating(order.product.reviews),
-        userReview: order.product.reviews.find(
-          (review) => review.reviewer === touristId
-        ),
-        // Spread the product details, but after our custom fields to avoid overwrites
-        ...order.product,
-      }));
-
-      setPurchasedProducts(productsWithDetails);
+      setPurchasedProducts(response.data);
       setLoading(false);
     } catch (error) {
       console.error("Error fetching purchased products:", error);
@@ -155,80 +144,67 @@ export default function ViewPurchasedProducts() {
     setReview("");
   };
 
-  if (loading) return <div className="loading">Loading purchased products...</div>;
-  if (error) return <div className="error">{error}</div>;
-
-  const displayProducts = getFilteredAndSortedProducts();
+  if (loading) {
+    return <div className="text-center mt-10">Loading...</div>;
+  }
 
   return (
-    <div className="container">
-      <h1 className="title">Your Purchased Products</h1>
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <h1 className="text-4xl font-extrabold text-center mb-8 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent animate-gradient">
+        My Purchases
+      </h1>
 
-      <div className="filters">
-        <input
-          type="text"
-          placeholder="Search product by name..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="search-input"
-        />
-        <input
-          type="number"
-          placeholder="Min Price"
-          value={minPrice}
-          onChange={(e) => setMinPrice(e.target.value)}
-          className="price-input"
-        />
-        <input
-          type="number"
-          placeholder="Max Price"
-          value={maxPrice}
-          onChange={(e) => setMaxPrice(e.target.value)}
-          className="price-input"
-        />
-        <select
-          value={sortRating}
-          onChange={(e) => setSortRating(e.target.value)}
-          className="sort-select"
-        >
-          <option value="none">Sort by Rating</option>
-          <option value="asc">Low to High</option>
-          <option value="desc">High to Low</option>
-        </select>
-      </div>
+      {error && (
+        <div className="relative overflow-hidden rounded-lg mb-4">
+          <div className="absolute inset-0 bg-error/20 animate-pulse"></div>
+          <p className="text-center p-4 text-error relative z-10">{error}</p>
+        </div>
+      )}
 
-      {displayProducts.length > 0 ? (
-        <div className="product-grid">
-          {displayProducts.map((product) => (
-            <div key={product.orderId} className="product-card">
+      {!touristId ? (
+        <div className="text-center p-8 bg-surface rounded-xl shadow-lg">
+          <p className="text-error font-medium">Please log in to view your orders</p>
+        </div>
+      ) : purchasedProducts.length === 0 ? (
+        <div className="text-center p-8 bg-surface rounded-xl shadow-lg">
+          <p className="text-secondary italic">You haven't made any purchases yet</p>
+        </div>
+      ) : (
+        <div className="purchased-grid">
+          {purchasedProducts.map((product) => (
+            <div key={product._id} className="purchased-card">
               <img
-                src={product.picture || "/placeholder.svg?height=200&width=200"}
-                alt={product.name}
-                className="product-image"
+                src={
+                  product.product.images?.length > 0
+                    ? `http://localhost:8000/${product.product.images[0].image_url}`
+                    : product.product.picture || "/placeholder.svg?height=200&width=200"
+                }
+                alt={product.product.name}
+                className="purchased-image"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = "/placeholder.svg?height=200&width=200";
+                }}
               />
-              <div className="product-details">
-                <h2 className="product-name">{product.name}</h2>
-                <p className="product-description">{product.description}</p>
-                <p className="product-price">
-                  {currencyConversions
-                    .convertFromDB(product.price)
-                    .toFixed(2) +
-                    " " +
-                    localStorage.getItem("currency")}
+              <div className="purchased-details">
+                <h2 className="purchased-name">{product.product.name}</h2>
+                <p className="purchased-description">{product.product.description}</p>
+                <p className="purchased-price">
+                  {currencyConversions.formatPrice(product.product.price)}
                 </p>
-                <p className="product-seller">
-                  Seller: {product.seller.store_name || "Unknown Seller"}
+                <p className="purchased-seller">
+                  Seller: {product.product.seller?.store_name || "Unknown Seller"}
                 </p>
-                <p className="product-rating">
-                  Rating: {product.rating.toFixed(1)} stars
+                <p className="purchased-rating">
+                  Rating: {calculateAverageRating(product.product.reviews).toFixed(1)} stars
                 </p>
-                <p className="product-reviews">
-                  Reviews: {product.reviews ? product.reviews.length : 0}
+                <p className="purchased-reviews">
+                  Reviews: {product.product.reviews?.length || 0}
                 </p>
-                <p className="product-order-date">
-                  Arrival Date: {product.orderDate}
+                <p className="purchased-order-date">
+                  Arrival Date: {new Date(product.arrival_date).toLocaleDateString()}
                 </p>
-                <p className="product-quantity">Quantity: {product.quantity}</p>
+                <p className="purchased-quantity">Quantity: {product.quantity}</p>
                 {product.userReview ? (
                   <div className="user-review">
                     <p>Your review: {product.userReview.rating} stars</p>
@@ -258,10 +234,6 @@ export default function ViewPurchasedProducts() {
             </div>
           ))}
         </div>
-      ) : (
-        <p className="no-products">
-          No purchased products found within the specified criteria.
-        </p>
       )}
 
       {isModalOpen && selectedProduct && (

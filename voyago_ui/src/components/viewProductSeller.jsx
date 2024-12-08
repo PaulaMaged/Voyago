@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import AddProduct from './addProduct';
 import EditProduct from './editProduct';
+import { FaSearch, FaDollarSign, FaStar, FaEdit, FaArchive, FaTrash } from 'react-icons/fa';
 
-const ViewProductSeller = () => {
+const ViewProducts = () => {
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [minPrice, setMinPrice] = useState('');
@@ -48,12 +49,20 @@ const ViewProductSeller = () => {
 
   const toggleArchiveStatus = async (productId, currentStatus) => {
     try {
-      await axios.put(`http://localhost:8000/api/seller/update-product/${productId}`, {
-        archived: !currentStatus
-      });
-      fetchProducts(); // Refresh the product list
+      const endpoint = currentStatus 
+        ? `http://localhost:8000/api/product/unarchive-product/${productId}/unarchive`
+        : `http://localhost:8000/api/product/archive-product/${productId}`;
+
+      const response = await axios.patch(endpoint);
+      
+      if (response.status === 200) {
+        fetchProducts(); // Refresh the product list
+      } else {
+        throw new Error('Failed to update archive status');
+      }
     } catch (error) {
       console.error('Error toggling archive status:', error);
+      alert('Failed to update product archive status');
     }
   };
 
@@ -87,125 +96,178 @@ const ViewProductSeller = () => {
   });
 
   return (
-    <div>
-      <AddProduct fetchProducts={fetchProducts} />
-      
-      {editingProductId && (
-        <EditProduct 
-          product={editingProductData} 
-          fetchProducts={fetchProducts} 
-          onCancel={handleCancelEdit}
-        />
-      )}
+    <div className="w-full">
+      <div className="mb-8">
+        <AddProduct fetchProducts={fetchProducts} />
+        
+        {editingProductId && (
+          <EditProduct 
+            product={editingProductData} 
+            fetchProducts={fetchProducts} 
+            onCancel={handleCancelEdit}
+          />
+        )}
 
-      <h1>Product List</h1>
-      <hr />
-      <br />
-
-      <div style={{ marginBottom: '20px', display: 'inline-block', marginLeft: '10px' }}>
-        <input
-          type="text"
-          placeholder="Search product by name..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          style={{ padding: '10px', width: '300px' }}
-        />
+        <h1 className="text-2xl font-bold text-[var(--textPrimary)] mb-6">
+          Product List
+        </h1>
       </div>
 
-      <div style={{ marginBottom: '20px', display: 'inline-block', marginLeft: '20px' }}>
-        <input
-          type="number"
-          placeholder="Min Price"
-          value={minPrice}
-          onChange={(e) => setMinPrice(e.target.value)}
-          style={{ padding: '10px', width: '120px', marginRight: '10px' }}
-        />
-        <input
-          type="number"
-          placeholder="Max Price"
-          value={maxPrice}
-          onChange={(e) => setMaxPrice(e.target.value)}
-          style={{ padding: '10px', width: '120px' }}
-        />
-      </div>
+      <div className="bg-[var(--surface)] p-6 rounded-lg shadow-md mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="relative">
+            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--textSecondary)]" />
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-[var(--border)] 
+                bg-[var(--background)] text-[var(--textPrimary)]
+                focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+            />
+          </div>
 
-      <div style={{ marginBottom: '20px', display: 'inline-block', marginLeft: '20px' }}>
-        <label htmlFor="ratingSort" style={{ marginRight: '10px' }}>
-          Sort by Rating:
-        </label>
-        <select
-          id="ratingSort"
-          value={sortRating}
-          onChange={(e) => setSortRating(e.target.value)}
-          style={{ padding: '10px', width: '150px' }}
-        >
-          <option value="none">No Sort</option>
-          <option value="asc">Low to High</option>
-          <option value="desc">High to Low</option>
-        </select>
+          <div className="flex gap-4">
+            <input
+              type="number"
+              placeholder="Min Price"
+              value={minPrice}
+              onChange={(e) => setMinPrice(e.target.value)}
+              className="w-full px-4 py-2 rounded-lg border border-[var(--border)]
+                bg-[var(--background)] text-[var(--textPrimary)]
+                focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+            />
+            <input
+              type="number"
+              placeholder="Max Price"
+              value={maxPrice}
+              onChange={(e) => setMaxPrice(e.target.value)}
+              className="w-full px-4 py-2 rounded-lg border border-[var(--border)]
+                bg-[var(--background)] text-[var(--textPrimary)]
+                focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+            />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <label className="text-[var(--textSecondary)]">Sort by Rating:</label>
+            <select
+              value={sortRating}
+              onChange={(e) => setSortRating(e.target.value)}
+              className="flex-1 px-4 py-2 rounded-lg border border-[var(--border)]
+                bg-[var(--background)] text-[var(--textPrimary)]
+                focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+            >
+              <option value="none">No Sort</option>
+              <option value="asc">Low to High</option>
+              <option value="desc">High to Low</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       {sortedProducts.length > 0 ? (
-        <div
-          className="productsList"
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(5, 1fr)',
-            gap: '15px',
-          }}
-        >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {sortedProducts.map((product) => (
-            <div
-              key={product._id}
-              style={{
-                border: '1px solid',
-                borderColor: product._id === editingProductId ? 'blue' : 'lightgray',
-                borderWidth: product._id === editingProductId ? '2px' : '1px',
-                padding: '15px',
-                backgroundColor: product.archived ? '#f0f0f0' : 'white',
-              }}
+            <div 
+              key={product._id} 
+              className={`bg-[var(--surface)] rounded-lg overflow-hidden shadow-md
+                transition-all duration-300 hover:shadow-lg
+                ${product.archived ? 'opacity-75' : ''}`}
             >
               <img
-                src={product.picture}
+                src={
+                  product.images && 
+                  Array.isArray(product.images) && 
+                  product.images.length > 0
+                    ? `http://localhost:8000/${product.images[0].image_url}`
+                    : "https://via.placeholder.com/300"
+                }
                 alt={product.name}
-                style={{ width: '100%', height: '200px', objectFit: 'cover' }}
+                className="w-full h-48 object-cover"
+                onError={(e) => {
+                  e.target.src = "https://via.placeholder.com/300";
+                }}
               />
-              <h2>{product.name}</h2>
-              <p>Description: {product.description}</p>
-              <p>Price: ${product.price}</p>
-              <p>Available Quantity: {product.available_quantity}</p>
-              <p>Seller: {product.seller.store_name || 'External Seller'}</p>
-              <p>Rating: {calculateAverageRating(product.reviews)} stars</p>
-              <p>Reviews: {product.reviews.length} reviews</p>
-              <p>Status: {product.archived ? 'Archived' : 'Active'}</p>
-              <ul>
-                {product.reviews.map((review) => (
-                  <li key={review._id}>
-                    <strong>{review.reviewer && review.reviewer.user ? review.reviewer.user.username : 'Anonymous'}:</strong> {review.comment}
-                  </li>
-                ))}
-              </ul>
-              <button onClick={() => handleEditClick(product)}>Edit</button>
-              <button 
-                onClick={() => toggleArchiveStatus(product._id, product.archived)}
-                style={{ marginLeft: '10px' }}
-              >
-                {product.archived ? 'Unarchive' : 'Archive'}
-              </button>
-              <button 
-                onClick={() => deleteProduct(product._id)} 
-                style={{ marginLeft: '10px', backgroundColor: 'red', color: 'white' }}
-              >
-                Delete
-              </button>
+              
+              <div className="p-6">
+                <h2 className="text-xl font-semibold text-[var(--textPrimary)] mb-2">
+                  {product.name}
+                </h2>
+                <p className="text-[var(--textSecondary)] mb-4">
+                  {product.description}
+                </p>
+                
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="flex items-center gap-2">
+                    <FaDollarSign className="text-[var(--primary)]" />
+                    <span className="text-[var(--textPrimary)]">${product.price}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FaStar className="text-[var(--secondary)]" />
+                    <span className="text-[var(--textPrimary)]">
+                      {calculateAverageRating(product.reviews)}
+                    </span>
+                  </div>
+                </div>
+
+                {product.reviews.length > 0 && (
+                  <div className="mb-4 p-4 bg-[var(--background)] rounded-lg">
+                    <h3 className="font-semibold text-[var(--textPrimary)] mb-2">
+                      Recent Reviews
+                    </h3>
+                    <ul className="space-y-2">
+                      {product.reviews.slice(0, 2).map((review) => (
+                        <li 
+                          key={review._id}
+                          className="text-sm text-[var(--textSecondary)]"
+                        >
+                          "{review.comment}"
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                <div className="flex gap-2 mt-4 pt-4 border-t border-[var(--border)]">
+                  <button
+                    onClick={() => handleEditClick(product)}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 
+                      bg-[var(--primary)] text-white rounded-lg
+                      hover:bg-[var(--primaryDark)] transition-colors"
+                  >
+                    <FaEdit /> Edit
+                  </button>
+                  <button
+                    onClick={() => toggleArchiveStatus(product._id, product.archived)}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2
+                      bg-[var(--secondary)] text-white rounded-lg
+                      hover:bg-[var(--secondaryDark)] transition-colors"
+                  >
+                    <FaArchive /> {product.archived ? 'Unarchive' : 'Archive'}
+                  </button>
+                  <button
+                    onClick={() => deleteProduct(product._id)}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2
+                      bg-red-500 text-white rounded-lg
+                      hover:bg-red-600 transition-colors"
+                  >
+                    <FaTrash /> Delete
+                  </button>
+                </div>
+              </div>
             </div>
           ))}
         </div>
       ) : (
-        <p>No products available within the specified criteria.</p>
+        <div className="text-center p-8 bg-[var(--surface)] rounded-lg">
+          <p className="text-[var(--textSecondary)]">
+            No products available within the specified criteria.
+          </p>
+        </div>
       )}
     </div>
   );
 };
 
-export default ViewProductSeller;
+export default ViewProducts;

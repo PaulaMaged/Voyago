@@ -1,6 +1,22 @@
 import express from "express";
 import TouristController from "../controllers/TouristController.js";
+import BookmarkController from "../controllers/BookmarkController.js";
+import multer from "multer";
+import path from "path";
 const router = express.Router();
+
+// Configure multer for file upload
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/");
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  },
+});
+
+const upload = multer({ storage: storage });
 
 /**
  *********************************************
@@ -48,6 +64,14 @@ router.delete(
 router.delete(
   "/tourist-cancel-itinerary-booking/:itineraryBookingId",
   TouristController.cancelItineraryBooking
+);
+router.get(
+  "/get-upcoming-bookings/:touristId",
+  TouristController.getUpcomingBookings
+);
+router.get(
+  "/get-booking-history/:touristId",
+  TouristController.getBookingHistory
 );
 
 /**
@@ -115,6 +139,29 @@ router.get(
 
 router.get("/get-all-tourists", TouristController.getAllTourists);
 router.delete("/delete-tourist/:touristId", TouristController.deleteTourist);
-router.post("/book-activies", TouristController.bookActivity);
 router.post("/check-if-new", TouristController.checkIfNew);
+router.post("/book-activties", TouristController.bookActivity);
+
+router.post("/create-bookmark", BookmarkController.createBookmark);
+router.get("/get-bookmarks/:touristId", BookmarkController.getTouristBookmarks);
+router.delete(
+  "/remove-bookmark/:touristId/:bookmarkId",
+  BookmarkController.removeBookmark
+);
+router.post(
+  "/upload-profile-picture/:touristId",
+  upload.single("profile_picture"),
+  TouristController.uploadProfilePicture
+);
+
+router.get(
+  "/get-tourist-notifications/:touristId",
+  TouristController.getTouristNotifications
+);
+
+router.get(
+  "/profile-picture/:touristId",
+  TouristController.getTouristProfilePicture
+);
+
 export default router;

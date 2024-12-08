@@ -1,0 +1,182 @@
+.edit-product-form {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  max-width: 800px;
+  margin: 2rem auto;
+  border: 1px solid #edf2f7;
+}
+
+.edit-product-form h2 {
+  color: #2d3748;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  border-bottom: 2px solid #edf2f7;
+  padding-bottom: 0.75rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #4a5568;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  background-color: #f8fafc;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: #008CBA;
+  box-shadow: 0 0 0 3px rgba(0, 140, 186, 0.1);
+  outline: none;
+  background-color: white;
+}
+
+.error-message {
+  color: #e53e3e;
+  font-weight: 500;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background-color: #fff5f5;
+  border-radius: 6px;
+  border: 1px solid #feb2b2;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #edf2f7;
+}
+
+.btn-update,
+.btn-cancel {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-update {
+  background-color: #008CBA;
+  color: white;
+}
+
+.btn-update:hover {
+  background-color: #006d8f;
+  transform: translateY(-1px);
+}
+
+.btn-cancel {
+  background-color: #edf2f7;
+  color: #4a5568;
+}
+
+.btn-cancel:hover {
+  background-color: #e2e8f0;
+  transform: translateY(-1px);
+}
+
+.image-upload-section {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background-color: #f8fafc;
+  border-radius: 8px;
+  border: 2px dashed #e2e8f0;
+}
+
+.image-upload-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+}
+
+.image-upload-label:hover {
+  border-color: #008CBA;
+  background-color: #f0f9ff;
+}
+
+.upload-icon {
+  font-size: 1.5rem;
+  color: #008CBA;
+}
+
+.image-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.image-preview-item {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: white;
+}
+
+.image-preview-item img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.remove-image-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: rgba(229, 62, 62, 0.9);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.remove-image-btn:hover {
+  background: #e53e3e;
+  transform: scale(1.1);
+}
+
+/* Checkbox styling */
+.form-group label[for="archived"] {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.form-group input[type="checkbox"] {
+  width: auto;
+  margin-right: 0.5rem;
+} 

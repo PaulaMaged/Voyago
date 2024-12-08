@@ -84,4 +84,16 @@ router.get(
   AdvertiserController.getAdvertiserActivities
 );
 
+router.get("/sales-report/:advertiserId", AdvertiserController.getAllRevenue);
+router.get("/sales-report/:advertiserId/by-date", AdvertiserController.getAllRevenueByDate);
+router.get("/sales-report/:advertiserId/by-activity/:activityId", AdvertiserController.getAllRevenueByActivity);
+router.get("/activity-bookings/:advertiserId", AdvertiserController.getActivityBookings);
+router.get("/sales-report/:advertiserId/by-month", AdvertiserController.getAllRevenueByMonth);
+
+router.get("/tourist-count/:advertiserId", AdvertiserController.getTotalTourists);
+router.get("/tourist-count/:advertiserId/by-month", AdvertiserController.getTouristsByMonth);
+
+router.get('/notifications/:advertiserId', AdvertiserController.getAdvertiserNotifications);
+
+router.patch('/mark-attendance/:advertiserId/:bookingId', AdvertiserController.markAttendance);
 export default router;

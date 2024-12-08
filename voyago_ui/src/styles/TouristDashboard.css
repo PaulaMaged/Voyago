@@ -1,0 +1,161 @@
+/* Base styles */
+:root {
+  --shadow-sm: 0 2px 4px var(--shadow);
+  --shadow-md: 0 4px 6px var(--shadow);
+  --shadow-lg: 0 8px 16px var(--shadow);
+  --transition-speed: 0.3s;
+}
+
+.dashboard {
+  background-color: var(--background);
+  color: var(--textPrimary);
+}
+
+.sidebar {
+  background-color: var(--primary);
+  color: var(--surface);
+}
+
+.nav-item {
+  background-color: var(--primary);
+  color: var(--surface);
+  transition: all var(--transition-speed) ease;
+}
+
+.nav-item:hover {
+  background-color: var(--primaryDark);
+  transform: translateX(4px);
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+.nav-item.active {
+  background-color: var(--secondary);
+  box-shadow: 0 2px 12px var(--shadow);
+}
+
+.nav-item.active:hover {
+  background-color: var(--secondaryDark);
+}
+
+.theme-switcher {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--accent);
+  color: var(--surface);
+  padding: 12px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  gap: 8px;
+}
+
+.theme-switcher:hover {
+  background-color: var(--accentLight);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.theme-label {
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform: translateX(-10px);
+}
+
+.theme-switcher:hover .theme-label {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.theme-switcher svg {
+  transition: transform 0.3s ease;
+}
+
+.theme-switcher:hover svg {
+  transform: rotate(360deg);
+}
+
+.theme-switcher[data-theme='spring'] svg {
+  color: var(--secondaryLight);
+}
+
+.theme-switcher[data-theme='summer'] svg {
+  color: var(--accentLight);
+}
+
+.theme-switcher[data-theme='autumn'] svg {
+  color: var(--primaryLight);
+}
+
+.theme-switcher[data-theme='default'] svg {
+  color: var(--surface);
+}
+
+.content {
+  background-color: var(--surface);
+}
+
+.dashboard-card {
+  background-color: var(--surface);
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
+  transition: transform var(--transition-speed) ease, 
+              box-shadow var(--transition-speed) ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  background-color: var(--surface);
+}
+
+.dashboard-button {
+  transition: all var(--transition-speed) ease;
+}
+
+.dashboard-button:hover {
+  transform: translateY(-2px);
+  background-color: var(--primaryLight);
+}
+
+.sidebar button:hover {
+  background-color: var(--secondaryLight);
+  color: var(--textPrimary);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Remove any hardcoded hover colors */
+.hover\:bg-blue-700:hover {
+  background-color: var(--primaryDark);
+}

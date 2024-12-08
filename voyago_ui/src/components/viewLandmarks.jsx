@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { FaMapMarkerAlt, FaHistory, FaInfoCircle, FaSearch, FaFilter, FaClock } from 'react-icons/fa';
+import './viewLandmarks.css';
 
 const ViewLandmarks = () => {
   const [landmarks, setLandmarks] = useState([]);
@@ -50,54 +52,84 @@ const ViewLandmarks = () => {
   };
 
   return (
-    <div>
-      <h1>Historical Places and Museums</h1>
-      <hr />
+    <div className="landmarks-viewer">
+      <h1 className="text-3xl font-bold text-center mb-8">
+        Historical Places and Museums
+      </h1>
 
-      {/* Search Input */}
-      <input
-        type="text"
-        placeholder="Search by name or tag..."
-        value={searchTerm}
-        onChange={handleSearchChange}
-        style={{ marginRight: '10px', padding: '5px' }}
-      />
+      <div className="filters">
+        <div className="flex items-center gap-2 flex-1">
+          <FaSearch className="text-[var(--textSecondary)]" />
+          <input
+            type="text"
+            placeholder="Search by name or tag..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+            className="flex-1"
+          />
+        </div>
 
-      {/* Tag Filter Dropdown */}
-      <select value={selectedTag} onChange={handleTagChange} style={{ padding: '5px' }}>
-        <option value="">All Tags</option>
-        {allTags.map(tag => (
-          <option key={tag} value={tag}>{tag}</option>
-        ))}
-      </select>
+        <div className="flex items-center gap-2">
+          <FaFilter className="text-[var(--textSecondary)]" />
+          <select 
+            value={selectedTag} 
+            onChange={handleTagChange}
+            className="min-w-[150px]"
+          >
+            <option value="">All Tags</option>
+            {allTags.map(tag => (
+              <option key={tag} value={tag}>{tag}</option>
+            ))}
+          </select>
+        </div>
+      </div>
 
-      {/* Landmarks Display */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginTop: '20px' }}>
+      <div className="landmarks-list">
         {filteredLandmarks.length > 0 ? (
           filteredLandmarks.map(landmark => (
-            <div key={landmark._id} style={{ border: '1px solid lightgray', padding: '20px' }}>
-              <h2>{landmark.name}</h2>
-              <p><strong>Description:</strong> {landmark.description}</p>
-              <p><strong>Type:</strong> {landmark.types}</p>
-              <p><strong>Location Latitude:</strong> {landmark.location.latitude}</p>
-              <p><strong>Location Longitude:</strong> {landmark.location.longitude}</p>
-              <p><strong>Opening Hours:</strong> {landmark.opening_hours} hours</p>
-              <p><strong>Tags:</strong> {landmark.tags.map(tag => tag.tag_name).join(', ')}</p>
-              
-              {/* Single image display */}
-              <div style={{ display: 'flex', gap: '10px' }}>
-                {landmark.image && (
-                  <img 
-                    src={landmark.image} 
-                    alt={`${landmark.name} image`} 
-                    style={{ width: '100px', height: '100px', objectFit: 'cover' }} 
-                  />
-                )}
+            <div key={landmark._id} className="bg-white rounded-xl shadow-md overflow-hidden hover:-translate-y-2 transition-all duration-300 hover:shadow-xl">
+
+
+              <div className="p-6">
+                <h2 className="text-xl font-bold mb-2 text-gray-800">{landmark.name}</h2>
+                
+                <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                  {landmark.description}
+                </p>
+
+                <div className="space-y-2 mb-4">
+                  <p className="text-sm text-gray-600">
+                    <span className="font-semibold">Type:</span> {landmark.types}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    <span className="font-semibold">Location:</span> {landmark.location.latitude}, {landmark.location.longitude}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    <span className="font-semibold">Opening Hours:</span> {landmark.opening_hours <= 12 ? 
+                      `${landmark.opening_hours} AM` : 
+                      `${landmark.opening_hours - 12} PM`}
+                  </p>
+                </div>
+
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold text-gray-700">Tags:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {landmark.tags.map(tag => (
+                      <span key={tag.tag_name} 
+                        className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-medium">
+                        {tag.tag_name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
+
             </div>
           ))
         ) : (
-          <p>No landmarks found with selected filters.</p>
+          <p className="text-center col-span-full text-[var(--textSecondary)]">
+            No landmarks found with selected filters.
+          </p>
         )}
       </div>
     </div>

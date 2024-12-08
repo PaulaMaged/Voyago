@@ -1,9 +1,12 @@
 // Import the Product model to interact with the product collection in the database
-import mongoose from "mongoose"
+import mongoose from "mongoose";
 import Product from "../models/Product.js";
 import Order from "../models/Order.js";
+import User from "../models/User.js"
+import Notification from "../models/Notification.js"
 import Tourist from "../models/Tourist.js";
-import { updateTouristData } from './TouristController.js';
+import { updateTouristData } from "./TouristController.js";
+import ProductImage from "../models/ProductImage.js";
 
 /**
  * Retrieves sales and quantity data for all products in the database.
@@ -169,60 +172,35 @@ const unarchiveProduct = async (req, res) => {
  */
 const uploadProductImage = async (req, res) => {
   try {
-    // Check if a file was provided
     if (!req.file) {
-      // If no file was provided, return a 400 error
-      res.status(400).send({ error: "No image file provided" });
-      return;
+      return res.status(400).json({ error: "No image file provided" });
     }
 
-    // Get the product ID from the request parameters
+    console.log('Debug - File received:', req.file); // Debug log
+
     const productId = req.params.productId;
-
-    // Check if a product ID was provided
-    if (!productId) {
-      // If no product ID was provided, return a 400 error
-      res.status(400).send({ error: "Product ID is required" });
-      return;
-    }
-
-    // Retrieve the product from the database
     const product = await Product.findById(productId);
 
-    // Check if the product exists
     if (!product) {
-      // If the product does not exist, return a 404 error
-      res.status(404).send({ error: "Product not found" });
-      return;
+      return res.status(404).json({ error: "Product not found" });
     }
 
-    // Set the product picture to the uploaded file name
-    product.picture = req.file.filename;
+    // Create new product image
+    const productImage = new ProductImage({
+      product: productId,
+      filename: req.file.filename
+    });
 
-    try {
-      // Save the updated product
-      await product.save();
+    await productImage.save();
+    console.log('Debug - Saved image:', productImage); // Debug log
 
-      // Return a success message
-      res.status(200).send({ message: "Image uploaded successfully" });
-    } catch (error) {
-      // If a validation error occurs, return a 400 error
-      if (error.name === "ValidationError") {
-        res.status(400).send({ error: "Invalid image filename" });
-      } else {
-        // Log any other errors that occur during execution
-        console.error(error);
-
-        // Return a 500 error if an error occurs
-        res.status(500).send({ error: "Failed to save product" });
-      }
-    }
+    res.status(200).json({ 
+      message: "Image uploaded successfully",
+      image: productImage
+    });
   } catch (error) {
-    // Log any errors that occur during execution
-    console.error(error);
-
-    // Return a 500 error if an error occurs
-    res.status(500).send({ error: "Failed to upload image" });
+    console.error('Error uploading product image:', error);
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -283,9 +261,25 @@ const createProduct = async (req, res) => {
 
 const getProductById = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
-    if (!product) return res.status(404).json({ message: "Product not found" });
-    res.json(product);
+    const product = await Product.findById(req.params.id)
+      .populate('seller')
+      .populate('reviews')
+      .lean();
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    // Get images for the product, sorted by creation date
+    const images = await ProductImage.find({ product: product._id })
+      .sort({ created_at: -1 }); // Sort by creation date, newest first
+    
+    const productWithImages = {
+      ...product,
+      images: images
+    };
+
+    res.json(productWithImages);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -293,10 +287,22 @@ const getProductById = async (req, res) => {
 
 const getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find().populate(
-      "seller".populate("reviews")
-    );
-    res.json(products);
+    const products = await Product.find()
+      .populate('seller')
+      .populate('reviews')
+      .lean();
+
+    // Get images for each product, sorted by creation date
+    const productsWithImages = await Promise.all(products.map(async (product) => {
+      const images = await ProductImage.find({ product: product._id })
+        .sort({ created_at: -1 }); // Sort by creation date, newest first
+      return {
+        ...product,
+        images: images
+      };
+    }));
+
+    res.json(productsWithImages);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -330,7 +336,14 @@ const deleteProductById = async (req, res) => {
 
 const createOrder = async (req, res) => {
   try {
-    const { touristId, productId, quantity, arrival_date, arrival_location, description } = req.body;
+    const {
+      touristId,
+      productId,
+      quantity,
+      arrival_date,
+      arrival_location,
+      description,
+    } = req.body;
 
     // Fetch the tourist directly using findById
     const tourist = await Tourist.findById(touristId);
@@ -339,7 +352,7 @@ const createOrder = async (req, res) => {
     }
 
     // Fetch the product directly using findById
-    const product = await Product.findById(productId);
+    const product = await Product.findById(productId).populate("seller");
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
@@ -369,6 +382,22 @@ const createOrder = async (req, res) => {
     // Update the product's available quantity
     product.available_quantity -= quantity;
     await product.save();
+
+    // Check if the product quantity is zero
+    if (product.available_quantity === 0) {
+      // Grab the product seller user
+      const seller = await User.findById(product.seller.user);
+
+      // Create a notification for the seller
+      const notification = new Notification({
+        recipient: seller._id,
+        message: `${product.name} has sold out.`,
+        type: "WARNING",
+      });
+
+      // Save the notification
+      await notification.save();
+    }
 
     // Create the order
     const order = new Order({
@@ -406,7 +435,7 @@ const getOrderById = async (req, res) => {
 const getAllOrdersForTourist = async (req, res) => {
   try {
     const touristId = req.params.touristId;
-    
+
     // Validate if touristId is a valid ObjectId
     if (!mongoose.Types.ObjectId.isValid(touristId)) {
       return res.status(400).json({ message: "Invalid tourist ID" });
@@ -415,25 +444,27 @@ const getAllOrdersForTourist = async (req, res) => {
     // Fetch orders for the tourist and populate all relevant fields
     const orders = await Order.find({ tourist: touristId })
       .populate({
-        path: 'product', // Populate the 'product' field
+        path: "product", // Populate the 'product' field
         populate: [
-          { 
-            path: 'reviews', // Populate the 'reviews' field inside the product
-            populate: { 
-              path: 'reviewer' // Optionally populate the reviewer (Tourist) for each review
-            }
+          {
+            path: "reviews", // Populate the 'reviews' field inside the product
+            populate: {
+              path: "reviewer", // Optionally populate the reviewer (Tourist) for each review
+            },
           },
-          { 
-            path: 'seller', // Populate the 'seller' field inside the product
+          {
+            path: "seller", // Populate the 'seller' field inside the product
             // No need to specify fields here, it will include everything from Seller schema
-          }
-        ]
+          },
+        ],
       })
-      .populate('arrival_location'); // Populate the 'arrival_location' field in the order
+      .populate("arrival_location"); // Populate the 'arrival_location' field in the order
 
     // If no orders are found
     if (!orders || orders.length === 0) {
-      return res.status(404).json({ message: "No orders found for this tourist" });
+      return res
+        .status(404)
+        .json({ message: "No orders found for this tourist" });
     }
 
     res.json(orders); // Return the populated orders
@@ -441,7 +472,6 @@ const getAllOrdersForTourist = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
 
 const getAllOrders = async (req, res) => {
   try {

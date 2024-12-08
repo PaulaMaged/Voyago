@@ -4,18 +4,35 @@ import { useNavigate } from "react-router-dom";
 import check from "../helpers/checks";
 import axios from "axios";
 import currencyConversions from "../helpers/currencyConversions";
+import BookmarkButton from "./BookmarkButton";
+import "./viewActivityGuest.css";
+import getCheckoutUrl from "../helpers/getCheckoutUrl";
+
 export default function ViewActivityGuest() {
   const [searchTerm, setSearchTerm] = useState("");
   const [budget, setBudget] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [sortOrder, setSortOrder] = useState("");
   const [isBooked, setIsBooked] = useState(false);
   const navigate = useNavigate();
+  const [bookingStates, setBookingStates] = useState({});
+
+  const touristId = localStorage.getItem("roleId");
+
+  const handleStripePayment = async (activity) => {
+    const url = await getCheckoutUrl(
+      "activity",
+      "http://localhost:5173/viewActivityGuest?accepted",
+      "http://localhost:5173/viewActivityGuest?cancelled",
+      [activity]
+    );
+
+    window.location = url;
+  };
 
   const handleBookActivity = async (activityId) => {
-    const touristId = localStorage.getItem("roleId");
-
     const data = {
       plans: [
         {
@@ -25,18 +42,54 @@ export default function ViewActivityGuest() {
       ],
     };
 
+    setBookingStates((prev) => ({
+      ...prev,
+      [activityId]: "loading",
+    }));
+
     try {
       const response = await axios.post(
         `http://localhost:8000/api/tourist/tourist-pay/${touristId}`,
         data
       );
-      // Handle successful booking response
-      if (response.status === 201) {
-        alert("Activity booked successfully!");
-      }
+
+      const touristResponse = await axios.get(
+        `http://localhost:8000/api/tourist/get-tourist/${touristId}`
+      );
+
+      localStorage.setItem("walletBalance", touristResponse.data.wallet);
+
+      setBookingStates((prev) => ({
+        ...prev,
+        [activityId]: "success",
+      }));
+
+      alert(
+        `Activity booked successfully! Your new wallet balance is $${touristResponse.data.wallet}`
+      );
+
+      setTimeout(() => {
+        setBookingStates((prev) => ({
+          ...prev,
+          [activityId]: null,
+        }));
+      }, 2000);
     } catch (error) {
-      console.log(error);
-      alert(error.response.data.message);
+      console.error(error);
+
+      setBookingStates((prev) => ({
+        ...prev,
+        [activityId]: "error",
+      }));
+
+      alert(error.response?.data?.message || "Failed to book activity");
+
+      setTimeout(() => {
+        setBookingStates((prev) => ({
+          ...prev,
+          [activityId]: null,
+        }));
+      }, 2000);
     }
   };
 
@@ -47,8 +100,6 @@ export default function ViewActivityGuest() {
   const { error: categoriesError, data: categories } = useFetch(
     "http://localhost:8000/api/admin/get-all-activity-categories"
   );
-
-  const touristId = localStorage.getItem("roleId");
 
   const { error: bookingsError, data: bookings } = useFetch(
     `http://localhost:8000/api/tourist/get-all-tourists-activity-bookings/${touristId}`
@@ -141,54 +192,55 @@ export default function ViewActivityGuest() {
   };
 
   return (
-    <div style={styles.container}>
-      <h1 style={styles.title}>Upcoming Activities</h1>
+    <div className="activity-guest-container">
+      <div className="activity-guest-header">
+        <h1 className="activity-guest-title">Discover Activities</h1>
+        <p className="activity-guest-subtitle">
+          Find and book amazing experiences
+        </p>
+      </div>
 
-      <div style={styles.filterContainer}>
+      <div className="activity-guest-filters">
         <input
           type="text"
-          placeholder="Search name, category, tag"
+          placeholder="Search activities..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          style={styles.input}
+          className="filter-input"
         />
         <input
           type="number"
-          placeholder="Max Budget"
+          placeholder="Max price"
           value={budget}
           onChange={(e) => setBudget(e.target.value)}
-          style={styles.input}
+          className="filter-input"
         />
         <input
           type="date"
           value={selectedDate}
           onChange={(e) => setSelectedDate(e.target.value)}
-          style={styles.input}
+          className="filter-input"
         />
-
         <select
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
-          style={styles.select}
+          className="filter-input"
         >
           <option value="">All Categories</option>
-          {!categoriesError
-            ? categories.map((category) => (
-                <option key={category._id} value={category._id}>
-                  {category.category}
-                </option>
-              ))
-            : "Can't fetch categories right now"}
+          {categories.map((category) => (
+            <option key={category._id} value={category._id}>
+              {category.category}
+            </option>
+          ))}
         </select>
-
         <select
           value={sortOrder}
           onChange={(e) => setSortOrder(e.target.value)}
-          style={styles.select}
+          className="filter-input"
         >
           <option value="">Sort by Price</option>
-          <option value="asc">Low to High</option>
-          <option value="desc">High to Low</option>
+          <option value="asc">Price: Low to High</option>
+          <option value="desc">Price: High to Low</option>
         </select>
 
         <label for="booked"> My Bookings </label>
@@ -199,13 +251,46 @@ export default function ViewActivityGuest() {
         />
       </div>
 
-      <div style={styles.activityGrid}>
-        {!activitiesError && filteredActivities.length > 0 ? (
-          filteredActivities.map((activity) => {
-            if (activity.flag_inapproperiate == true) return null;
+      <div className="activity-guest-grid">
+        {filteredActivities.map((activity) => (
+          <div key={activity._id} className="activity-guest-card">
+            <div className="card-content">
+              <h2 className="card-title">{activity.title}</h2>
+              <p className="card-description">{activity.description}</p>
 
-            return (
-              <div key={activity._id} style={styles.card}>
+              <div className="tag-container">
+                {activity.tags?.map((tag) => (
+                  <span key={tag._id} className="tag">
+                    {tag.tag_name}
+                  </span>
+                ))}
+              </div>
+
+              <div className="card-details">
+                <div className="detail-item">
+                  <span className="detail-label">Price</span>
+                  <span className="detail-value">${activity.price}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">Duration</span>
+                  <span className="detail-value">{activity.duration} mins</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">Date</span>
+                  <span className="detail-value">
+                    {new Date(activity.start_time).toLocaleDateString()}
+                  </span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">Time</span>
+                  <span className="detail-value">
+                    {new Date(activity.start_time).toLocaleTimeString()}
+                  </span>
+                </div>
+              </div>
+
+              <div className="card-actions">
+                <BookmarkButton activityId={activity._id} />
                 <button
                   className="copy"
                   onClick={() =>
@@ -284,24 +369,50 @@ export default function ViewActivityGuest() {
                 </button>
                 <button
                   id="book-activity"
+                  className={`btn btn-book ${
+                    bookingStates[activity._id] || ""
+                  }`}
                   onClick={() => handleBookActivity(activity._id)}
+                  disabled={bookingStates[activity._id] === "loading"}
                 >
-                  Book activity
+                  <span className="button-text">
+                    {bookingStates[activity._id] === "loading"
+                      ? "Booking..."
+                      : bookingStates[activity._id] === "success"
+                      ? "Booked!"
+                      : bookingStates[activity._id] === "error"
+                      ? "Failed!"
+                      : "Book Now"}
+                  </span>
+                  {bookingStates[activity._id] === "success" && (
+                    <span className="checkmark">✓</span>
+                  )}
                 </button>
-
                 <button
-                  onClick={() => {
-                    handleFeedback(activity);
-                  }}
+                  className="btn btn-book"
+                  onClick={() => handleStripePayment(activity)}
+                >
+                  <span>Book - Card</span>
+                </button>
+                <button
+                  className="btn btn-feedback"
+                  onClick={() => handleFeedback(activity)}
                 >
                   Feedback
                 </button>
               </div>
-            );
-          })
-        ) : (
-          <p style={styles.noActivities}>No upcoming activities available.</p>
-        )}
+            </div>
+
+            <button
+              className="btn btn-copy"
+              onClick={() =>
+                navigator.clipboard.writeText(window.location.href)
+              }
+            >
+              Copy Link
+            </button>
+          </div>
+        ))}
       </div>
     </div>
   );

@@ -6,6 +6,8 @@ import currencyConversions from "../helpers/currencyConversions";
 import "./viewItinerary.css";
 import useFetch from "../hooks/useFetch";
 
+import "./viewItineraryGuest.css";
+import getCheckoutUrl from "../helpers/getCheckoutUrl";
 const ViewItineraryGuest = () => {
   const [itineraries, setItineraries] = useState([]);
   const [filteredItineraries, setFilteredItineraries] = useState([]);
@@ -44,6 +46,17 @@ const ViewItineraryGuest = () => {
     itineraries,
     isBooked,
   ]);
+
+  const handleStripePayment = async (itinerary) => {
+    const url = await getCheckoutUrl(
+      "itinerary",
+      "http://localhost:5173/viewItineraryGuest?accepted",
+      "http://localhost:5173/viewItineraryGuest?cancelled",
+      [itinerary]
+    );
+
+    window.location = url;
+  };
 
   const fetchItineraries = async () => {
     try {
@@ -169,18 +182,29 @@ const ViewItineraryGuest = () => {
       ],
     };
 
-    console.log(data);
     try {
       const response = await axios.post(
         `http://localhost:8000/api/tourist/tourist-pay/${touristId}`,
         data
       );
-      if (response.status === 201) {
-        alert("Itinerary booked successfully!");
-      }
+
+      // Get updated tourist data for wallet balance
+      const touristResponse = await axios.get(
+        `http://localhost:8000/api/tourist/get-tourist/${touristId}`
+      );
+
+      // Update wallet balance in localStorage
+      localStorage.setItem("walletBalance", touristResponse.data.wallet);
+
+      alert(
+        `Itinerary booked successfully! Your new wallet balance is $${touristResponse.data.wallet}`
+      );
     } catch (error) {
-      console.log(error);
-      alert(error.response.data.message);
+      console.error("Error booking itinerary:", error);
+      alert(
+        error.response?.data?.message ||
+          "An error occurred while booking the Itinerary. Please try again later."
+      );
     }
   };
 
@@ -254,7 +278,9 @@ const ViewItineraryGuest = () => {
           onChange={(e) => setSelectedTag(e.target.value)}
           className="filter-select"
         >
-          <option value="">All Tags</option>
+          <option key="tag-default" value="">
+            All Tags
+          </option>
           {getAllTags().map((tag) => (
             <option key={tag._id} value={tag._id}>
               {tag.tag_name}
@@ -267,7 +293,9 @@ const ViewItineraryGuest = () => {
           onChange={(e) => setSelectedCategory(e.target.value)}
           className="filter-select"
         >
-          <option value="">All Categories</option>
+          <option key="category-default" value="">
+            All Categories
+          </option>
           {categories.map((category) => (
             <option key={category._id} value={category._id}>
               {category.category}
@@ -280,9 +308,11 @@ const ViewItineraryGuest = () => {
           onChange={(e) => setSelectedLanguage(e.target.value)}
           className="filter-select"
         >
-          <option value="">All Languages</option>
+          <option key="language-default" value="">
+            All Languages
+          </option>
           {getAllLanguages().map((language) => (
-            <option key={language} value={language}>
+            <option key={`lang-${language}`} value={language}>
               {language}
             </option>
           ))}
@@ -316,9 +346,21 @@ const ViewItineraryGuest = () => {
           onChange={(e) => setSortCriteria(e.target.value)}
           className="filter-select"
         >
-          <option value="">Sort By</option>
-          <option value="price_asc">Price: Low to High</option>
-          <option value="price_desc">Price: High to Low</option>
+          <option key="sort-default" value="">
+            Sort By
+          </option>
+          <option key="sort-price-asc" value="price_asc">
+            Price: Low to High
+          </option>
+          <option key="sort-price-desc" value="price_desc">
+            Price: High to Low
+          </option>
+          <option key="sort-date-asc" value="date_asc">
+            Date: Earliest First
+          </option>
+          <option key="sort-date-desc" value="date_desc">
+            Date: Latest First
+          </option>
         </select>
 
         <label for="booking"> My Bookings</label>
@@ -339,7 +381,7 @@ const ViewItineraryGuest = () => {
           return (
             <div key={itinerary._id} className="itinerary-card">
               <button
-                className="copy"
+                className="btn-copy-link"
                 onClick={() =>
                   navigator.clipboard.writeText(window.location.href)
                 }
@@ -360,12 +402,8 @@ const ViewItineraryGuest = () => {
                 <strong>Language:</strong> {itinerary.language}
               </p>
               <p>
-                <strong>Price:</strong>
-                {currencyConversions
-                  .convertFromDB(itinerary.price)
-                  ?.toFixed(2) +
-                  " " +
-                  localStorage.getItem("currency")}
+                <strong>Price:</strong>{" "}
+                {currencyConversions.formatPrice(itinerary.price)}
               </p>
               <p>
                 <strong>Start Date:</strong>{" "}
@@ -399,26 +437,33 @@ const ViewItineraryGuest = () => {
               <button onClick={() => handleCancel(itinerary)}>
                 Cancel Itinerary
               </button>
-              <button
-                id="bookItin"
-                onClick={() => handleBookItinerary(itinerary._id)}
-              >
-                Book Itinerary
-              </button>
-              <button
-                onClick={() => {
-                  handleFeedbackItinerary(itinerary);
-                }}
-              >
-                Itinerary Feedback
-              </button>
-              <button
-                onClick={() => {
-                  handleFeedbackTourGuide(itinerary);
-                }}
-              >
-                Tour Guide Feedback
-              </button>
+
+              <div className="itinerary-actions">
+                <button
+                  className="itinerary-btn btn-book-itinerary"
+                  onClick={() => handleBookItinerary(itinerary)}
+                >
+                  <span>Book - Wallet</span>
+                </button>
+                <button
+                  className="itinerary-btn btn-book-itinerary"
+                  onClick={() => handleStripePayment(itinerary)}
+                >
+                  <span>Book - Card</span>
+                </button>
+                <button
+                  className="itinerary-btn btn-feedback-itinerary"
+                  onClick={() => handleFeedbackItinerary(itinerary)}
+                >
+                  Itinerary Feedback
+                </button>
+                <button
+                  className="itinerary-btn btn-feedback-guide"
+                  onClick={() => handleFeedbackTourGuide(itinerary)}
+                >
+                  Guide Feedback
+                </button>
+              </div>
             </div>
           );
         })}
