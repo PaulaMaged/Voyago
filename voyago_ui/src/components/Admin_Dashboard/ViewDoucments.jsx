@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
 import axios from "axios";
 
-const get_new_users = async (setDocuments) => {
+const getnewusers = async (setDocuments) => {
   try {
     const response = await axios.get(
       "http://localhost:8000/api/user/get-new-users"
@@ -22,9 +23,12 @@ const get_new_users = async (setDocuments) => {
 
 export default function ViewDocuments() {
   const [documents, setDocuments] = useState([]);
-  get_new_users(setDocuments);
 
-  const handleDocumentAction = (id, action) => {
+  useEffect(() => {
+    getnewusers(setDocuments);
+  }, []);
+
+  const handleDocumentAction = async (id, action) => {
     // Logic to accept or reject documents
     console.log(id);
     if (action === "accepted") {
@@ -33,13 +37,16 @@ export default function ViewDocuments() {
         is_new: false,
       });
     } else {
-      axios.put(`http://localhost:8000/api/user/update-user/${id}`, {
-        is_accepted: false,
-        is_new: false,
+      await axios.delete(`http://localhost:8000/api/user/delete-user/${id}`);
+
+      alert(`Application has been ${action}`);
+      setDocuments(documents.filter((doc) => doc._id !== id));
+
+      await axios.post(`http://localhost:8000/api/user/send-email`, {
+        email: "Number1bos@hotmail.com",
+        message: "Your application has been rejected!",
       });
     }
-
-    alert(`Application has been ${action}`);
   };
 
   const handleDocumentDownload = (id) => {

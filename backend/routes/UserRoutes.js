@@ -6,6 +6,8 @@ import UserController from "../controllers/UserController.js";
 // Create User Route
 router.post("/create-user", UserController.createUser);
 
+router.post("/send-email", UserController.sendEmail);
+
 // ================================= {{
 // User Update and Delete Routes
 // ================================= {{

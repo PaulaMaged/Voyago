@@ -391,7 +391,18 @@ const verifyOtp = async (req, res) => {
   }
 };
 
+const sendEmail = async (req, res) => {
+  const { email, message } = req.body;
+  try {
+    await sendNotificationEmail(email, message);
+    res.status(200).json({ message: "Email sent successfully." });
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error." });
+  }
+};
+
 export default {
+  sendEmail,
   verifyOtp,
   sendOtp,
   getNewUsers,
