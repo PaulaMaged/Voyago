@@ -435,7 +435,7 @@
 
 //above works well
 
-import { useState } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import {
   FaUser,
@@ -447,10 +447,11 @@ import {
   FaBuilding,
   FaFileAlt,
 } from "react-icons/fa";
-import backgroundImage from "../../assets/signUp.png"; // You'll need to add this image
+import backgroundImage from "../../assets/signUp.png";
 import logo from "../../assets/205255760.png";
 
 function SignUp() {
+  const [done, setDone] = useState(false);
   const [step, setStep] = useState(1);
   const [role, setRole] = useState("TOURIST");
   const [username, setUsername] = useState("");
@@ -469,39 +470,50 @@ function SignUp() {
   const [isStudent, setIsStudent] = useState(false);
   const [userId, setUserId] = useState(null);
   const [document, setDocument] = useState(null);
-  const [done, setDone] = useState(false);
 
   const handleUploading = (e) => {
     setDocument(e.target.files[0]);
+    console.log("Selected file:", e.target.files[0]);
   };
 
-  const handleNext = async (e) => {
+  const handleNext = (e) => {
     e.preventDefault();
-    const step1Data = { username, password, email, role: role.toUpperCase() };
-    try {
-      const response = await axios.post(
-        "http://localhost:8000/api/user/create-user",
-        step1Data
-      );
-      if (response.status === 201) {
-        setStep(2);
-        setUserId(response.data._id);
+    const step1Data = {
+      username: username,
+      password: password,
+      email: email,
+      role: role.toUpperCase(),
+    };
+    const register_user = async () => {
+      console.log("Step 1 Data:", step1Data);
+      try {
+        const response = await axios.post(
+          "http://localhost:8000/api/user/create-user",
+          step1Data
+        );
+        if (response.status === 201) {
+          setStep(2);
+          setUserId(response.data._id);
+        } else {
+          throw new Error("Registration failed");
+        }
+      } catch (error) {
+        if (error.response && error.response.status === 400) {
+          alert(error.response.data.message);
+          if (error.response.data.message.includes("Username")) setUsername("");
+          else setEmail("");
+        } else {
+          console.error(error);
+          alert("An error occurred during registration.");
+          setEmail("");
+          setUsername("");
+        }
       }
-    } catch (error) {
-      if (error.response && error.response.status === 400) {
-        alert(error.response.data.message);
-        if (error.response.data.message.includes("Username")) setUsername("");
-        else setEmail("");
-      } else {
-        console.error(error);
-        alert("An error occurred during registration.");
-        setEmail("");
-        setUsername("");
-      }
-    }
+    };
+    register_user();
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     const mobilePattern = /^[0-9-]*$/;
     if (
@@ -518,6 +530,13 @@ function SignUp() {
       return;
     }
 
+    const data_for_tourist = {
+      user: userId,
+      DOB: dob,
+      phone_number: mobile,
+      nationality: nationality,
+      is_student: isStudent,
+    };
     const formData = new FormData();
     formData.append("user", userId);
     if (role === "TOURIST" || role === "TOUR_GUIDE") {
@@ -545,6 +564,7 @@ function SignUp() {
 
     if (document) {
       formData.append("upFile", document);
+      console.log("File appended to FormData:", document);
     } else if (
       role === "TOUR_GUIDE" ||
       role === "ADVERTISER" ||
@@ -572,19 +592,36 @@ function SignUp() {
         url = "http://localhost:8000/api/user/register";
     }
 
-    try {
-      const response = await axios.post(url, formData);
-      if (response.status === 201 || response.status === 200) {
-        alert("Registration successful");
-        setDone(true);
-        setTimeout(() => {
-          window.location.href = "http://localhost:5173/";
-        }, 3000);
+    const registerUser = async () => {
+      try {
+        console.log("Submitting to URL:", url);
+        console.log("Role:", role);
+        let response = "";
+        if (role === "TOURIST") {
+          const response2 = await axios.post(url, data_for_tourist);
+          response = response2;
+        } else {
+          const response2 = await axios.post(url, formData);
+          response = response2;
+        }
+        console.log(response.status);
+
+        if (response.status === 201 || response.status === 200) {
+          alert("Registration successful");
+          setDone(true);
+          setTimeout(() => {
+            window.location.href = "http://localhost:5173/";
+          }, 3000);
+        } else {
+          throw new Error("Registration failed");
+        }
+      } catch (err) {
+        console.error("Error during registration:", err);
+        alert("An error occurred during registration.");
       }
-    } catch (err) {
-      console.error("Error during registration:", err);
-      alert("An error occurred during registration.");
-    }
+    };
+
+    registerUser();
   };
 
   return (

@@ -1000,8 +1000,29 @@ const bookActivity = async (req, res) => {
   }
 };
 
+const checkIfNew = async (req, res) => {
+  try {
+    const { touristId } = req.body;
+    const tourist = await Tourist.findById(touristId);
+
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    if (tourist.first_login) {
+      tourist.first_login = false;
+      await tourist.save();
+      return res.status(201).json({ message: "First login" });
+    } else {
+      return res.status(200).json({ message: "Not first login" });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 // Export the controllers
 export default {
+  checkIfNew,
   createTourist,
   rateProduct,
   updateTouristData,

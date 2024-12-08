@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const touristSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  first_login: { type: Boolean, default: true },
   points: {
     type: Number,
     default: 0,

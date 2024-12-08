@@ -422,6 +422,8 @@ const login = async (username, password, setShowTerms, setUserId) => {
       setShowTerms(true);
       const userId = response.data.userId;
       setUserId(userId);
+    } else if (response.status === 202) {
+      alert("Your documents are still under review. Please check back later.");
     }
   } catch (error) {
     console.error("Login error:", error);

@@ -17,9 +17,10 @@ const createUser = async (req, res) => {
     const payload = req.body;
     const existingUser = await User.findOne({ email: payload.email });
     const existingUsername = await User.findOne({ username: payload.username });
-    if (existingUser) {
-      return res.status(400).json({ message: "Email already in use" });
-    } else if (existingUsername) {
+
+    if (existingUsername) {
+      return res.status(400).json({ message: "Username already in use" });
+    } else if (existingUser) {
       return res.status(400).json({ message: "Email already in use" });
     }
 
@@ -257,6 +258,14 @@ const login = async (req, res) => {
         message: "Please accept the terms and conditions",
         userId: user._id,
       });
+    }
+    if (user.is_accepted === false && user.is_new === true) {
+      {
+        return res.status(202).json({
+          message: "Please wait for the admin to accept your request",
+          userId: user._id,
+        });
+      }
     }
 
     const token = createToken({ username, role });

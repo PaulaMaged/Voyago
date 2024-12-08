@@ -147,6 +147,8 @@
 
 //the above is totally correct and works fine just in case
 
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
   FaUser,
   FaLock,
@@ -158,7 +160,6 @@ import {
   FaChevronDown,
   FaChevronUp,
 } from "react-icons/fa";
-import React, { useState, useEffect } from "react";
 import Profile from "../Profiles/Tourist_profile";
 import ChangePassword from "../Profiles/Changepassword";
 import ComplaintForm from "./Tourist_complaint";
@@ -169,6 +170,7 @@ import ViewLandmarks from "../viewLandmarks";
 import ViewProductTourist from "../viewProductTourist";
 import ViewPurchasedProducts from "../viewPurchasedProducts";
 import LoyaltySystem from "./Loyalty_points";
+import WelcomeModal from "./welcomeMessage";
 
 export default function TouristDashboard() {
   const [activeSection, setActiveSection] = useState("profile");
@@ -177,7 +179,26 @@ export default function TouristDashboard() {
   const [isProfileOpen, setIsProfileOpen] = useState(true);
   const [isExploreOpen, setIsExploreOpen] = useState(true);
   const [isAccountOpen, setIsAccountOpen] = useState(true);
-  const [isProductsOpen, setIsProductsOpen] = useState(true); // Added state for Products section
+  const [isProductsOpen, setIsProductsOpen] = useState(true);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+
+  const checkIfNew = async () => {
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/api/tourist/check-if-new",
+        {
+          touristId,
+        }
+      );
+      if (response.status === 201) {
+        setShowWelcomeModal(true);
+      } else {
+        setShowWelcomeModal(false);
+      }
+    } catch (error) {
+      console.error("Error checking if new:", error);
+    }
+  };
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -187,7 +208,11 @@ export default function TouristDashboard() {
 
     const tourist_id = localStorage.getItem("roleId");
     setTouristId(tourist_id);
-  }, []);
+
+    if (tourist_id) {
+      checkIfNew();
+    }
+  }, [touristId]);
 
   const renderContent = () => {
     if (userId === null) {
@@ -263,7 +288,7 @@ export default function TouristDashboard() {
       case "explore":
         setIsExploreOpen(!isExploreOpen);
         break;
-      case "products": // Toggle products section visibility
+      case "products":
         setIsProductsOpen(!isProductsOpen);
         break;
       default:
@@ -399,7 +424,7 @@ export default function TouristDashboard() {
             )}
           </div>
 
-          {/* Loyalty System Section (New standalone section) */}
+          {/* Loyalty System Section */}
           <div>
             <button
               onClick={() => setActiveSection("loyalty")}
@@ -427,6 +452,11 @@ export default function TouristDashboard() {
           {renderContent()}
         </div>
       </main>
+
+      {/* Welcome Modal */}
+      {showWelcomeModal && (
+        <WelcomeModal onClose={() => setShowWelcomeModal(false)} />
+      )}
     </div>
   );
 }

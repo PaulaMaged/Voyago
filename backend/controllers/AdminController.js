@@ -592,8 +592,7 @@ const setInapproperiateFlagItinerary = async (req, res) => {
 };
 const getTotalUsers = async (req, res) => {
   try {
-    //await sendNotificationEmail("Number1bos@hotmail.com");
-    const totalUsers = await User.countDocuments();
+    const totalUsers = await User.countDocuments({ is_accepted: true });
     res.json({ totalUsers });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -611,6 +610,7 @@ const getTotalNewUsersInThismonth = async (req, res) => {
         $gte: startOfMonth,
         $lt: endOfMonth,
       },
+      is_accepted: true,
     });
 
     res.json({ newUsersThisMonth: users });
