@@ -52,6 +52,7 @@ import OrderConfirmation from "./components/OrderConfirmation";
 import { ThemeProvider } from './context/ThemeContext';
 import SellerDashboard from './components/Seller_Dashboard/Seller_dash';
 import TourGuideDashboard from "./components/TourGuide_Dashboard/TourGuide_dash";
+import TouristDashboardDemo from "./components/demo/TouristDashboardDemo";
 function App() {
   return (
     <ThemeProvider>
@@ -147,6 +148,7 @@ function App() {
               <TourGuideDashboard />
           } 
         />
+        <Route path="/demo/tourist-dashboard" element={<TouristDashboardDemo />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>
