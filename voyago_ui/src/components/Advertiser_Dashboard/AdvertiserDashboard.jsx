@@ -12,6 +12,8 @@ import {
   FaMoneyBillWave,
   FaUserCog,
   FaUserCheck,
+  FaBell,
+  FaChartBar,
 } from "react-icons/fa";
 
 import Profile from "../Profiles/Advertiser_profile";
@@ -23,6 +25,8 @@ import BookingHistory from "./BookingHistory";
 import ThemeSwitcher from '../ThemeSwitcher';
 import { applyTheme } from '../../utils/themeManager';
 import ActivityAttendance from './ActivityAttendance';
+import AdvTouristStats from '../Statistics/AdvTouristStats';
+import AdvertiserNotifications from '../Notifications/AdvertiserNotifications';
 
 export default function AdvertiserDashboard() {
   const [activeSection, setActiveSection] = useState("profile");
@@ -58,7 +62,11 @@ export default function AdvertiserDashboard() {
     ],
     analytics: [
       { key: "salesStats", label: "Sales Statistics", icon: <FaChartLine /> },
+      { key: "touristStats", label: "Tourist Statistics", icon: <FaChartBar /> },
       { key: "bookingHistory", label: "Booking History", icon: <FaCalendarAlt /> },
+    ],
+    notifications: [
+      { key: "notifications", label: "View Notifications", icon: <FaBell /> },
     ],
   };
 
@@ -66,6 +74,7 @@ export default function AdvertiserDashboard() {
     profile: FaUser,
     activities: FaRoute,
     analytics: FaMoneyBillWave,
+    notifications: FaBell,
   };
 
   const toggleSection = (section) => {
@@ -102,10 +111,14 @@ export default function AdvertiserDashboard() {
         return <ManageActivities />;
       case "salesStats":
         return <AdvSales />;
+      case "touristStats":
+        return <AdvTouristStats />;
       case "bookingHistory":
         return <BookingHistory />;
       case "attendance":
         return <ActivityAttendance />;
+      case "notifications":
+        return <AdvertiserNotifications />;
       default:
         return <Profile />;
     }
