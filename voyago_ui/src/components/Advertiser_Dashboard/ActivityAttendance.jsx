@@ -1,239 +1,98 @@
-import React, { useState, useEffect } from "react";
-import {
-  FaUser,
-  FaLock,
-  FaCalendarAlt,
-  FaChartLine,
-  FaClipboardList,
-  FaEdit,
-  FaChevronDown,
-  FaChevronUp,
-  FaRoute,
-  FaMoneyBillWave,
-  FaUserCog,
-  FaUserCheck,
-  FaTasks,
-  FaBell,
-  FaChartBar,
-} from "react-icons/fa";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-import Profile from "../Profiles/Advertiser_profile";
-import ChangePassword from "../Profiles/Changepassword";
-import ViewActivityAdv from "../viewActivityAdv";
-import ManageActivities from "./ManageActivities";
-import AdvSales from '../Sales/AdvSales';
-import BookingHistory from "./BookingHistory";
-import ThemeSwitcher from '../ThemeSwitcher';
-import { applyTheme } from '../../utils/themeManager';
-import ActivityAttendance from './ActivityAttendance';
-import AdvTouristStats from '../Statistics/AdvTouristStats';
-import AdvertiserNotifications from '../Notifications/AdvertiserNotifications';
+const ActivityAttendance = () => {
+  const [bookings, setBookings] = useState([]);
+  const [filteredBookings, setFilteredBookings] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const advertiserId = localStorage.getItem('roleId');
 
-export default function AdvertiserDashboard() {
-  const [activeSection, setActiveSection] = useState("profile");
-  const [userId, setUserId] = useState(null);
-  const [expandedSections, setExpandedSections] = useState([]);
-  const [isHovered, setIsHovered] = useState(false);
-  const [theme, setTheme] = useState('default');
-  const [activeTab, setActiveTab] = useState('activities');
-
-  useEffect(() => {
-    const id = localStorage.getItem("roleId");
-    if (id) {
-      setUserId(id);
+  const fetchBookings = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8000/api/advertiser/activity-bookings/${advertiserId}`);
+      setBookings(response.data);
+      setFilteredBookings(response.data);
+    } catch (error) {
+      console.error('Error fetching bookings:', error);
     }
-    applyTheme();
-  }, []);
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('preferred-theme');
-    if (savedTheme) {
-      handleThemeChange(savedTheme);
-    }
-  }, []);
-
-  const navItems = {
-    profile: [
-      { key: "profile", label: "Profile", icon: <FaUserCog /> },
-      { key: "changePassword", label: "Change Password", icon: <FaLock /> },
-    ],
-    activities: [
-      { key: "viewActivities", label: "View Activities", icon: <FaClipboardList /> },
-      { key: "manageActivities", label: "Manage Activities", icon: <FaTasks /> },
-      { key: "attendance", label: "Activity Attendance", icon: <FaUserCheck /> },
-    ],
-    analytics: [
-      { key: "salesStats", label: "Sales Statistics", icon: <FaChartLine /> },
-      { key: "touristStats", label: "Tourist Statistics", icon: <FaChartBar /> },
-      { key: "bookingHistory", label: "Booking History", icon: <FaCalendarAlt /> },
-    ],
-    notifications: [
-      { key: "notifications", label: "View Notifications", icon: <FaBell /> },
-    ],
   };
 
-  const sectionIcons = {
-    profile: FaUser,
-    activities: FaRoute,
-    analytics: FaMoneyBillWave,
-    notifications: FaBell,
-  };
+  useEffect(() => {
+    fetchBookings();
+  }, []);
 
-  const toggleSection = (section) => {
-    setExpandedSections(prev =>
-      prev.includes(section) 
-        ? prev.filter(item => item !== section)
-        : [...prev, section]
+  const handleSearch = (e) => {
+    const term = e.target.value.toLowerCase();
+    setSearchTerm(term);
+    
+    const filtered = bookings.filter(booking => 
+      booking.tourist.user.username.toLowerCase().includes(term) ||
+      booking.activity.title.toLowerCase().includes(term)
     );
+    setFilteredBookings(filtered);
   };
 
-  const handleThemeChange = (newTheme) => {
-    setTheme(newTheme);
-    applyTheme(newTheme);
-    localStorage.setItem('preferred-theme', newTheme);
-  };
-
-  const renderContent = () => {
-    if (userId === null) {
-      return (
-        <div className="flex justify-center items-center h-full text-gray-500">
-          Loading...
-        </div>
+  const markAsAttended = async (bookingId) => {
+    try {
+      const advertiserId = localStorage.getItem('roleId');
+      await axios.patch(
+        `http://localhost:8000/api/advertiser/mark-attendance/${advertiserId}/${bookingId}`
       );
-    }
-
-    switch (activeSection) {
-      case "profile":
-        return <Profile />;
-      case "changePassword":
-        return <ChangePassword />;
-      case "viewActivities":
-        return <ViewActivityAdv />;
-      case "manageActivities":
-        return <ManageActivities />;
-      case "salesStats":
-        return <AdvSales />;
-      case "touristStats":
-        return <AdvTouristStats />;
-      case "bookingHistory":
-        return <BookingHistory />;
-      case "attendance":
-        return <ActivityAttendance />;
-      case "notifications":
-        return <AdvertiserNotifications />;
-      default:
-        return <Profile />;
+      await fetchBookings();
+    } catch (error) {
+      console.error('Error marking attendance:', error);
+      alert('Error marking attendance: ' + error.message);
     }
   };
 
   return (
-    <div className="flex min-h-screen bg-[var(--background)]">
-      <aside 
-        className={`
-          transition-all duration-300 ease-[var(--ease-out)]
-          bg-[var(--primary)] text-[var(--surface)] 
-          shadow-xl p-4 fixed top-0 left-0 h-screen
-          ${isHovered ? 'w-64' : 'w-16'}
-        `}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        <div className="flex flex-col h-full">
-          <div className={`sidebar-header mb-6 ${isHovered ? 'text-center' : 'text-center'}`}>
-            {isHovered ? (
-              <h2 className="text-xl font-semibold">Advertiser Dashboard</h2>
-            ) : (
-              <div className="text-2xl">📢</div>
-            )}
-          </div>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-6">Activity Attendance</h1>
+      
+      <div className="mb-6">
+        <input
+          type="text"
+          placeholder="Search by tourist or activity name..."
+          value={searchTerm}
+          onChange={handleSearch}
+          className="w-full p-2 border border-gray-300 rounded-lg"
+        />
+      </div>
 
-          <nav className="space-y-2">
-            {Object.entries(navItems).map(([section, items]) => (
-              <div key={section} className="relative group">
-                <button
-                  onClick={() => toggleSection(section)}
-                  className={`
-                    w-full flex items-center 
-                    justify-${isHovered ? 'between' : 'center'} 
-                    p-3 rounded-lg 
-                    transition-all duration-300 ease-in-out
-                    bg-[var(--primary)]
-                    hover:bg-[var(--primaryLight)]
-                    active:bg-[var(--primaryDark)]
-                    text-[var(--surface)]
-                    hover:translate-x-1
-                    hover:shadow-md
-                  `}
-                >
-                  <span className="flex items-center">
-                    {React.createElement(sectionIcons[section], { className: 'text-xl' })}
-                    {isHovered && (
-                      <span className="ml-3">{section.replace(/([A-Z])/g, ' $1').trim()}</span>
-                    )}
+      <div className="grid gap-4">
+        {filteredBookings.map(booking => (
+          <div key={booking._id} className="bg-white p-4 rounded-lg shadow">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="font-semibold">{booking.activity.title}</h3>
+                <p className="text-sm text-gray-600">Tourist: {booking.tourist.user.username}</p>
+                <p className="text-sm text-gray-600">
+                  Booking Date: {new Date(booking.booking_date).toLocaleDateString()}
+                </p>
+                <p className="text-sm text-gray-600">
+                  Activity Date: {new Date(booking.activity.start_time).toLocaleDateString()}
+                </p>
+              </div>
+              <div>
+                {booking.attended ? (
+                  <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                    Attended
                   </span>
-                  {isHovered && (
-                    <span className="transition-transform duration-200">
-                      {expandedSections.includes(section) ? <FaChevronDown /> : <FaChevronUp />}
-                    </span>
-                  )}
-                </button>
-
-                {expandedSections.includes(section) && isHovered && (
-                  <div className="pl-4 mt-1 space-y-1">
-                    {items.map((item) => (
-                      <button
-                        key={item.key}
-                        onClick={() => setActiveSection(item.key)}
-                        className={`
-                          w-full flex items-center 
-                          p-2 rounded-lg 
-                          transition-all duration-300 ease-in-out
-                          text-sm
-                          ${
-                            activeSection === item.key 
-                            ? 'bg-[var(--secondary)] hover:bg-[var(--secondaryLight)] active:bg-[var(--secondaryDark)]' 
-                            : 'bg-[var(--primary)] hover:bg-[var(--primaryLight)] active:bg-[var(--primaryDark)]'
-                          }
-                          hover:translate-x-1
-                          hover:shadow-md
-                        `}
-                      >
-                        <span className="mr-3">{item.icon}</span>
-                        <span>{item.label}</span>
-                      </button>
-                    ))}
-                  </div>
+                ) : (
+                  <button
+                    onClick={() => markAsAttended(booking._id)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Mark as Attended
+                  </button>
                 )}
               </div>
-            ))}
-          </nav>
-
-          <div className="mt-auto pb-4">
-            <ThemeSwitcher 
-              onThemeChange={handleThemeChange}
-              currentTheme={theme}
-              isHovered={isHovered}
-            />
+            </div>
           </div>
-        </div>
-      </aside>
-
-      <main className={`
-        flex-1 p-8 transition-all duration-300 ease-[var(--ease-out)]
-        ${isHovered ? 'ml-64' : 'ml-16'}
-      `}>
-        <header className="mb-6">
-          <h1 className="text-3xl font-bold text-[var(--text-primary)] capitalize">
-            {activeSection.replace(/([A-Z])/g, ' $1').trim()}
-          </h1>
-        </header>
-        <div className="bg-[var(--surface)] shadow-lg rounded-lg p-6 
-          transition-all duration-300 ease-[var(--ease-out)]
-          hover:shadow-xl"
-        >
-          {renderContent()}
-        </div>
-      </main>
+        ))}
+      </div>
     </div>
   );
-} 
+};
+
+export default ActivityAttendance;
