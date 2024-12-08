@@ -5,7 +5,8 @@ import check from "../helpers/checks";
 import axios from "axios";
 import currencyConversions from "../helpers/currencyConversions";
 import BookmarkButton from "./BookmarkButton";
-import './viewActivityGuest.css';
+import "./viewActivityGuest.css";
+import getCheckoutUrl from "../helpers/getCheckoutUrl";
 
 export default function ViewActivityGuest() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -17,9 +18,20 @@ export default function ViewActivityGuest() {
   const navigate = useNavigate();
   const [bookingStates, setBookingStates] = useState({});
 
-  const handleBookActivity = async (activityId) => {
-    const touristId = localStorage.getItem("roleId");
+  const touristId = localStorage.getItem("roleId");
 
+  const handleStripePayment = async (activity) => {
+    const url = await getCheckoutUrl(
+      "activity",
+      "http://localhost:5173/viewActivityGuest?accepted",
+      "http://localhost:5173/viewActivityGuest?cancelled",
+      [activity]
+    );
+
+    window.location = url;
+  };
+
+  const handleBookActivity = async (activityId) => {
     const data = {
       plans: [
         {
@@ -29,9 +41,9 @@ export default function ViewActivityGuest() {
       ],
     };
 
-    setBookingStates(prev => ({
+    setBookingStates((prev) => ({
       ...prev,
-      [activityId]: 'loading'
+      [activityId]: "loading",
     }));
 
     try {
@@ -43,37 +55,38 @@ export default function ViewActivityGuest() {
       const touristResponse = await axios.get(
         `http://localhost:8000/api/tourist/get-tourist/${touristId}`
       );
-      
-      localStorage.setItem('walletBalance', touristResponse.data.wallet);
-      
-      setBookingStates(prev => ({
+
+      localStorage.setItem("walletBalance", touristResponse.data.wallet);
+
+      setBookingStates((prev) => ({
         ...prev,
-        [activityId]: 'success'
+        [activityId]: "success",
       }));
-      
-      alert(`Activity booked successfully! Your new wallet balance is $${touristResponse.data.wallet}`);
+
+      alert(
+        `Activity booked successfully! Your new wallet balance is $${touristResponse.data.wallet}`
+      );
 
       setTimeout(() => {
-        setBookingStates(prev => ({
+        setBookingStates((prev) => ({
           ...prev,
-          [activityId]: null
+          [activityId]: null,
         }));
       }, 2000);
-      
     } catch (error) {
       console.error(error);
-      
-      setBookingStates(prev => ({
+
+      setBookingStates((prev) => ({
         ...prev,
-        [activityId]: 'error'
+        [activityId]: "error",
       }));
-      
+
       alert(error.response?.data?.message || "Failed to book activity");
 
       setTimeout(() => {
-        setBookingStates(prev => ({
+        setBookingStates((prev) => ({
           ...prev,
-          [activityId]: null
+          [activityId]: null,
         }));
       }, 2000);
     }
@@ -139,7 +152,9 @@ export default function ViewActivityGuest() {
     <div className="activity-guest-container">
       <div className="activity-guest-header">
         <h1 className="activity-guest-title">Discover Activities</h1>
-        <p className="activity-guest-subtitle">Find and book amazing experiences</p>
+        <p className="activity-guest-subtitle">
+          Find and book amazing experiences
+        </p>
       </div>
 
       <div className="activity-guest-filters">
@@ -192,7 +207,7 @@ export default function ViewActivityGuest() {
             <div className="card-content">
               <h2 className="card-title">{activity.title}</h2>
               <p className="card-description">{activity.description}</p>
-              
+
               <div className="tag-container">
                 {activity.tags?.map((tag) => (
                   <span key={tag._id} className="tag">
@@ -227,18 +242,30 @@ export default function ViewActivityGuest() {
               <div className="card-actions">
                 <BookmarkButton activityId={activity._id} />
                 <button
-                  className={`btn btn-book ${bookingStates[activity._id] || ''}`}
+                  className={`btn btn-book ${
+                    bookingStates[activity._id] || ""
+                  }`}
                   onClick={() => handleBookActivity(activity._id)}
-                  disabled={bookingStates[activity._id] === 'loading'}
+                  disabled={bookingStates[activity._id] === "loading"}
                 >
                   <span className="button-text">
-                    {bookingStates[activity._id] === 'loading' ? 'Booking...' :
-                     bookingStates[activity._id] === 'success' ? 'Booked!' :
-                     bookingStates[activity._id] === 'error' ? 'Failed!' :
-                     'Book Now'}
+                    {bookingStates[activity._id] === "loading"
+                      ? "Booking..."
+                      : bookingStates[activity._id] === "success"
+                      ? "Booked!"
+                      : bookingStates[activity._id] === "error"
+                      ? "Failed!"
+                      : "Book Now"}
                   </span>
-                  {bookingStates[activity._id] === 'success' && 
-                    <span className="checkmark">✓</span>}
+                  {bookingStates[activity._id] === "success" && (
+                    <span className="checkmark">✓</span>
+                  )}
+                </button>
+                <button
+                  className="btn btn-book"
+                  onClick={() => handleStripePayment(activity)}
+                >
+                  <span>Book - Card</span>
                 </button>
                 <button
                   className="btn btn-feedback"
@@ -248,10 +275,12 @@ export default function ViewActivityGuest() {
                 </button>
               </div>
             </div>
-            
+
             <button
               className="btn btn-copy"
-              onClick={() => navigator.clipboard.writeText(window.location.href)}
+              onClick={() =>
+                navigator.clipboard.writeText(window.location.href)
+              }
             >
               Copy Link
             </button>
@@ -332,4 +361,3 @@ export default function ViewActivityGuest() {
 //     color: "#666",
 //   },
 // };
-
