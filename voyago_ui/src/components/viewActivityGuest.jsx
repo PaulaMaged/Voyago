@@ -18,64 +18,68 @@ export default function ViewActivityGuest() {
   const [bookingStates, setBookingStates] = useState({});
 
   const handleBookActivity = async (activityId) => {
-    const touristId = localStorage.getItem("roleId");
-
-    const data = {
-      plans: [
-        {
-          type: "Activity",
-          activityId: activityId,
-        },
-      ],
-    };
-
-    setBookingStates(prev => ({
-      ...prev,
-      [activityId]: 'loading'
-    }));
-
     try {
+      // Get the activity from the activities list
+      const activity = activities.find(act => act._id === activityId);
+      if (!activity) {
+        console.error('Activity not found');
+        return;
+      }
+
+      // Check if activity is already booked
+      const isAlreadyBooked = await check.isBooked(activity, "activity");
+      if (isAlreadyBooked) {
+        alert("You have already booked this activity.");
+        return;
+      }
+
+      // Check if activity is in the past
+      const isPast = check.isCompleted(activity);
+      if (isPast) {
+        alert("Cannot book past activities");
+        return;
+      }
+
+      setBookingStates(prev => ({ ...prev, [activityId]: 'loading' }));
+
+      const touristId = localStorage.getItem("roleId");
       const response = await axios.post(
         `http://localhost:8000/api/tourist/tourist-pay/${touristId}`,
-        data
+        {
+          plans: [
+            {
+              type: "Activity",
+              activityId: activityId,
+            },
+          ],
+        }
       );
 
-      const touristResponse = await axios.get(
-        `http://localhost:8000/api/tourist/get-tourist/${touristId}`
-      );
-      
-      localStorage.setItem('walletBalance', touristResponse.data.wallet);
-      
-      setBookingStates(prev => ({
-        ...prev,
-        [activityId]: 'success'
-      }));
-      
-      alert(`Activity booked successfully! Your new wallet balance is $${touristResponse.data.wallet}`);
-
-      setTimeout(() => {
-        setBookingStates(prev => ({
-          ...prev,
-          [activityId]: null
-        }));
-      }, 2000);
-      
+      if (response.status === 201) {
+        setBookingStates(prev => ({ ...prev, [activityId]: 'success' }));
+        alert("Activity booked successfully!");
+      }
     } catch (error) {
-      console.error(error);
+      console.error("Error booking activity:", error);
+      setBookingStates(prev => ({ ...prev, [activityId]: 'error' }));
       
-      setBookingStates(prev => ({
-        ...prev,
-        [activityId]: 'error'
-      }));
-      
-      alert(error.response?.data?.message || "Failed to book activity");
-
-      setTimeout(() => {
-        setBookingStates(prev => ({
-          ...prev,
-          [activityId]: null
-        }));
-      }, 2000);
+      if (error.response) {
+        switch (error.response.status) {
+          case 409:
+            alert("You have already booked this activity.");
+            break;
+          case 400:
+            alert(error.response.data.message || "Invalid booking request.");
+            break;
+          case 403:
+            alert("Insufficient wallet balance. Please top up your wallet.");
+            break;
+          default:
+            alert("An error occurred while booking the activity. Please try again.");
+        }
+      } else {
+        alert("Network error. Please check your connection and try again.");
+      }
     }
   };
 

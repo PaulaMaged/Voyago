@@ -21,7 +21,7 @@ const BookmarkButton = ({ activityId }) => {
       } else {
         // Find the bookmark ID first
         const bookmarks = await axios.get(`http://localhost:8000/api/tourist/get-bookmarks/${touristId}`);
-        const bookmark = bookmarks.data.find(b => b.activity._id === activityId);
+        const bookmark = bookmarks.data.find(b => b.activity && b.activity._id === activityId);
         
         if (bookmark) {
           await axios.delete(`http://localhost:8000/api/tourist/remove-bookmark/${touristId}/${bookmark._id}`);
@@ -38,16 +38,24 @@ const BookmarkButton = ({ activityId }) => {
   useEffect(() => {
     const checkBookmarkStatus = async () => {
       try {
+        if (!touristId || !activityId) {
+          setIsBookmarked(false);
+          setCount(0);
+          return;
+        }
+
         const response = await axios.get(`http://localhost:8000/api/tourist/get-bookmarks/${touristId}`);
-        setIsBookmarked(response.data.some(bookmark => bookmark.activity._id === activityId));
         
-        // Temporarily comment out bookmark count fetch until endpoint is ready
-        // const activityResponse = await axios.get(`http://localhost:8000/api/tourist/activity-bookmark-count/${activityId}`);
-        // setCount(activityResponse.data.count);
-        setCount(0); // Default to 0 for now
+        // Filter out bookmarks with null activities before checking
+        const validBookmarks = response.data.filter(bookmark => bookmark.activity != null);
+        setIsBookmarked(validBookmarks.some(bookmark => bookmark.activity._id === activityId));
+        
+        // Temporarily set count to 0 until endpoint is ready
+        setCount(0);
       } catch (error) {
         console.error('Error checking bookmark status:', error);
-        setCount(0); // Ensure count is set even on error
+        setIsBookmarked(false);
+        setCount(0);
       }
     };
 
@@ -58,18 +66,12 @@ const BookmarkButton = ({ activityId }) => {
 
   return (
     <button 
-      className={`bookmark-button ${isBookmarked ? 'active' : ''}`}
       onClick={handleBookmark}
+      className={`bookmark-button ${isBookmarked ? 'bookmarked' : ''}`}
       aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
     >
-      <span className="bookmark-icon">
-        {isBookmarked ? <FaBookmark /> : <FaRegBookmark />}
-      </span>
-      {count > 0 && (
-        <span className="bookmark-count">
-          {count}
-        </span>
-      )}
+      <i className={`fas fa-bookmark ${isBookmarked ? 'active' : ''}`}></i>
+      {count > 0 && <span className="bookmark-count">{count}</span>}
     </button>
   );
 };

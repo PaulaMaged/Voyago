@@ -1,17 +1,23 @@
 import axios from "axios";
 
 const isBooked = async (event, type) => {
-  let isBooked = false;
-
+  if (!event?._id) return false;
+  
   const touristId = localStorage.getItem("roleId");
+  if (!touristId) return false;
 
-  const { data: bookings } = await axios.get(
-    `http://localhost:8000/api/tourist/get-all-tourists-${type}-bookings/${touristId}`
-  );
+  try {
+    const { data: bookings } = await axios.get(
+      `http://localhost:8000/api/tourist/get-all-tourists-${type}-bookings/${touristId}`
+    );
 
-  isBooked =
-    bookings && bookings.some((booking) => event._id == booking[type]._id);
-  return isBooked;
+    return bookings?.some(booking => 
+      booking?.[type]?._id === event._id
+    ) || false;
+  } catch (error) {
+    console.error('Error checking booking status:', error);
+    return false;
+  }
 };
 
 const getEndDateActivity = (activity) => {
@@ -59,16 +65,16 @@ const isPastItinerary = (itinerary) => {
   return isPast;
 };
 
-const isCompleted = async (event, type) => {
-  let isCompleted = false;
-
-  if (type == "activity") {
-    isCompleted = isPastActivity(event);
-  } else if (type == "itinerary") {
-    isCompleted = isPastItinerary(event);
+const isCompleted = (activity) => {
+  if (!activity?.start_time || !activity?.duration) {
+    return false;
   }
 
-  return isCompleted;
+  const endDate = getEndDateActivity(activity);
+  if (!endDate) return false;
+
+  const currentDate = new Date();
+  return currentDate > endDate;
 };
 
 export default {

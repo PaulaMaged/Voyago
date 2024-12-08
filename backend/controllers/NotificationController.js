@@ -7,20 +7,25 @@ export const createUpcomingActivityNotifications = async () => {
   try {
     const currentDate = new Date();
     const upcomingDate = new Date();
-    upcomingDate.setDate(currentDate.getDate() + 1); // 1 day before the activity
+    upcomingDate.setDate(currentDate.getDate() + 1);
 
     const bookings = await ActivityBooking.find({
       active: true,
       attended: false,
-    }).populate("activity tourist");
+    }).populate({
+      path: 'activity',
+      match: { start_time: { $exists: true } }
+    }).populate('tourist');
 
-    for (const booking of bookings) {
-      const activityStartDate = new Date(booking.activity.start_date);
+    const validBookings = bookings.filter(booking => booking.activity);
+
+    for (const booking of validBookings) {
+      const activityStartDate = new Date(booking.activity.start_time);
       if (activityStartDate <= upcomingDate && activityStartDate > currentDate) {
         const notification = new Notification({
-          recipient: booking.tourist.user, // Assuming tourist has a user reference
+          recipient: booking.tourist.user,
           type: "NORMAL",
-          message: `Reminder: Your activity "${booking.activity.name}" is happening soon.`,
+          message: `Reminder: Your activity "${booking.activity.title}" is happening soon.`,
         });
         await notification.save();
       }
@@ -33,19 +38,26 @@ export const createUpcomingActivityNotifications = async () => {
 export const checkBookmarkedActivities = async () => {
   try {
     const bookmarks = await Bookmark.find()
-      .populate('tourist')
-      .populate('activity');
+      .populate({
+        path: 'activity',
+        match: { 
+          booking_open: { $exists: true },
+          start_time: { $exists: true },
+          flag_inapproperiate: { $exists: true }
+        }
+      })
+      .populate('tourist');
 
-    for (const bookmark of bookmarks) {
+    const validBookmarks = bookmarks.filter(bookmark => bookmark.activity);
+
+    for (const bookmark of validBookmarks) {
       const activity = bookmark.activity;
       const tourist = bookmark.tourist;
       
-      // Check if activity is available for booking
       if (activity.booking_open && 
           new Date(activity.start_time) > new Date() && 
           !activity.flag_inapproperiate) {
             
-        // Check if notification already exists
         const existingNotification = await Notification.findOne({
           recipient: tourist.user,
           message: `Activity "${activity.title}" that you bookmarked is now available for booking!`,
