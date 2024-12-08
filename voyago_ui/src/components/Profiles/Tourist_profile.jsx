@@ -245,51 +245,30 @@ import {
 import currencyConversions from "../../helpers/currencyConversions";
 
 function Tourist_profile({ userId, touristId }) {
-  const [profileData, setProfileData] = useState({
-    user: { email: '', username: '' },
-    phone_number: '',
-    nationality: '',
-    is_student: false,
-    wallet: 0,
-    DOB: ''
-  });
-  const [profilePicture, setProfilePicture] = useState(null);
+  const [profileData, setProfileData] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isPending, setPending] = useState(true);
   const [error, setError] = useState(null);
   const [currency, setCurrency] = useState(
     localStorage.getItem("currency") || "USD"
   );
-  const [file, setFile] = useState(null);
+  const [file, setFile] = useState(null); // To hold the profile picture file
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Get profile data
-        const profileResponse = await axios.get(
+        const response = await axios.get(
           `http://localhost:8000/api/tourist/get-tourist/${touristId}`
         );
-
-        if (profileResponse.status === 200) {
-          profileResponse.data.wallet = currencyConversions.convertFromDB(
-            profileResponse.data.wallet
+        if (response.status === 200) {
+          response.data.wallet = currencyConversions.convertFromDB(
+            response.data.wallet
           );
-          setProfileData(profileResponse.data);
+          setProfileData(response.data);
+          setPending(false);
+        } else {
+          setError("Error fetching data");
         }
-
-        // Try to get profile picture, but don't block on failure
-        try {
-          const pictureResponse = await axios.get(
-            `http://localhost:8000/api/tourist/profile-picture/${touristId}`
-          );
-          if (pictureResponse.status === 200) {
-            setProfilePicture(pictureResponse.data.image_url);
-          }
-        } catch (pictureError) {
-          console.log("No profile picture found");
-        }
-
-        setPending(false);
       } catch (error) {
         setError(error.message);
         setPending(false);
@@ -297,14 +276,6 @@ function Tourist_profile({ userId, touristId }) {
     };
     fetchData();
   }, [touristId]);
-
-  const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setProfileData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -315,27 +286,20 @@ function Tourist_profile({ userId, touristId }) {
       formData.append("phone_number", profileData.phone_number);
       formData.append("nationality", profileData.nationality);
       formData.append("is_student", profileData.is_student);
-      
       if (file) {
         formData.append("profile_picture", file);
-        
-        // Upload profile picture
-        const uploadResponse = await axios.post(
-          `http://localhost:8000/api/tourist/upload-profile-picture/${profileData._id}`,
-          formData,
-          { 
-            headers: { 
-              "Content-Type": "multipart/form-data" 
-            } 
-          }
-        );
-
-        if (uploadResponse.status === 200) {
-          setProfilePicture(uploadResponse.data.image_url);
-        }
       }
 
-      // Update other tourist information
+      const response2 = await axios.put(
+        `http://localhost:8000/api/user/update-user/${userId}`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+
+      if (response2.status !== 200) {
+        return alert("Email already exists");
+      }
+
       const response = await axios.put(
         `http://localhost:8000/api/tourist/update-tourist/${profileData._id}`,
         {
@@ -344,13 +308,13 @@ function Tourist_profile({ userId, touristId }) {
           is_student: profileData.is_student,
         }
       );
-
       if (response.status === 200) {
         alert("Profile updated successfully");
+      } else {
+        alert("Error updating profile");
       }
     } catch (error) {
-      console.error("Error updating profile:", error);
-      alert(error.response?.data?.message || "Error updating profile");
+      console.log(error.message);
     }
   };
 
@@ -391,10 +355,11 @@ function Tourist_profile({ userId, touristId }) {
 
   return (
     <div className="p-4 max-w-3xl mx-auto bg-white shadow-lg rounded-lg">
+      {/* Profile Picture */}
       <div className="flex justify-center mb-4">
-        {profilePicture ? (
+        {profileData.profile_picture ? (
           <img
-            src={`http://localhost:8000/uploads/${profilePicture}`}
+            src={`http://localhost:8000/uploads/${profileData.profile_picture}`}
             alt="Profile"
             className="rounded-full w-24 h-24 object-cover"
           />
@@ -447,46 +412,78 @@ function Tourist_profile({ userId, touristId }) {
           </div>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Phone Number
+              Email
+            </label>
+            <input
+              type="email"
+              value={profileData.user.email}
+              onChange={(e) =>
+                setProfileData({
+                  ...profileData,
+                  user: { ...profileData.user, email: e.target.value },
+                })
+              }
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Mobile Number
             </label>
             <input
               type="text"
-              name="phone_number"
-              value={profileData.phone_number || ''}
-              onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+              value={profileData.phone_number}
+              onChange={(e) =>
+                setProfileData({ ...profileData, phone_number: e.target.value })
+              }
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+              required
             />
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Nationality
             </label>
             <input
               type="text"
-              name="nationality"
-              value={profileData.nationality || ''}
-              onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+              value={profileData.nationality}
+              onChange={(e) =>
+                setProfileData({ ...profileData, nationality: e.target.value })
+              }
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+              required
             />
           </div>
-
           <div>
-            <label className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                name="is_student"
-                checked={profileData.is_student || false}
-                onChange={handleInputChange}
-                className="rounded text-teal-600"
-              />
-              <span className="text-sm text-gray-700">Student</span>
+            <label className="block text-sm font-medium text-gray-700">
+              Is Student
             </label>
+            <input
+              type="checkbox"
+              checked={profileData.is_student}
+              onChange={(e) =>
+                setProfileData({ ...profileData, is_student: e.target.checked })
+              }
+              className="focus:ring-teal-500"
+            />
           </div>
-
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Currency of Choice
+            </label>
+            <select
+              value={currency}
+              onChange={handleCurrency}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
+            >
+              <option value="USD">USD</option>
+              <option value="EGY">EGY</option>
+            </select>
+          </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Profile Picture
@@ -497,7 +494,6 @@ function Tourist_profile({ userId, touristId }) {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm"
             />
           </div>
-
           <div>
             <button
               type="submit"

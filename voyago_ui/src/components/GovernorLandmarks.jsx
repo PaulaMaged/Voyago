@@ -208,96 +208,114 @@ const GovernorLandmarks = () => {
   };
 
   return (
-    <div className="landmarks-viewer">
-      <h1 className="text-3xl font-bold text-center mb-8">
-        Landmarks Management
-      </h1>
+    <div style={{ padding: '20px' }}>
+      <h1>Landmarks Management</h1>
+      
+      {/* Search and Filter Controls */}
+      <div style={{ marginBottom: '20px', display: 'flex', gap: '10px' }}>
+        <input
+          type="text"
+          placeholder="Search landmarks by Name or Tag..."
+          value={searchTerm}
+          onChange={handleSearchChange}
+          style={{ padding: '5px', width: '450px'  }}
+        />
+        
+        <select 
+          value={selectedTag} 
+          onChange={handleTagChange} 
+          style={{ padding: '5px', minWidth: '150px' }}
+        >
+          <option value="">All Tags</option>
+          {allTags.map(tag => (
+            <option key={tag._id} value={tag.tag_name}>{tag.tag_name}</option>
+          ))}
+        </select>
 
-      <div className="filters">
-        <div className="flex items-center gap-2 flex-1">
-          <input
-            type="text"
-            placeholder="Search landmarks by Name or Tag..."
-            value={searchTerm}
-            onChange={handleSearchChange}
-            className="flex-1 p-2 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
-          />
-          
-          <select 
-            value={selectedTag} 
-            onChange={handleTagChange}
-            className="min-w-[150px] p-2 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
-          >
-            <option value="">All Tags</option>
-            {allTags.map(tag => (
-              <option key={tag._id} value={tag.tag_name}>{tag.tag_name}</option>
-            ))}
-          </select>
-
-          <button 
-            onClick={() => {
-              setIsModalOpen(true);
-              setEditingLandmark(null);
-              resetFormData();
-            }}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors flex items-center gap-2"
-          >
-            Add New Landmark
-          </button>
-        </div>
+        <button 
+          onClick={() => {
+            setIsModalOpen(true);
+            setEditingLandmark(null);
+            resetFormData();
+          }}
+          style={{ 
+            padding: '5px 15px',
+            backgroundColor: '#4CAF50',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}
+        >
+          Add New Landmark
+        </button>
       </div>
 
       {/* Landmarks Grid */}
-      <div className="landmarks-list">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
         {filteredLandmarks.map(landmark => (
-          <div key={landmark._id} className="bg-white rounded-xl shadow-md overflow-hidden hover:-translate-y-2 transition-all duration-300 hover:shadow-xl">
-            <div className="p-6">
-              <h2 className="text-xl font-bold mb-4 text-gray-800">{landmark.name}</h2>
-              
-              <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                {landmark.description}
-              </p>
+          <div key={landmark._id} style={{ 
+            border: '1px solid #ddd', 
+            borderRadius: '8px',
+            padding: '15px',
+            backgroundColor: 'white',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+          }}>
+            <h2 style={{ marginTop: 0 }}>{landmark.name}</h2>
+            
+            {landmark.image && (
+              <img 
+                src={landmark.image} 
+                alt={landmark.name} 
+                style={{ 
+                  width: '100%', 
+                  height: '200px', 
+                  objectFit: 'cover', 
+                  borderRadius: '4px',
+                  marginBottom: '10px' 
+                }} 
+              />
+            )}
+            
+            <p><strong>Description:</strong> {landmark.description}</p>
+            <p><strong>Type:</strong> {landmark.types}</p>
+            {landmark.location && (
+              <p><strong>Location:</strong> {landmark.location.latitude}, {landmark.location.longitude}</p>
+            )}
+            <p><strong>Opening Hours:</strong> {landmark.opening_hours} hours</p>
+            <p><strong>Tags:</strong> {
+              landmark.tags && landmark.tags.length > 0 
+                ? landmark.tags.map(tag => tag.tag_name).join(', ') 
+                : 'No tags'
+            }</p>
 
-              <div className="space-y-2 mb-4">
-                <p className="text-sm text-gray-600">
-                  <span className="font-semibold">Type:</span> {landmark.types}
-                </p>
-                <p className="text-sm text-gray-600">
-                  <span className="font-semibold">Location:</span> {landmark.location.latitude}, {landmark.location.longitude}
-                </p>
-                <p className="text-sm text-gray-600">
-                  <span className="font-semibold">Opening Hours:</span> {landmark.opening_hours <= 12 ? 
-                    `${landmark.opening_hours} AM` : 
-                    `${landmark.opening_hours - 12} PM`}
-                </p>
-              </div>
-
-              <div className="space-y-1">
-                <p className="text-sm font-semibold text-gray-700">Tags:</p>
-                <div className="flex flex-wrap gap-2">
-                  {landmark.tags && landmark.tags.length > 0 ? (
-                    landmark.tags.map(tag => (
-                      <span key={tag.tag_name} 
-                        className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-medium">
-                        {tag.tag_name}
-                      </span>
-                    ))
-                  ) : (
-                    <span className="text-sm text-gray-500">No tags</span>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
+            <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
               <button 
                 onClick={() => openEditModal(landmark)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+                style={{ 
+                  flex: 1,
+                  padding: '8px',
+                  backgroundColor: '#2196F3',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
                 Edit
               </button>
               <button 
                 onClick={() => handleDeleteLandmark(landmark._id)}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors">
+                style={{ 
+                  flex: 1,
+                  padding: '8px',
+                  backgroundColor: '#f44336',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
                 Delete
               </button>
             </div>

@@ -1,3 +1,4 @@
+// Import the required models for the Itinerary and Tourist entities
 import Itinerary from "../models/Itinerary.js";
 import Activity from "../models/Activity.js";
 import Tourist from "../models/Tourist.js";
@@ -12,24 +13,6 @@ import ActivityReview from "../models/ActivityReview.js";
 import TourGuide from "../models/TourGuide.js"; // Added
 import Product from "../models/Product.js"; // Added
 import Complain from "../models/Complaint.js";
-import Notification from "../models/Notification.js";
-import Bookmark from "../models/Bookmark.js";
-import multer from "multer";
-import path from "path";
-import TouristImage from "../models/TouristImage.js";
-
-// Set up multer storage
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/");
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname));
-  },
-});
-
-const upload = multer({ storage: storage });
-
 /**
  * Create a new tourist.
  * @param {Object} req - Express request object.
@@ -258,30 +241,6 @@ const touristPay = async (req, res) => {
   } catch (error) {
     console.error("Error in touristPay:", error);
     res.status(500).json({ error: error.message });
-  }
-};
-
-const bookItineraryStripe = async (touristId, itineraryId) => {
-  try {
-    const itineraryBooked = await ItineraryBooking.findOne({
-      itinerary: itineraryId,
-      tourist: touristId,
-    });
-
-    if (itineraryBooked) {
-      console.log("You have already booked this itinerary");
-      return;
-    }
-
-    await ItineraryBooking.create({
-      itinerary: itineraryId,
-      tourist: touristId,
-      attended: false,
-      active: true,
-      booking_date: new Date(),
-    });
-  } catch (error) {
-    console.log("Error occured whilst booking: " + error.message);
   }
 };
 
@@ -1012,53 +971,17 @@ const bookActivity = async (req, res) => {
   try {
     const { activityId, touristId } = req.body;
 
-    // Check if the activity exists
+    // Check if the activity and tourist exist
     const activity = await Activity.findById(activityId);
+    const tourist = await Tourist.findById(touristId);
+
     if (!activity) {
       return res.status(404).json({ error: "Activity not found" });
     }
 
-    // Check if bookings are open
-    if (!activity.booking_open) {
-      return res
-        .status(400)
-        .json({ error: "Bookings for this activity are closed" });
-    }
-
-    // Check if the activity start time has passed
-    if (new Date(activity.start_time) < new Date()) {
-      return res
-        .status(400)
-        .json({ error: "Cannot book an activity that has already started" });
-    }
-
-    // Check if the tourist exists
-    const tourist = await Tourist.findById(touristId);
     if (!tourist) {
       return res.status(404).json({ error: "Tourist not found" });
     }
-
-    // Check if the tourist has already booked the activity
-    const existingBooking = await ActivityBooking.findOne({
-      activity: activityId,
-      tourist: touristId,
-    });
-    if (existingBooking) {
-      return res
-        .status(400)
-        .json({ error: "Tourist has already booked this activity" });
-    }
-
-    // Check if the tourist has sufficient funds in their wallet
-    if (tourist.wallet < activity.price) {
-      return res
-        .status(400)
-        .json({ error: "Insufficient funds in tourist's wallet" });
-    }
-
-    // Deduct the activity price from the tourist's wallet
-    tourist.wallet -= activity.price;
-    await tourist.save();
 
     // Create a new activity booking
     const newBooking = new ActivityBooking({
@@ -1080,6 +1003,12 @@ const bookActivity = async (req, res) => {
 const checkIfNew = async (req, res) => {
   try {
     const { touristId } = req.body;
+    const tourist = await Tourist.findById(touristId);
+
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
     if (tourist.first_login) {
       tourist.first_login = false;
       await tourist.save();
@@ -1091,266 +1020,6 @@ const checkIfNew = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
-const bookActivityStripe = async (touristId, activityId) => {
-  try {
-    // Check if the activity exists
-    const activity = await Activity.findById(activityId);
-    if (!activity) {
-      console.log("Activity not found");
-    }
-
-    // Check if bookings are open
-    if (!activity.booking_open) {
-      console.log("booking not open");
-      return;
-    }
-
-    // Check if the activity start time has passed
-    if (new Date(activity.start_time) < new Date()) {
-      console.log("activity already started");
-      return;
-    }
-
-    // Check if the tourist exists
-    const tourist = await Tourist.findById(touristId);
-    if (!tourist) {
-      console.log("tourist doesn't exist");
-      return;
-    }
-
-    // Check if the tourist has already booked the activity
-    const existingBooking = await ActivityBooking.findOne({
-      activity: activityId,
-      tourist: touristId,
-    });
-    if (existingBooking) {
-      console.log("already booked activity");
-      return;
-    }
-
-    // Create a new activity booking
-    const newBooking = new ActivityBooking({
-      activity: activityId,
-      tourist: touristId,
-    });
-
-    // Save the booking to the database
-    const savedBooking = await newBooking.save();
-  } catch (error) {
-    console.error("Error booking activity:", error);
-  }
-};
-
-const getUpcomingBookings = async (req, res) => {
-  try {
-    const touristId = req.params.touristId;
-    const currentDate = new Date();
-
-    // Get all activity bookings first (without filters) to check what exists
-    const allActivityBookings = await ActivityBooking.find({
-      tourist: touristId,
-    });
-    console.log("All activity bookings:", allActivityBookings);
-
-    // Get upcoming activity bookings with filters
-    const activityBookings = await ActivityBooking.find({
-      tourist: touristId,
-      active: true,
-      attended: false,
-    }).populate({
-      path: "activity",
-      match: {
-        start_time: { $gt: currentDate },
-        booking_open: true,
-        flag_inapproperiate: false,
-      },
-      select:
-        "title description start_time duration price location booking_open",
-    });
-
-    console.log("Filtered activity bookings:", activityBookings);
-    console.log(
-      "Activity bookings after population:",
-      activityBookings.map((booking) => ({
-        bookingId: booking._id,
-        activityData: booking.activity,
-        active: booking.active,
-        attended: booking.attended,
-      }))
-    );
-
-    // Rest of the code remains the same...
-    const itineraryBookings = await ItineraryBooking.find({
-      tourist: touristId,
-      active: true,
-      attended: false,
-    }).populate({
-      path: "itinerary",
-      match: { start_date: { $gt: currentDate } },
-      select:
-        "name description start_date end_date price location activities tour_guide",
-    });
-
-    const upcomingActivities = activityBookings.filter(
-      (booking) => booking.activity !== null
-    );
-    const upcomingItineraries = itineraryBookings.filter(
-      (booking) => booking.itinerary !== null
-    );
-
-    res.status(200).json({
-      activities: upcomingActivities,
-      itineraries: upcomingItineraries,
-    });
-  } catch (error) {
-    console.error("Error in getUpcomingBookings:", error);
-    res.status(500).json({ error: error.message });
-  }
-};
-
-const getBookingHistory = async (req, res) => {
-  try {
-    const touristId = req.params.touristId;
-    const currentDate = new Date();
-
-    // Get past activity bookings
-    const activityBookings = await ActivityBooking.find({
-      tourist: touristId,
-      $or: [
-        { attended: true },
-        {
-          active: true,
-          "activity.end_date": { $lt: currentDate },
-        },
-      ],
-    })
-      .populate({
-        path: "activity",
-        select: "name description start_date end_date price location",
-      })
-      .sort({ booking_date: -1 }); // Sort by booking date, most recent first
-
-    // Get past itinerary bookings
-    const itineraryBookings = await ItineraryBooking.find({
-      tourist: touristId,
-      $or: [
-        { attended: true },
-        {
-          active: true,
-          "itinerary.end_date": { $lt: currentDate },
-        },
-      ],
-    })
-      .populate({
-        path: "itinerary",
-        select: "name description start_date end_date price location",
-      })
-      .sort({ booking_date: -1 }); // Sort by booking date, most recent first
-
-    // Filter for only past events and add status
-    const pastActivities = activityBookings.map((booking) => ({
-      ...booking.toObject(),
-      status: booking.attended
-        ? "Completed"
-        : !booking.active
-        ? "Cancelled"
-        : "Expired",
-    }));
-
-    const pastItineraries = itineraryBookings.map((booking) => ({
-      ...booking.toObject(),
-      status: booking.attended
-        ? "Completed"
-        : !booking.active
-        ? "Cancelled"
-        : "Expired",
-    }));
-
-    res.status(200).json({
-      activities: pastActivities,
-      itineraries: pastItineraries,
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-const getTouristNotifications = async (req, res) => {
-  try {
-    const touristId = req.params.touristId;
-    const tourist = await Tourist.findById(touristId).populate("user");
-
-    if (!tourist) {
-      return res.status(404).json({ message: "Tourist not found" });
-    }
-
-    const notifications = await Notification.find({
-      recipient: tourist.user._id,
-    }).sort({ created_at: -1 });
-    console.log("Found Notifications:", notifications);
-    res.status(200).json(notifications);
-  } catch (error) {
-    console.error("Error:", error);
-    res.status(500).json({ error: error.message });
-  }
-};
-
-const getTouristProfilePicture = async (req, res) => {
-  try {
-    const touristId = req.params.touristId;
-    const touristImage = await TouristImage.findOne({ tourist: touristId });
-
-    if (!touristImage) {
-      return res.status(404).json({ message: "No profile picture found" });
-    }
-
-    res.status(200).json({ image_url: touristImage.image_url });
-  } catch (error) {
-    console.error("Error getting profile picture:", error);
-    res.status(500).json({ error: error.message });
-  }
-};
-
-const uploadProfilePicture = async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ message: "No file uploaded" });
-    }
-
-    const touristId = req.params.touristId;
-    const tourist = await Tourist.findById(touristId);
-
-    if (!tourist) {
-      return res.status(404).json({ message: "Tourist not found" });
-    }
-
-    // Check if tourist already has an image
-    let touristImage = await TouristImage.findOne({ tourist: touristId });
-
-    if (touristImage) {
-      // Update existing image
-      touristImage.image_url = req.file.filename;
-      await touristImage.save();
-    } else {
-      // Create new image record
-      touristImage = new TouristImage({
-        tourist: touristId,
-        image_url: req.file.filename,
-      });
-      await touristImage.save();
-    }
-
-    res.status(200).json({
-      message: "Profile picture uploaded successfully",
-      image_url: req.file.filename,
-    });
-  } catch (error) {
-    console.error("Error uploading profile picture:", error);
-    res.status(500).json({ error: error.message });
-  }
-};
-
 // Export the controllers
 export default {
   checkIfNew,
@@ -1381,11 +1050,4 @@ export default {
   getAllComplaints,
   updateComplaint,
   bookActivity,
-  bookActivityStripe,
-  bookItineraryStripe,
-  getUpcomingBookings,
-  getBookingHistory,
-  getTouristNotifications,
-  uploadProfilePicture,
-  getTouristProfilePicture,
 };

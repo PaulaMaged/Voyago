@@ -129,6 +129,14 @@ const ViewItineraryAdmin = () => {
     );
   };
 
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>{error}</div>;
+  }
+
   const handleFlagChange = async (itinerary) => {
     const data = {
       flag_inapproperiate: !itinerary.flag_inapproperiate,
@@ -145,52 +153,6 @@ const ViewItineraryAdmin = () => {
       console.log(error);
       alert("Failed to change flag status");
     }
-  };
-
-  const renderItineraries = () => {
-    return filteredItineraries.map((itinerary) => (
-      <div key={itinerary._id} className="itinerary-card">
-        <div className="itinerary-header">
-          <h2>{itinerary.name}</h2>
-          <div className="itinerary-meta">
-            <span>Price: ${itinerary.price}</span>
-            <span>Language: {itinerary.language}</span>
-          </div>
-        </div>
-
-        <div className="itinerary-details">
-          <p><strong>Description:</strong> {itinerary.description}</p>
-          <p>
-            <strong>Date:</strong>{" "}
-            {new Date(itinerary.start_date).toLocaleDateString()}
-          </p>
-          <p><strong>Duration:</strong> {itinerary.duration} hours</p>
-          <p>
-            <strong>Tour Guide:</strong>{" "}
-            {itinerary.tour_guide?.user?.username || "Not assigned"}
-          </p>
-          <p>
-            <strong>Status:</strong>{" "}
-            <span className={`status ${itinerary.active ? "active" : "inactive"}`}>
-              {itinerary.active ? "Active" : "Inactive"}
-            </span>
-          </p>
-          <p>
-            <strong>Flagged:</strong>{" "}
-            <button
-              onClick={() => handleFlagChange(itinerary)}
-              className={`flag-button ${
-                itinerary.flag_inapproperiate ? "flagged" : ""
-              }`}
-            >
-              {itinerary.flag_inapproperiate ? "Flagged" : "Not Flagged"}
-            </button>
-          </p>
-        </div>
-
-        <ActivitiesSection activities={itinerary.activities} />
-      </div>
-    ));
   };
 
   return (
@@ -279,16 +241,66 @@ const ViewItineraryAdmin = () => {
         </select>
       </div>
 
-      <div className="itineraries-grid">
-        {isLoading ? (
-          <div className="loading">Loading...</div>
-        ) : error ? (
-          <div className="error">{error}</div>
-        ) : filteredItineraries.length === 0 ? (
-          <div className="no-results">No itineraries found</div>
-        ) : (
-          renderItineraries()
-        )}
+      <div className="itinerary-list">
+        {filteredItineraries.map((itinerary) => (
+          <div key={itinerary._id} className="itinerary-card">
+            <h2>{itinerary.name}</h2>
+            <p>
+              <strong>Description:</strong> {itinerary.description}
+            </p>
+            <p>
+              <strong>Tour Guide:</strong>{" "}
+              {itinerary.tour_guide.user
+                ? itinerary.tour_guide.user.username
+                : "N/A"}
+            </p>
+            <p>
+              <strong>Language:</strong> {itinerary.language}
+            </p>
+            <p>
+              <strong>Price:</strong> ${itinerary.price}
+            </p>
+            <p>
+              <strong>Start Date:</strong>{" "}
+              {new Date(itinerary.start_date).toLocaleDateString()}
+            </p>
+            <p>
+              <strong>Start Time:</strong> {itinerary.start_time}
+            </p>
+            <p>
+              <strong>Accessibility:</strong>{" "}
+              {itinerary.accessibility ? "Yes" : "No"}
+            </p>
+            <p>
+              <strong>Active:</strong> {itinerary.active ? "Yes" : "No"}
+            </p>
+            {itinerary.pick_up && (
+              <p>
+                <strong>Pick-up Location:</strong> Latitude:{" "}
+                {itinerary.pick_up.latitude}, Longitude:{" "}
+                {itinerary.pick_up.longitude}
+              </p>
+            )}
+            {itinerary.drop_off && (
+              <p>
+                <strong>Drop-off Location:</strong> Latitude:{" "}
+                {itinerary.drop_off.latitude}, Longitude:{" "}
+                {itinerary.drop_off.longitude}
+              </p>
+            )}
+            <ActivitiesSection activities={itinerary.activities} />
+            <div className="flag">
+              Flag status: {itinerary.flag_inapproperiate.toString()}
+            </div>
+            <button
+              onClick={() => {
+                handleFlagChange(itinerary);
+              }}
+            >
+              Flag/UnFlag itinerary
+            </button>
+          </div>
+        ))}
       </div>
     </div>
   );

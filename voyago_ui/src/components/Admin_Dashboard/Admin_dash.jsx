@@ -1,78 +1,166 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import {
-  FaUser,
-  FaUserPlus,
-  FaUsers,
-  FaFileAlt,
-  FaClipboardList,
-  FaExclamationTriangle,
-  FaLayerGroup,
-  FaTags,
-  FaMapSigns,
-  FaRoute,
-  FaChartLine,
-  FaGift,
-  FaChevronDown,
-  FaChevronUp,
-  FaFlask,
-} from 'react-icons/fa';
+// import { useState } from "react";
+// import AddUser from "./AddUser";
+// // import DeleteAccount from "./DeleteAccount";
+// import ViewDocuments from "./ViewDoucments";
+// import ViewUsers from "./ViewAllusers";
+// import ManageComplaints from "./ManageComplaints";
+// import ManageActCategories from "./manageActCategories";
+// import ManageTags from "./manageTags";
+// import ViewActivitiesAdmin from "./ViewActivitiesAdmin";
+// import ViewItinerariesAdmin from "./ViewItinerariesAdmin";
 
+// export default function AdminDashboard() {
+//   const [activeTab, setActiveTab] = useState("addUser");
+
+//   const renderContent = () => {
+//     switch (activeTab) {
+//       case "addUser":
+//         return <AddUser />;
+
+//       case "View Users":
+//         return <ViewUsers />;
+//       case "viewDocuments":
+//         return <ViewDocuments />;
+//       case "manageComplaints":
+//         return <ManageComplaints />;
+//       case "manageActCategories":
+//         return <ManageActCategories />;
+//       case "manageTags":
+//         return <ManageTags />;
+//       case "viewActivities":
+//         return <ViewActivitiesAdmin />;
+//       case "viewItineraries":
+//         return <ViewItinerariesAdmin />;
+//       default:
+//         return <AddUser />;
+//     }
+//   };
+
+//   return (
+//     <div className="admin-dashboard">
+//       <nav className="sidebar">
+//         <h2>Admin Dashboard</h2>
+//         <ul>
+//           <li>
+//             <button onClick={() => setActiveTab("addUser")}>Add User</button>
+//           </li>
+//           <li>
+//             <button onClick={() => setActiveTab("View Users")}>
+//               View Users
+//             </button>
+//           </li>
+//           <li>
+//             <button onClick={() => setActiveTab("viewDocuments")}>
+//               View Documents
+//             </button>
+//           </li>
+//           <li>
+//             <button onClick={() => setActiveTab("manageComplaints")}>
+//               Manage Complaints
+//             </button>
+//           </li>
+//           <li>
+//             <button onClick={() => setActiveTab("manageActCategories")}>
+//               Manage Activity Categories
+//             </button>
+//           </li>
+//           <li>
+//             <button onClick={() => setActiveTab("manageTags")}>
+//               Manage Tags
+//             </button>
+//           </li>
+//           <li>
+//             <button onClick={() => setActiveTab("viewActivities")}>
+//               view Activities
+//             </button>
+//           </li>
+//           <li>
+//             <button onClick={() => setActiveTab("viewItineraries")}>
+//               view Itineraries
+//             </button>
+//           </li>
+//         </ul>
+//       </nav>
+//       <main className="main-content">{renderContent()}</main>
+//       <style>{`
+//         .admin-dashboard {
+//           display: flex;
+//           height: 100vh;
+//           font-family: Arial, sans-serif;
+//         }
+//         .sidebar {
+//           width: 250px;
+//           background-color: #2c3e50;
+//           color: white;
+//           padding: 20px;
+//         }
+//         .sidebar h2 {
+//           margin-bottom: 20px;
+//         }
+//         .sidebar ul {
+//           list-style-type: none;
+//           padding: 0;
+//         }
+//         .sidebar li {
+//           margin-bottom: 10px;
+//         }
+//         .sidebar button {
+//           width: 100%;
+//           padding: 10px;
+//           background-color: #34495e;
+//           color: white;
+//           border: none;
+//           cursor: pointer;
+//           text-align: left;
+//           transition: background-color 0.3s;
+//         }
+//         .sidebar button:hover {
+//           background-color: #4a6785;
+//         }
+//         .main-content {
+//           flex-grow: 1;
+//           padding: 20px;
+//           background-color: #ecf0f1;
+//           overflow-y: auto;
+//         }
+//       `}</style>
+//     </div>
+//   );
+// }
+
+//kole el above 48lah
+
+import React, { useState } from "react";
+import { ChevronDown, ChevronRight, Bell, Search, User } from "lucide-react";
 import AddUser from "./AddUser";
-import ViewUsers from "./ViewAllusers";
+import ViewUsers from "./ViewAllUsers";
 import ViewDocuments from "./ViewDoucments";
 import ManageComplaints from "./ManageComplaints";
-import ManageActCategories from "./manageActCategories";
-import ManageTags from "./manageTags";
+import ManageActCategories from "./ManageActCategories";
+import ManageTags from "./ManageTags";
 import ViewActivitiesAdmin from "./ViewActivitiesAdmin";
 import ViewItinerariesAdmin from "./ViewItinerariesAdmin";
-import SalesReport from './SalesReport';
 import CreatePromoCode from "./CreatePromoCode";
 import ShowcasePromoCodes from "./ShowcasePromoCodes";
-import ThemeSwitcher from '../ThemeSwitcher';
-import { applyTheme } from '../../utils/themeManager';
+import {
+  UserPlus,
+  Users,
+  FileText,
+  MessageSquare,
+  Grid,
+  Tag,
+  Activity,
+  Map,
+  Gift,
+  Eye,
+} from "lucide-react";
 
 export default function AdminDashboard() {
-  const [activeSection, setActiveSection] = useState("addUser");
-  const [expandedSections, setExpandedSections] = useState(['userManagement']);
-  const [isHovered, setIsHovered] = useState(false);
-  const [theme, setTheme] = useState('default');
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('preferred-theme');
-    if (savedTheme) {
-      handleThemeChange(savedTheme);
-    }
-  }, []);
-
-  const navItems = {
-    userManagement: [
-      { key: "addUser", label: "Add User", icon: <FaUserPlus /> },
-      { key: "viewUsers", label: "View Users", icon: <FaUsers /> },
-      { key: "viewDocuments", label: "View Documents", icon: <FaFileAlt /> },
-    ],
-    complaints: [
-      { key: "manageComplaints", label: "Manage Complaints", icon: <FaExclamationTriangle /> },
-    ],
-    contentManagement: [
-      { key: "manageActCategories", label: "Manage Activity Categories", icon: <FaLayerGroup /> },
-      { key: "manageTags", label: "Manage Tags", icon: <FaTags /> },
-    ],
-    activities: [
-      { key: "viewActivities", label: "View Activities", icon: <FaMapSigns /> },
-      { key: "viewItineraries", label: "View Itineraries", icon: <FaRoute /> },
-    ],
-    analytics: [
-      { key: "salesReport", label: "Sales Report", icon: <FaChartLine /> },
-    ],
-    promotions: [
-      { key: "createPromoCode", label: "Create Promo Code", icon: <FaGift /> },
-      { key: "showcasePromoCodes", label: "View Promo Codes", icon: <FaClipboardList /> },
-    ],
-  };
+  const [activeTab, setActiveTab] = useState("addUser");
+  const [expandedSections, setExpandedSections] = useState(["User Management"]);
 
   const renderContent = () => {
-    switch (activeSection) {
+    switch (activeTab) {
       case "addUser":
         return <AddUser />;
       case "viewUsers":
@@ -89,8 +177,6 @@ export default function AdminDashboard() {
         return <ViewActivitiesAdmin />;
       case "viewItineraries":
         return <ViewItinerariesAdmin />;
-      case "salesReport":
-        return <SalesReport />;
       case "createPromoCode":
         return <CreatePromoCode />;
       case "showcasePromoCodes":
@@ -100,150 +186,310 @@ export default function AdminDashboard() {
     }
   };
 
-  const toggleSection = (section) => {
-    if (expandedSections.includes(section)) {
-      setExpandedSections(expandedSections.filter((item) => item !== section));
-    } else {
-      setExpandedSections([...expandedSections, section]);
-    }
-  };
+  const sections = [
+    {
+      title: "User Management",
+      items: [
+        { id: "addUser", label: "Add User", icon: UserPlus },
+        { id: "viewUsers", label: "View Users", icon: Users },
+        { id: "viewDocuments", label: "View Documents", icon: FileText },
+        {
+          id: "manageComplaints",
+          label: "Manage Complaints",
+          icon: MessageSquare,
+        },
+      ],
+    },
+    {
+      title: "Content Management",
+      items: [
+        {
+          id: "manageActCategories",
+          label: "Manage Activity Categories",
+          icon: Grid,
+        },
+        { id: "manageTags", label: "Manage Tags", icon: Tag },
+      ],
+    },
+    {
+      title: "Activity Management",
+      items: [
+        { id: "viewActivities", label: "View Activities", icon: Activity },
+        { id: "viewItineraries", label: "View Itineraries", icon: Map },
+      ],
+    },
+    {
+      title: "Promo Codes",
+      items: [
+        { id: "createPromoCode", label: "Create Promo Code", icon: Gift },
+        { id: "showcasePromoCodes", label: "Showcase Promo Codes", icon: Eye },
+      ],
+    },
+  ];
 
-  const handleThemeChange = (newTheme) => {
-    setTheme(newTheme);
-    applyTheme(newTheme);
-    localStorage.setItem('preferred-theme', newTheme);
+  const toggleSection = (title) => {
+    setExpandedSections((prev) =>
+      prev.includes(title) ? prev.filter((t) => t !== title) : [...prev, title]
+    );
   };
 
   return (
-    <div className={`flex h-screen bg-[var(--background)]`}>
-      <aside 
-        className={`
-          transition-all duration-300 ease-[var(--ease-out)]
-          bg-[var(--primary)] text-[var(--surface)] 
-          shadow-xl p-4 fixed top-0 left-0 h-screen
-          ${isHovered ? 'w-64' : 'w-16'}
-        `}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        <div className="flex flex-col h-full">
-          <div className={`sidebar-header mb-6 ${isHovered ? 'text-center' : 'text-center'}`}>
-            {isHovered ? (
-              <h2 className="text-xl font-semibold text-[var(--surface)]">Admin Dashboard</h2>
-            ) : (
-              <div className="text-2xl">🏷️</div>
-            )}
-          </div>
-
-          <nav className="space-y-2">
-            {Object.entries(navItems).map(([section, items]) => (
-              <div key={section} className="relative group">
-                <button
-                  onClick={() => toggleSection(section)}
-                  className={`
-                    w-full flex items-center 
-                    justify-${isHovered ? 'between' : 'center'} 
-                    p-3 rounded-lg 
-                    transition-all duration-300 ease-in-out
-                    bg-[var(--primary)]
-                    hover:bg-[var(--primaryLight)]
-                    active:bg-[var(--primaryDark)]
-                    text-[var(--surface)]
-                    hover:translate-x-1
-                    hover:shadow-md
-                  `}
-                >
-                  <span className="flex items-center">
-                    {items[0].icon}
-                    {isHovered && (
-                      <span className="ml-3">{section.replace(/([A-Z])/g, ' $1').trim()}</span>
-                    )}
-                  </span>
-                  {isHovered && (
-                    <span className="transition-transform duration-200">
-                      {expandedSections.includes(section) ? <FaChevronDown /> : <FaChevronUp />}
-                    </span>
-                  )}
-                </button>
-                {expandedSections.includes(section) && isHovered && (
-                  <div className="pl-4 mt-1 space-y-1">
-                    {items.map((item) => (
-                      <button
-                        key={item.key}
-                        onClick={() => setActiveSection(item.key)}
-                        className={`
-                          w-full flex items-center 
-                          p-2 rounded-lg 
-                          transition-all duration-300 ease-in-out
-                          text-sm
-                          ${
-                            activeSection === item.key 
-                            ? 'bg-[var(--secondary)] text-[var(--surface)] hover:bg-[var(--secondaryLight)] active:bg-[var(--secondaryDark)]' 
-                            : 'bg-[var(--primary)] text-[var(--surface)] hover:bg-[var(--primaryLight)] active:bg-[var(--primaryDark)]'
-                          }
-                          hover:translate-x-1
-                          hover:shadow-md
-                          border-none
-                        `}
-                      >
-                        <span className="mr-3">{item.icon}</span>
-                        <span>{item.label}</span>
-                      </button>
-                    ))}
-                  </div>
+    <div className="admin-dashboard">
+      <nav className="sidebar">
+        <div className="sidebar-header">
+          <h2 style={{ color: "white" }}>Admin Dashboard</h2>
+        </div>
+        <ul className="sidebar-menu">
+          {sections.map((section, index) => (
+            <li key={index} className="sidebar-section">
+              <button
+                onClick={() => toggleSection(section.title)}
+                className="section-toggle"
+              >
+                <span>{section.title}</span>
+                {expandedSections.includes(section.title) ? (
+                  <ChevronDown className="icon" />
+                ) : (
+                  <ChevronRight className="icon" />
                 )}
-              </div>
-            ))}
-          </nav>
-
-          <div className="mt-auto pb-4">
-            <ThemeSwitcher 
-              onThemeChange={handleThemeChange}
-              currentTheme={theme}
-              isHovered={isHovered}
-            />
-          </div>
-
-          <Link
-            to="/demo/admin-dashboard"
-            className={`
-              flex items-center gap-3 px-4 py-3 
-              text-[var(--surface)] hover:bg-[var(--primaryLight)] 
-              transition-all duration-300 group
-              ${isHovered ? 'justify-between' : 'justify-center'}
-            `}
-          >
-            <span className="flex items-center gap-2 min-w-0">
-              <FaFlask className="text-xl group-hover:scale-110 transition-transform" />
-              {isHovered && (
-                <span className="font-medium truncate text-[var(--surface)]">Try Demo</span>
+              </button>
+              {expandedSections.includes(section.title) && (
+                <ul className="section-items">
+                  {section.items.map((item) => (
+                    <li key={item.id}>
+                      <button
+                        onClick={() => setActiveTab(item.id)}
+                        className={`section-item ${
+                          activeTab === item.id ? "active" : ""
+                        }`}
+                      >
+                        <item.icon className="icon" />
+                        {item.label}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               )}
-            </span>
-            {isHovered && (
-              <span className="bg-[var(--accent)] text-[var(--surface)] text-xs px-2 py-1 rounded-full shrink-0">
-                New
-              </span>
-            )}
-          </Link>
-        </div>
-      </aside>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      <div className="main-content">
+        <header className="header">
+          <div className="header-content">
+            <h1>
+              {sections.find((section) =>
+                section.items.some((item) => item.id === activeTab)
+              )?.title || "Dashboard"}
+            </h1>
+            <div className="header-actions">
+              <button className="icon-button1">
+                <Bell className="icon" style={{ color: "rgb(52, 73, 94)" }} />
+              </button>
 
-      <main className={`
-        flex-1 p-8 transition-all duration-300 ease-[var(--ease-out)]
-        ${isHovered ? 'ml-64' : 'ml-16'}
-      `}>
-        <header className="mb-6">
-          <h1 className="text-3xl font-bold text-[var(--textPrimary)] capitalize">
-            {activeSection.replace(/([A-Z])/g, ' $1').trim()}
-          </h1>
+              <button className="user-button1">
+                <User className="icon" style={{ color: "rgb(52, 73, 94)" }} />
+                <span>Admin</span>
+              </button>
+            </div>
+          </div>
         </header>
-        <div className="bg-[var(--surface)] shadow-lg rounded-lg p-6 
-          transition-all duration-300 ease-[var(--ease-out)]
-          hover:shadow-xl"
-        >
-          {renderContent()}
-        </div>
-      </main>
+        <main className="content">
+          <div className="content-wrapper">{renderContent()}</div>
+        </main>
+        <footer className="footer">
+          <p>© 2023 Admin Dashboard. All rights reserved.</p>
+        </footer>
+      </div>
+
+      <style>{`
+        .admin-dashboard {
+          display: flex;
+          height: 100vh;
+          overflow: hidden;
+          font-family: Arial, sans-serif;
+        }
+
+        .sidebar {
+          width: 250px;
+          background-color: #2c3e50;
+          color: white;
+          overflow-y: auto;
+          position: fixed;
+          height: 100%;
+          box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-header {
+          padding: 20px;
+          z-index: 2;
+        }
+
+        .sidebar-header h2 {
+          margin: 0;
+          font-size: 1.5rem;
+        }
+
+        .sidebar-menu {
+          list-style-type: none;
+          padding: 0;
+          margin: 0;
+        }
+
+        .sidebar-section {
+          margin-bottom: 10px;
+        }
+
+        .section-toggle {
+          width: 100%;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 10px 20px;
+          background: none;
+          border: none;
+          color: #bdc3c7;
+          font-size: 0.9rem;
+          font-weight: bold;
+          cursor: pointer;
+          transition: background-color 0.3s;
+        }
+
+        .section-toggle:hover {
+          background-color: #34495e;
+        }
+
+        .section-items {
+          list-style-type: none;
+          padding: 0;
+          margin: 0;
+        }
+
+        .section-item {
+          display: flex;
+          align-items: center;
+          width: 100%;
+          padding: 10px 30px;
+          background: none;
+          border: none;
+          color: white;
+          font-size: 0.9rem;
+          cursor: pointer;
+          transition: background-color 0.3s;
+        }
+
+        .section-item:hover {
+          background-color: #4a6785;
+        }
+
+        .section-item.active {
+          background-color: #4a6785;
+        }
+
+        .icon {
+          width: 20px;
+          height: 20px;
+          margin-right: 10px;
+        }
+
+        .main-content {
+          flex: 1;
+          margin-left: 250px; /* Keeps the sidebar width */
+          display: flex;
+          flex-direction: column;
+          position: relative;
+        }
+
+        .header {
+          background-color: white;
+          padding: 20px;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+          z-index: 10;
+        }
+
+        .header-content {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .header h1 {
+          margin: 0;
+          font-size: 1.5rem;
+          color: #2c3e50;
+        }
+
+        .header-actions {
+          display: flex;
+          align-items: center;
+        }
+
+        .search-bar {
+          position: relative;
+          margin-right: 20px;
+        }
+
+        .search-bar input {
+          padding: 8px 30px 8px 10px;
+          border-radius: 20px;
+          border: 1px solid #ddd;
+          outline: none;
+        }
+
+        .search-bar .icon {
+          position: absolute;
+          right: 10px;
+          top: 50%;
+          transform: translateY(-50%);
+          color: #7f8c8d;
+        }
+
+        .icon-button1,
+        .user-button1 {
+          background: none;
+          border: none;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          padding: 5px 10px;
+          border-radius: 20px;
+          transition: background-color 0.3s;
+        }
+
+        .icon-button1:hover,
+        .user-button1:hover {
+          background-color: #f1f3f5;
+        }
+
+        .user-button1 span {
+          margin-left: 5px;
+          font-size: 0.9rem;
+          color: #2c3e50;
+        }
+
+        .content {
+          flex: 1;
+          padding: 20px;
+          overflow-y: auto;
+          background-color: #f1f3f5;
+        }
+
+        .content-wrapper {
+          background-color: white;
+          border-radius: 8px;
+          padding: 20px;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer {
+          background-color: white;
+          padding: 10px 20px;
+          text-align: center;
+          font-size: 0.8rem;
+          color: #7f8c8d;
+          border-top: 1px solid #ecf0f1;
+        }
+      `}</style>
     </div>
   );
 }

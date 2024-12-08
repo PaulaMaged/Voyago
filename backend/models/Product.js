@@ -18,16 +18,6 @@ const productSchema = new Schema({
   ],
 });
 
-productSchema.virtual('images', {
-  ref: 'ProductImage',
-  localField: '_id',
-  foreignField: 'product'
-});
-
-// Make sure virtuals are included when converting to JSON
-productSchema.set('toJSON', { virtuals: true });
-productSchema.set('toObject', { virtuals: true });
-
 // add a method to calculate sales and available quantity
 productSchema.methods.calculateSalesAndQuantity = async function () {
   const product = this;
