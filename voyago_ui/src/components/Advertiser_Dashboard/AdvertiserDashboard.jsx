@@ -11,6 +11,7 @@ import {
   FaRoute,
   FaMoneyBillWave,
   FaUserCog,
+  FaUserCheck,
 } from "react-icons/fa";
 
 import Profile from "../Profiles/Advertiser_profile";
@@ -21,6 +22,7 @@ import AdvSales from '../Sales/AdvSales';
 import BookingHistory from "./BookingHistory";
 import ThemeSwitcher from '../ThemeSwitcher';
 import { applyTheme } from '../../utils/themeManager';
+import ActivityAttendance from './ActivityAttendance';
 
 export default function AdvertiserDashboard() {
   const [activeSection, setActiveSection] = useState("profile");
@@ -28,6 +30,7 @@ export default function AdvertiserDashboard() {
   const [expandedSections, setExpandedSections] = useState([]);
   const [isHovered, setIsHovered] = useState(false);
   const [theme, setTheme] = useState('default');
+  const [activeTab, setActiveTab] = useState('activities');
 
   useEffect(() => {
     const id = localStorage.getItem("roleId");
@@ -52,6 +55,7 @@ export default function AdvertiserDashboard() {
     activities: [
       { key: "viewActivities", label: "View Activities", icon: <FaClipboardList /> },
       { key: "manageActivities", label: "Manage Activities", icon: <FaEdit /> },
+      { key: "attendance", label: "Activity Attendance", icon: <FaUserCheck /> },
     ],
     analytics: [
       { key: "salesStats", label: "Sales Statistics", icon: <FaChartLine /> },
@@ -101,6 +105,8 @@ export default function AdvertiserDashboard() {
         return <AdvSales />;
       case "bookingHistory":
         return <BookingHistory />;
+      case "attendance":
+        return <ActivityAttendance />;
       default:
         return <Profile />;
     }

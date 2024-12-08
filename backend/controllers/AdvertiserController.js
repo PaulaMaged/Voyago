@@ -199,11 +199,52 @@ const getAllActivities = async (req, res) => {
 
 const getActivityBookings = async (req, res) => {
   try {
-    const activityId = req.params.activityId;
-    const bookings = await ActivityBooking.find({ activity: activityId })
-      .populate('tourist')
-      .populate('activity');
+    const advertiserId = req.params.advertiserId;
+    
+    // First get all activities for this advertiser
+    const activities = await Activity.find({ advertiser: advertiserId });
+    const activityIds = activities.map(activity => activity._id);
+
+    // Then get all bookings for these activities
+    const bookings = await ActivityBooking.find({ 
+      activity: { $in: activityIds },
+      active: true
+    })
+    .populate({
+      path: 'tourist',
+      populate: {
+        path: 'user',
+        select: 'username email'
+      }
+    })
+    .populate('activity');
+
     res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const markAttendance = async (req, res) => {
+  try {
+    const { bookingId } = req.params;
+    const advertiserId = req.params.advertiserId;
+
+    const booking = await ActivityBooking.findById(bookingId);
+    if (!booking) {
+      return res.status(404).json({ error: "Booking not found" });
+    }
+
+    // Verify this booking belongs to an activity owned by this advertiser
+    const activity = await Activity.findById(booking.activity);
+    if (!activity || activity.advertiser.toString() !== advertiserId) {
+      return res.status(403).json({ error: "Unauthorized to mark attendance for this booking" });
+    }
+
+    booking.attended = true;
+    await booking.save();
+
+    res.status(200).json(booking);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -563,6 +604,7 @@ export default {
   getAllRevenueByDate,
   getAllRevenueByActivity,
   getActivityBookings,
+  markAttendance,
   getAllRevenueByMonth,
   getTotalTourists,
   getTouristsByMonth,
