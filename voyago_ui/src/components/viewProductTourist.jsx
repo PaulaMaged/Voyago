@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import currencyConversions from "../helpers/currencyConversions";
 import "./viewProductTourist.css";
-import { FaStar, FaStarHalf, FaRegStar } from 'react-icons/fa';
+import { FaStar, FaStarHalf, FaRegStar } from "react-icons/fa";
 import "./product.css";
 export default function ViewProductTourist() {
   const [products, setProducts] = useState([]);
@@ -87,8 +87,10 @@ export default function ViewProductTourist() {
         alert("Please log in to add items to your wishlist");
         return;
       }
-      
-      await axios.post(`http://localhost:8000/api/wishlist/${touristId}/${productId}`);
+
+      await axios.post(
+        `http://localhost:8000/api/wishlist/${touristId}/${productId}`
+      );
       alert("Product added to wishlist!");
     } catch (err) {
       alert(err.response?.data?.message || "Failed to add product to wishlist");
@@ -161,12 +163,15 @@ export default function ViewProductTourist() {
       {sortedProducts.length > 0 ? (
         <div className="product-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr">
           {sortedProducts.map((product) => (
-            <div key={product._id} className="product-card group h-[600px] flex flex-col">
+            <div
+              key={product._id}
+              className="product-card group h-[600px] flex flex-col"
+            >
               <div className="relative w-full h-[240px] overflow-hidden">
                 <img
                   src={
-                    product.images && 
-                    Array.isArray(product.images) && 
+                    product.images &&
+                    Array.isArray(product.images) &&
                     product.images.length > 0
                       ? `http://localhost:8000/${product.images[0].image_url}`
                       : "https://via.placeholder.com/200"
@@ -178,19 +183,27 @@ export default function ViewProductTourist() {
                   }}
                 />
               </div>
-              
+
               <div className="flex flex-col flex-grow p-4">
                 <div className="flex-grow">
-                  <h2 className="product-name text-xl font-bold mb-2 line-clamp-1">{product.name}</h2>
-                  <p className="product-description text-gray-600 mb-3 line-clamp-2">{product.description}</p>
+                  <h2 className="product-name text-xl font-bold mb-2 line-clamp-1">
+                    {product.name}
+                  </h2>
+                  <p className="product-description text-gray-600 mb-3 line-clamp-2">
+                    {product.description}
+                  </p>
                   <p className="product-price text-2xl font-bold text-accent mb-3">
                     {currencyConversions.formatPrice(product.price)}
                   </p>
-                  
+
                   <div className="flex items-center gap-2 mb-3">
                     <RatingStars rating={product.rating} />
                     <span className="text-sm text-gray-600">
-                      ({product.reviews && Array.isArray(product.reviews) ? product.reviews.length : 0})
+                      (
+                      {product.reviews && Array.isArray(product.reviews)
+                        ? product.reviews.length
+                        : 0}
+                      )
                     </span>
                   </div>
 
@@ -203,15 +216,20 @@ export default function ViewProductTourist() {
                       </div>
                       <div className="flex justify-between">
                         <span className="font-medium">Seller:</span>
-                        <span className="truncate ml-2">{product.seller.store_name || "Unknown Seller"}</span>
+                        <span className="truncate ml-2">
+                          {product.seller?.store_name || "Unknown Seller"}
+                        </span>
                       </div>
-                      
+
                       {product.reviews.length > 0 && (
                         <div className="mt-2 border-t border-gray-200 pt-2">
                           <h3 className="font-medium mb-1">Recent Reviews:</h3>
                           <ul className="space-y-1">
                             {product.reviews.slice(0, 1).map((review) => (
-                              <li key={review._id} className="text-sm line-clamp-2">
+                              <li
+                                key={review._id}
+                                className="text-sm line-clamp-2"
+                              >
                                 <span className="font-medium">
                                   {review.reviewer && review.reviewer.user
                                     ? review.reviewer.user.username
@@ -236,10 +254,11 @@ export default function ViewProductTourist() {
                                relative overflow-hidden group/btn"
                   >
                     <span className="relative z-10">Add to Wishlist</span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-accent to-accentLight 
+                    <div
+                      className="absolute inset-0 bg-gradient-to-r from-accent to-accentLight 
                                   transform scale-x-0 group-hover/btn:scale-x-100 
-                                  transition-transform duration-300 origin-left">
-                    </div>
+                                  transition-transform duration-300 origin-left"
+                    ></div>
                   </button>
 
                   <button
@@ -249,17 +268,21 @@ export default function ViewProductTourist() {
                         alert("Please log in to add items to your cart");
                         return;
                       }
-                      
-                      axios.post(
-                        `http://localhost:8000/api/cart/${touristId}/${product._id}`,
-                        { quantity: 1 }
-                      )
-                      .then(() => {
-                        alert("Product added to cart successfully!");
-                      })
-                      .catch((err) => {
-                        alert(err.response?.data?.message || "Failed to add product to cart");
-                      });
+
+                      axios
+                        .post(
+                          `http://localhost:8000/api/cart/${touristId}/${product._id}`,
+                          { quantity: 1 }
+                        )
+                        .then(() => {
+                          alert("Product added to cart successfully!");
+                        })
+                        .catch((err) => {
+                          alert(
+                            err.response?.data?.message ||
+                              "Failed to add product to cart"
+                          );
+                        });
                     }}
                     className="cart-button w-full py-2 px-4 rounded-lg bg-primary text-white font-semibold
                                transform transition-all duration-300 hover:-translate-y-1 hover:shadow-lg
@@ -269,10 +292,11 @@ export default function ViewProductTourist() {
                       <i className="fas fa-shopping-cart"></i>
                       Add to Cart
                     </span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary to-primaryLight 
+                    <div
+                      className="absolute inset-0 bg-gradient-to-r from-primary to-primaryLight 
                                   transform scale-x-0 group-hover/btn:scale-x-100 
-                                  transition-transform duration-300 origin-left">
-                    </div>
+                                  transition-transform duration-300 origin-left"
+                    ></div>
                   </button>
                 </div>
               </div>

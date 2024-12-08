@@ -4,7 +4,8 @@ import check from "../helpers/checks";
 import axios from "axios";
 import currencyConversions from "../helpers/currencyConversions";
 import "./viewItinerary.css";
-import './viewItineraryGuest.css';
+import "./viewItineraryGuest.css";
+import getCheckoutUrl from "../helpers/getCheckoutUrl";
 const ViewItineraryGuest = () => {
   const [itineraries, setItineraries] = useState([]);
   const [filteredItineraries, setFilteredItineraries] = useState([]);
@@ -41,6 +42,17 @@ const ViewItineraryGuest = () => {
     sortCriteria,
     itineraries,
   ]);
+
+  const handleStripePayment = async (itinerary) => {
+    const url = await getCheckoutUrl(
+      "itinerary",
+      "http://localhost:5173/viewItineraryGuest?accepted",
+      "http://localhost:5173/viewItineraryGuest?cancelled",
+      [itinerary]
+    );
+
+    window.location = url;
+  };
 
   const fetchItineraries = async () => {
     try {
@@ -219,7 +231,9 @@ const ViewItineraryGuest = () => {
           onChange={(e) => setSelectedTag(e.target.value)}
           className="filter-select"
         >
-          <option key="tag-default" value="">All Tags</option>
+          <option key="tag-default" value="">
+            All Tags
+          </option>
           {getAllTags().map((tag) => (
             <option key={tag._id} value={tag._id}>
               {tag.tag_name}
@@ -232,7 +246,9 @@ const ViewItineraryGuest = () => {
           onChange={(e) => setSelectedCategory(e.target.value)}
           className="filter-select"
         >
-          <option key="category-default" value="">All Categories</option>
+          <option key="category-default" value="">
+            All Categories
+          </option>
           {categories.map((category) => (
             <option key={category._id} value={category._id}>
               {category.category}
@@ -245,7 +261,9 @@ const ViewItineraryGuest = () => {
           onChange={(e) => setSelectedLanguage(e.target.value)}
           className="filter-select"
         >
-          <option key="language-default" value="">All Languages</option>
+          <option key="language-default" value="">
+            All Languages
+          </option>
           {getAllLanguages().map((language) => (
             <option key={`lang-${language}`} value={language}>
               {language}
@@ -281,11 +299,21 @@ const ViewItineraryGuest = () => {
           onChange={(e) => setSortCriteria(e.target.value)}
           className="filter-select"
         >
-          <option key="sort-default" value="">Sort By</option>
-          <option key="sort-price-asc" value="price_asc">Price: Low to High</option>
-          <option key="sort-price-desc" value="price_desc">Price: High to Low</option>
-          <option key="sort-date-asc" value="date_asc">Date: Earliest First</option>
-          <option key="sort-date-desc" value="date_desc">Date: Latest First</option>
+          <option key="sort-default" value="">
+            Sort By
+          </option>
+          <option key="sort-price-asc" value="price_asc">
+            Price: Low to High
+          </option>
+          <option key="sort-price-desc" value="price_desc">
+            Price: High to Low
+          </option>
+          <option key="sort-date-asc" value="date_asc">
+            Date: Earliest First
+          </option>
+          <option key="sort-date-desc" value="date_desc">
+            Date: Latest First
+          </option>
         </select>
       </div>
 
@@ -300,7 +328,9 @@ const ViewItineraryGuest = () => {
             <div key={itinerary._id} className="itinerary-card">
               <button
                 className="btn-copy-link"
-                onClick={() => navigator.clipboard.writeText(window.location.href)}
+                onClick={() =>
+                  navigator.clipboard.writeText(window.location.href)
+                }
               >
                 Copy Link
               </button>
@@ -352,11 +382,16 @@ const ViewItineraryGuest = () => {
               <ActivitiesSection activities={itinerary.activities} />
               <div className="itinerary-actions">
                 <button
-                  id="bookItin"
                   className="itinerary-btn btn-book-itinerary"
-                  onClick={() => handleBookItinerary(itinerary._id)}
+                  onClick={() => handleBookItinerary(itinerary)}
                 >
-                  Book Itinerary
+                  <span>Book - Wallet</span>
+                </button>
+                <button
+                  className="itinerary-btn btn-book-itinerary"
+                  onClick={() => handleStripePayment(itinerary)}
+                >
+                  <span>Book - Card</span>
                 </button>
                 <button
                   className="itinerary-btn btn-feedback-itinerary"

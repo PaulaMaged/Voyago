@@ -87,8 +87,7 @@ export default function SellerDashboard() {
       { key: "changePassword", label: "Change Password", icon: FaLock },
     ],
     products: [
-      { key: "addProduct", label: "Add Product", icon: FaPlus },
-      { key: "viewProducts", label: "View Products", icon: FaBoxes },
+      { key: "viewProducts", label: "Manage Products", icon: FaBoxes },
     ],
     sales: [
       { key: "sales", label: "Sales Report", icon: FaChartLine },

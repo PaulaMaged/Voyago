@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ViewItineraryGuide from '../ViewItineraryGuide';
 import GuideSales from '../Sales/GuideSales';
+import GuideTouristStats from '../Statistics/GuideTouristStats';
+import TourGuideNotifications from '../Notifications/TourGuideNotifications';
 import {
   FaUser,
   FaRoute,
@@ -14,6 +16,8 @@ import {
   FaChevronDown,
   FaChevronUp,
   FaFlask,
+  FaUsers,
+  FaBell,
 } from 'react-icons/fa';
 import ThemeSwitcher from '../ThemeSwitcher';
 import { applyTheme } from '../../utils/themeManager';
@@ -39,6 +43,10 @@ export default function TourGuideDashboard() {
         return <ViewItineraryGuide mode="view" />;
       case 'sales':
         return <GuideSales />;
+      case 'touristStats':
+        return <GuideTouristStats />;
+      case 'notifications':
+        return <TourGuideNotifications />;
       default:
         return <div>Select a section</div>;
     }
@@ -52,15 +60,20 @@ export default function TourGuideDashboard() {
     itineraries: [
       { key: "viewItineraries", label: "View Itineraries", icon: FaList },
     ],
-    sales: [
+    analytics: [
       { key: "sales", label: "Sales Report", icon: FaChartLine },
+      { key: "touristStats", label: "Tourist Statistics", icon: FaUsers },
+    ],
+    notifications: [
+      { key: "notifications", label: "View Notifications", icon: FaBell },
     ],
   };
 
   const sectionIcons = {
     profile: FaUser,
     itineraries: FaRoute,
-    sales: FaMoneyBillWave,
+    analytics: FaChartLine,
+    notifications: FaBell,
   };
 
   const toggleSection = (section) => {
