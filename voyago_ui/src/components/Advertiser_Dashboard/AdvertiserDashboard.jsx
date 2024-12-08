@@ -54,7 +54,6 @@ export default function AdvertiserDashboard() {
     ],
     activities: [
       { key: "viewActivities", label: "View Activities", icon: <FaClipboardList /> },
-      { key: "manageActivities", label: "Manage Activities", icon: <FaEdit /> },
       { key: "attendance", label: "Activity Attendance", icon: <FaUserCheck /> },
     ],
     analytics: [
