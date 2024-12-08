@@ -12,6 +12,7 @@ import {
   FaMoneyBillWave,
   FaUserCog,
   FaUserCheck,
+  FaTasks,
 } from "react-icons/fa";
 
 import Profile from "../Profiles/Advertiser_profile";
@@ -54,6 +55,7 @@ export default function AdvertiserDashboard() {
     ],
     activities: [
       { key: "viewActivities", label: "View Activities", icon: <FaClipboardList /> },
+      { key: "manageActivities", label: "Manage Activities", icon: <FaTasks /> },
       { key: "attendance", label: "Activity Attendance", icon: <FaUserCheck /> },
     ],
     analytics: [
