@@ -138,6 +138,58 @@
 }
 
 .btn-book {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.btn-book.loading {
+  background-color: #cccccc;
+  cursor: wait;
+}
+
+.btn-book.success {
+  background-color: #4CAF50;
+  color: white;
+  animation: successPulse 0.5s ease;
+}
+
+.btn-book.error {
+  background-color: #f44336;
+  color: white;
+  animation: errorShake 0.5s ease;
+}
+
+.checkmark {
+  display: inline-block;
+  margin-left: 8px;
+  animation: popIn 0.3s ease;
+}
+
+@keyframes successPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+@keyframes errorShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+@keyframes popIn {
+  0% { transform: scale(0); }
+  70% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.button-text {
+  display: inline-block;
+  transition: all 0.3s ease;
+}
+
+.btn-book {
   background-color: var(--secondary);
   color: var(--surface);
   flex: 2;

@@ -127,25 +127,25 @@ const ViewItineraryGuest = () => {
       ],
     };
 
-    console.log(data);
     try {
       const response = await axios.post(
         `http://localhost:8000/api/tourist/tourist-pay/${touristId}`,
         data
       );
-      console.log(response.data);
-      if (response.status === 201) {
-        alert("Itinerary booked successfully!");
-      } else {
-        alert("Failed to book the Itinerary. Please try again.");
-      }
-      // Handle successful booking
+
+      // Get updated tourist data for wallet balance
+      const touristResponse = await axios.get(
+        `http://localhost:8000/api/tourist/get-tourist/${touristId}`
+      );
+      
+      // Update wallet balance in localStorage
+      localStorage.setItem('walletBalance', touristResponse.data.wallet);
+      
+      alert(`Itinerary booked successfully! Your new wallet balance is $${touristResponse.data.wallet}`);
+      
     } catch (error) {
       console.error("Error booking itinerary:", error);
-      // Handle booking error
-      alert(
-        "An error occurred while booking the Itinerary. Please try again later."
-      );
+      alert(error.response?.data?.message || "An error occurred while booking the Itinerary. Please try again later.");
     }
   };
 

@@ -13,6 +13,7 @@ import {
   FaBookmark,
   FaHeart,
   FaFlask,
+  FaCalendarAlt,
 } from "react-icons/fa";
 import React, { useState, useEffect } from "react";
 import Profile from "../Profiles/Tourist_profile";
@@ -33,6 +34,7 @@ import Bookmarks from '../../pages/Bookmarks';
 import WishlistPage from '../../pages/WishlistPage';
 import { Link } from 'react-router-dom';
 import OrdersSummary from '../dashboard/OrdersSummary';
+import UpcomingBookingsSection from '../UpcomingBookings';
 export default function TouristDashboard() {
   const [activeSection, setActiveSection] = useState("profile");
   const [userId, setUserId] = useState(null);
@@ -71,18 +73,6 @@ export default function TouristDashboard() {
       );
     }
 
-    if (activeSection === "loyalty") {
-      return (
-        <div className="dashboard-container">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="col-span-1 md:col-span-2 lg:col-span-1">
-              <LoyaltySystem userId={userId} touristId={touristId} />
-            </div>
-          </div>
-        </div>
-      );
-    }
-
     switch (activeSection) {
       case "profile":
         return <Profile userId={userId} touristId={touristId} />;
@@ -114,6 +104,8 @@ export default function TouristDashboard() {
         return <WishlistPage />;
       case "orders":
         return <OrdersSummary />;
+      case "upcomingBookings":
+        return <UpcomingBookingsSection />;
       default:
         return <Profile userId={userId} touristId={touristId} />;
     }
@@ -123,6 +115,9 @@ export default function TouristDashboard() {
     profile: [
       { key: "profile", label: "Profile", icon: <FaUser /> },
       { key: "changePassword", label: "Change Password", icon: <FaLock /> },
+    ],
+    bookings: [
+      { key: "upcomingBookings", label: "Upcoming Bookings", icon: <FaCalendarAlt /> },
     ],
     complaints: [
       { key: "complaint", label: "Make a Complaint", icon: <FaFileAlt /> },

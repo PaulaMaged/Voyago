@@ -15,6 +15,7 @@ export default function ViewActivityGuest() {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [sortOrder, setSortOrder] = useState("");
   const navigate = useNavigate();
+  const [bookingStates, setBookingStates] = useState({});
 
   const handleBookActivity = async (activityId) => {
     const touristId = localStorage.getItem("roleId");
@@ -28,19 +29,53 @@ export default function ViewActivityGuest() {
       ],
     };
 
-    console.log(data);
+    setBookingStates(prev => ({
+      ...prev,
+      [activityId]: 'loading'
+    }));
+
     try {
       const response = await axios.post(
         `http://localhost:8000/api/tourist/tourist-pay/${touristId}`,
         data
       );
-      // Handle successful booking response
-      if (response.status === 201) {
-        alert("Activity booked successfully!");
-      }
+
+      const touristResponse = await axios.get(
+        `http://localhost:8000/api/tourist/get-tourist/${touristId}`
+      );
+      
+      localStorage.setItem('walletBalance', touristResponse.data.wallet);
+      
+      setBookingStates(prev => ({
+        ...prev,
+        [activityId]: 'success'
+      }));
+      
+      alert(`Activity booked successfully! Your new wallet balance is $${touristResponse.data.wallet}`);
+
+      setTimeout(() => {
+        setBookingStates(prev => ({
+          ...prev,
+          [activityId]: null
+        }));
+      }, 2000);
+      
     } catch (error) {
-      console.log(error);
-      alert(error.response.data.message);
+      console.error(error);
+      
+      setBookingStates(prev => ({
+        ...prev,
+        [activityId]: 'error'
+      }));
+      
+      alert(error.response?.data?.message || "Failed to book activity");
+
+      setTimeout(() => {
+        setBookingStates(prev => ({
+          ...prev,
+          [activityId]: null
+        }));
+      }, 2000);
     }
   };
 
@@ -192,10 +227,18 @@ export default function ViewActivityGuest() {
               <div className="card-actions">
                 <BookmarkButton activityId={activity._id} />
                 <button
-                  className="btn btn-book"
+                  className={`btn btn-book ${bookingStates[activity._id] || ''}`}
                   onClick={() => handleBookActivity(activity._id)}
+                  disabled={bookingStates[activity._id] === 'loading'}
                 >
-                  <span>Book Now</span>
+                  <span className="button-text">
+                    {bookingStates[activity._id] === 'loading' ? 'Booking...' :
+                     bookingStates[activity._id] === 'success' ? 'Booked!' :
+                     bookingStates[activity._id] === 'error' ? 'Failed!' :
+                     'Book Now'}
+                  </span>
+                  {bookingStates[activity._id] === 'success' && 
+                    <span className="checkmark">✓</span>}
                 </button>
                 <button
                   className="btn btn-feedback"
