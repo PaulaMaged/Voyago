@@ -46,19 +46,45 @@
   transition: all 0.3s ease;
 }
 
-.btn-edit, .btn-delete {
+.btn-edit {
   background: var(--primary);
   color: white;
 }
 
+.btn-edit:hover {
+  background: var(--primary-dark);
+}
+
+.btn-delete {
+    background: var(--delete-color, #ff4757); /* Fallback if variable not set */
+    color: var(--delete-text, white);
+    border: 1px solid var(--delete-border, #ff4757);
+    transition: all 0.3s ease;
+}
+  
+.btn-delete:hover {
+    background: var(--delete-hover, #ff6b81);
+    border-color: var(--delete-hover-border, #ff6b81);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px var(--delete-shadow, rgba(255, 71, 87, 0.2));
+}
+  
 .btn-save {
-  background: var(--success);
+  background: #28a745;
   color: white;
 }
 
+.btn-save:hover {
+  background: #218838;
+}
+
 .btn-cancel {
-  background: var(--warning);
+  background: #dc3545;
   color: white;
+}
+
+.btn-cancel:hover {
+  background: #c82333;
 }
 
 .edit-form {
