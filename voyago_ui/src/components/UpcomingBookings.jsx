@@ -59,6 +59,39 @@ export default function UpcomingBookings() {
     }
   };
 
+  const handleCancelItinerary = async (booking) => {
+    if (!window.confirm('Are you sure you want to cancel this itinerary?')) {
+      return;
+    }
+
+    try {
+      const isPast = await check.isCompleted(booking.itinerary, "itinerary");
+      if (isPast) {
+        alert("Cannot cancel past itineraries");
+        return;
+      }
+
+      const response = await axios.delete(
+        `http://localhost:8000/api/tourist/tourist-cancel-itinerary-booking/${booking._id}`
+      );
+
+      if (response.status === 200) {
+        const touristId = localStorage.getItem('roleId');
+        const touristResponse = await axios.get(
+          `http://localhost:8000/api/tourist/get-tourist/${touristId}`
+        );
+        
+        localStorage.setItem('walletBalance', touristResponse.data.wallet);
+        
+        alert(`Itinerary cancelled successfully. $${booking.itinerary.price} has been refunded to your wallet.`);
+        fetchUpcomingBookings();
+      }
+    } catch (error) {
+      console.error('Error cancelling itinerary:', error);
+      alert(error.response?.data?.message || 'Error cancelling itinerary');
+    }
+  };
+
   return (
     <div className="upcoming-bookings-container">
       <h1>Upcoming Bookings</h1>
@@ -124,6 +157,12 @@ export default function UpcomingBookings() {
                     <strong>Price:</strong> ${booking.itinerary.price}
                   </p>
                 </div>
+                <button 
+                  className="cancel-button"
+                  onClick={() => handleCancelItinerary(booking)}
+                >
+                  Cancel Itinerary
+                </button>
               </div>
             ))}
           </div>
