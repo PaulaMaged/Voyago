@@ -14,8 +14,8 @@ const getCheckoutUrl = async (
     {
       type: type,
       touristId: touristId,
-      successUrl: successUrl,
-      cancelUrl: cancelUrl,
+      successUrl: "http://localhost:5173/Tourist_Dashboard?accepted",
+      cancelUrl: "http://localhost:5173/Tourist_Dashboard?declined",
       items: itemList,
       extra: extra,
     }
