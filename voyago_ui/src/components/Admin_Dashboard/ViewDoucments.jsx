@@ -91,12 +91,14 @@ export default function ViewDocuments() {
                 </button>
               </td>
               <td>
-                <button
-                  onClick={() => handleDocumentDownload(doc._id)}
-                  className="download"
-                >
-                  Download PDF
-                </button>
+                {doc.role !== "TOURIST" && (
+                  <button
+                    onClick={() => handleDocumentDownload(doc._id)}
+                    className="download"
+                  >
+                    Download PDF
+                  </button>
+                )}
               </td>
             </tr>
           ))}
