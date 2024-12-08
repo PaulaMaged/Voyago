@@ -123,10 +123,25 @@ const ManageActivities = () => {
 
   const handleEdit = (activity) => {
     setEditingActivity(activity);
+    
+    // Add date format validation and fallback
+    const formatDateTime = (dateString) => {
+      try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) {
+          // If invalid date, return current datetime
+          return new Date().toISOString().slice(0, 16);
+        }
+        return date.toISOString().slice(0, 16);
+      } catch {
+        return new Date().toISOString().slice(0, 16);
+      }
+    };
+
     setFormInputs({
       ...activity,
-      start_time: new Date(activity.start_time).toISOString().slice(0, 16),
-      end_time: new Date(activity.end_time).toISOString().slice(0, 16),
+      start_time: formatDateTime(activity.start_time),
+      end_time: formatDateTime(activity.end_time),
       location: activity.location?._id || '',
     });
     setIsFormVisible(true);

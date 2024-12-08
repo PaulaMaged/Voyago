@@ -3,6 +3,7 @@ import LocationController from '../controllers/LocationController.js';
 
 const router = express.Router();
 
+router.get('/', LocationController.getAllLocations);
 router.post('/reference', LocationController.createOrGetLocation);
 router.get('/:locationId', LocationController.getLocation);
 
