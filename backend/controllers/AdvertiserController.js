@@ -152,17 +152,16 @@ const deleteActivity = async (req, res) => {
 // AdvertiserController.js
 const getAdvertiserByUserId = async (req, res) => {
   try {
-    const advertiser = await Advertiser.findOne({
-      user: req.params.userId,
-    }).populate("user");
-
+    const userId = req.params.userId;
+    const advertiser = await Advertiser.findOne({ user: userId }).populate("user");
+    
     if (!advertiser) {
-      return res
-        .status(404)
-        .json({ message: "Advertiser not found for this user" });
+      return res.status(404).json({ message: "Advertiser not found for this user" });
     }
+    
     res.status(200).json(advertiser);
   } catch (error) {
+    console.error('Error in getAdvertiserByUserId:', error);
     res.status(500).json({ error: error.message });
   }
 };
