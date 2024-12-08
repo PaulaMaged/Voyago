@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from "react";
 import {
   FaUser,
   FaLock,
@@ -5,16 +6,18 @@ import {
   FaChartLine,
   FaClipboardList,
   FaEdit,
-  FaPlus,
   FaChevronDown,
   FaChevronUp,
+  FaRoute,
+  FaMoneyBillWave,
+  FaUserCog,
 } from "react-icons/fa";
-import React, { useState, useEffect } from "react";
+
 import Profile from "../Profiles/Advertiser_profile";
 import ChangePassword from "../Profiles/Changepassword";
 import ViewActivityAdv from "../viewActivityAdv";
 import ManageActivities from "./ManageActivities";
-import ActivityStats from "./ActivityStats";
+import AdvSales from '../Sales/AdvSales';
 import BookingHistory from "./BookingHistory";
 import ThemeSwitcher from '../ThemeSwitcher';
 import { applyTheme } from '../../utils/themeManager';
@@ -22,28 +25,58 @@ import { applyTheme } from '../../utils/themeManager';
 export default function AdvertiserDashboard() {
   const [activeSection, setActiveSection] = useState("profile");
   const [userId, setUserId] = useState(null);
-  const [expandedSections, setExpandedSections] = useState({});
+  const [expandedSections, setExpandedSections] = useState([]);
+  const [isHovered, setIsHovered] = useState(false);
+  const [theme, setTheme] = useState('default');
 
   useEffect(() => {
     const id = localStorage.getItem("roleId");
-    setUserId(id);
+    if (id) {
+      setUserId(id);
+    }
     applyTheme();
+  }, []);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('preferred-theme');
+    if (savedTheme) {
+      handleThemeChange(savedTheme);
+    }
   }, []);
 
   const navItems = {
     profile: [
-      { key: "profile", label: "Profile", icon: <FaUser /> },
+      { key: "profile", label: "Profile", icon: <FaUserCog /> },
       { key: "changePassword", label: "Change Password", icon: <FaLock /> },
     ],
     activities: [
       { key: "viewActivities", label: "View Activities", icon: <FaClipboardList /> },
       { key: "manageActivities", label: "Manage Activities", icon: <FaEdit /> },
-      { key: "createActivity", label: "Create Activity", icon: <FaPlus /> },
     ],
     analytics: [
-      { key: "activityStats", label: "Activity Statistics", icon: <FaChartLine /> },
+      { key: "salesStats", label: "Sales Statistics", icon: <FaChartLine /> },
       { key: "bookingHistory", label: "Booking History", icon: <FaCalendarAlt /> },
     ],
+  };
+
+  const sectionIcons = {
+    profile: FaUser,
+    activities: FaRoute,
+    analytics: FaMoneyBillWave,
+  };
+
+  const toggleSection = (section) => {
+    setExpandedSections(prev =>
+      prev.includes(section) 
+        ? prev.filter(item => item !== section)
+        : [...prev, section]
+    );
+  };
+
+  const handleThemeChange = (newTheme) => {
+    setTheme(newTheme);
+    applyTheme(newTheme);
+    localStorage.setItem('preferred-theme', newTheme);
   };
 
   const renderContent = () => {
@@ -64,8 +97,8 @@ export default function AdvertiserDashboard() {
         return <ViewActivityAdv />;
       case "manageActivities":
         return <ManageActivities />;
-      case "activityStats":
-        return <ActivityStats />;
+      case "salesStats":
+        return <AdvSales />;
       case "bookingHistory":
         return <BookingHistory />;
       default:
@@ -73,65 +106,105 @@ export default function AdvertiserDashboard() {
     }
   };
 
-  const toggleSection = (section) => {
-    setExpandedSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
-  };
-
   return (
-    <div className="flex h-screen bg-[var(--background)]">
-      {/* Sidebar */}
-      <nav className="w-64 bg-[var(--surface)] shadow-lg">
-        <div className="p-4">
-          <h1 className="text-2xl font-bold text-[var(--text-primary)]">
-            Advertiser Dashboard
-          </h1>
-        </div>
-        <div className="mt-4">
-          {Object.entries(navItems).map(([section, items]) => (
-            <div key={section} className="mb-4">
-              <button
-                className="flex items-center justify-between w-full p-4 text-left 
-                  text-[var(--text-primary)] hover:bg-[var(--hover)]"
-                onClick={() => toggleSection(section)}
-              >
-                <span className="capitalize">{section}</span>
-                {expandedSections[section] ? <FaChevronUp /> : <FaChevronDown />}
-              </button>
-              {expandedSections[section] && (
-                <div className="pl-4">
-                  {items.map((item) => (
-                    <button
-                      key={item.key}
-                      className={`flex items-center w-full p-3 text-left 
-                        ${
-                          activeSection === item.key
-                            ? "bg-[var(--primary)] text-white"
-                            : "text-[var(--text-primary)] hover:bg-[var(--hover)]"
-                        }`}
-                      onClick={() => setActiveSection(item.key)}
-                    >
-                      <span className="mr-2">{item.icon}</span>
-                      {item.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-        <div className="absolute bottom-0 w-64 p-4">
-          <ThemeSwitcher />
-        </div>
-      </nav>
+    <div className="flex min-h-screen bg-[var(--background)]">
+      <aside 
+        className={`
+          transition-all duration-300 ease-[var(--ease-out)]
+          bg-[var(--primary)] text-[var(--surface)] 
+          shadow-xl p-4 fixed top-0 left-0 h-screen
+          ${isHovered ? 'w-64' : 'w-16'}
+        `}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <div className="flex flex-col h-full">
+          <div className={`sidebar-header mb-6 ${isHovered ? 'text-center' : 'text-center'}`}>
+            {isHovered ? (
+              <h2 className="text-xl font-semibold">Advertiser Dashboard</h2>
+            ) : (
+              <div className="text-2xl">📢</div>
+            )}
+          </div>
 
-      {/* Main Content */}
-      <main className="flex-1 p-8 overflow-auto">
-        <header className="mb-8">
+          <nav className="space-y-2">
+            {Object.entries(navItems).map(([section, items]) => (
+              <div key={section} className="relative group">
+                <button
+                  onClick={() => toggleSection(section)}
+                  className={`
+                    w-full flex items-center 
+                    justify-${isHovered ? 'between' : 'center'} 
+                    p-3 rounded-lg 
+                    transition-all duration-300 ease-in-out
+                    bg-[var(--primary)]
+                    hover:bg-[var(--primaryLight)]
+                    active:bg-[var(--primaryDark)]
+                    text-[var(--surface)]
+                    hover:translate-x-1
+                    hover:shadow-md
+                  `}
+                >
+                  <span className="flex items-center">
+                    {React.createElement(sectionIcons[section], { className: 'text-xl' })}
+                    {isHovered && (
+                      <span className="ml-3">{section.replace(/([A-Z])/g, ' $1').trim()}</span>
+                    )}
+                  </span>
+                  {isHovered && (
+                    <span className="transition-transform duration-200">
+                      {expandedSections.includes(section) ? <FaChevronDown /> : <FaChevronUp />}
+                    </span>
+                  )}
+                </button>
+
+                {expandedSections.includes(section) && isHovered && (
+                  <div className="pl-4 mt-1 space-y-1">
+                    {items.map((item) => (
+                      <button
+                        key={item.key}
+                        onClick={() => setActiveSection(item.key)}
+                        className={`
+                          w-full flex items-center 
+                          p-2 rounded-lg 
+                          transition-all duration-300 ease-in-out
+                          text-sm
+                          ${
+                            activeSection === item.key 
+                            ? 'bg-[var(--secondary)] hover:bg-[var(--secondaryLight)] active:bg-[var(--secondaryDark)]' 
+                            : 'bg-[var(--primary)] hover:bg-[var(--primaryLight)] active:bg-[var(--primaryDark)]'
+                          }
+                          hover:translate-x-1
+                          hover:shadow-md
+                        `}
+                      >
+                        <span className="mr-3">{item.icon}</span>
+                        <span>{item.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </nav>
+
+          <div className="mt-auto pb-4">
+            <ThemeSwitcher 
+              onThemeChange={handleThemeChange}
+              currentTheme={theme}
+              isHovered={isHovered}
+            />
+          </div>
+        </div>
+      </aside>
+
+      <main className={`
+        flex-1 p-8 transition-all duration-300 ease-[var(--ease-out)]
+        ${isHovered ? 'ml-64' : 'ml-16'}
+      `}>
+        <header className="mb-6">
           <h1 className="text-3xl font-bold text-[var(--text-primary)] capitalize">
-            {activeSection.replace(/([A-Z])/g, " $1").trim()}
+            {activeSection.replace(/([A-Z])/g, ' $1').trim()}
           </h1>
         </header>
         <div className="bg-[var(--surface)] shadow-lg rounded-lg p-6 
