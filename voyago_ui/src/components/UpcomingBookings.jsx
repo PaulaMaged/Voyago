@@ -10,21 +10,22 @@ export default function UpcomingBookings() {
   });
 
   useEffect(() => {
+    const fetchUpcomingBookings = async () => {
+      try {
+        const touristId = localStorage.getItem('roleId');
+        const response = await axios.get(
+          `http://localhost:8000/api/tourist/get-upcoming-bookings/${touristId}`
+        );
+        console.log('Upcoming bookings response:', response.data);
+        setUpcomingBookings(response.data);
+      } catch (error) {
+        console.error('Error fetching upcoming bookings:', error);
+        alert('Error fetching upcoming bookings');
+      }
+    };
+
     fetchUpcomingBookings();
   }, []);
-
-  const fetchUpcomingBookings = async () => {
-    try {
-      const touristId = localStorage.getItem('roleId');
-      const response = await axios.get(
-        `http://localhost:8000/api/tourist/get-upcoming-bookings/${touristId}`
-      );
-      setUpcomingBookings(response.data);
-    } catch (error) {
-      console.error('Error fetching upcoming bookings:', error);
-      alert('Error fetching upcoming bookings');
-    }
-  };
 
   const handleCancelActivity = async (booking) => {
     if (!window.confirm('Are you sure you want to cancel this activity?')) {
