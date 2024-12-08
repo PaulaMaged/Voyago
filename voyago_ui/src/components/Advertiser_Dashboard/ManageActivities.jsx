@@ -1,19 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FaEdit, FaTrash, FaCheck, FaTimes } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaCheck, FaTimes, FaPlus, 
+         FaClock, FaTag, FaDollarSign, FaCalendarAlt } from 'react-icons/fa';
+import { motion, AnimatePresence } from 'framer-motion';
 import './ManageActivities.css';
 
-export default function ManageActivities() {
+const ManageActivities = () => {
+  const [searchTerm, setSearchTerm] = useState('');
   const [activities, setActivities] = useState([]);
-  const [editingActivity, setEditingActivity] = useState(null);
   const [categories, setCategories] = useState([]);
   const [tags, setTags] = useState([]);
+  const [editingActivity, setEditingActivity] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isFormVisible, setIsFormVisible] = useState(false);
+  const [locations, setLocations] = useState([]);
+
+  const [formInputs, setFormInputs] = useState({
+    title: '',
+    description: '',
+    start_time: new Date().toISOString().slice(0, 16),
+    end_time: new Date().toISOString().slice(0, 16),
+    price: '0',
+    location: '',
+  });
 
   useEffect(() => {
     fetchActivities();
     fetchCategories();
     fetchTags();
+    fetchLocations();
   }, []);
 
   const fetchActivities = async () => {
@@ -52,172 +67,318 @@ export default function ManageActivities() {
     }
   };
 
-  const handleEdit = (activity) => {
-    setEditingActivity({
-      ...activity,
-      start_time: new Date(activity.start_time).toISOString().slice(0, 16),
-      tags: activity.tags.map(tag => tag._id)
+  const fetchLocations = async () => {
+    try {
+      const response = await axios.get('http://localhost:8000/api/locations');
+      setLocations(response.data);
+    } catch (error) {
+      console.error('Error fetching locations:', error);
+    }
+  };
+
+  const resetForm = () => {
+    setFormInputs({
+      title: '',
+      description: '',
+      start_time: new Date().toISOString().slice(0, 16),
+      end_time: new Date().toISOString().slice(0, 16),
+      price: '0',
+      location: '',
     });
   };
 
-  const handleUpdate = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const advertiserId = localStorage.getItem('roleId');
+
     try {
-      const response = await axios.put(
-        `http://localhost:8000/api/advertiser/update-activity/${editingActivity._id}`,
-        editingActivity
-      );
-      setActivities(activities.map(activity => 
-        activity._id === response.data._id ? response.data : activity
-      ));
+      const formattedData = {
+        ...formInputs,
+        price: Number(formInputs.price),
+        advertiser: advertiserId
+      };
+
+      if (editingActivity) {
+        await axios.put(
+          `http://localhost:8000/api/advertiser/update-activity/${editingActivity._id}`,
+          formattedData
+        );
+      } else {
+        await axios.post(
+          'http://localhost:8000/api/advertiser/create-activity',
+          formattedData
+        );
+      }
+      
+      fetchActivities();
       setEditingActivity(null);
-      alert('Activity updated successfully!');
+      setIsFormVisible(false);
+      resetForm();
+      
     } catch (error) {
-      console.error('Error updating activity:', error);
-      alert(error.response?.data?.message || 'Error updating activity');
+      console.error('Error saving activity:', error);
+      alert(error.response?.data?.message || 'Error saving activity');
     }
   };
 
+  const handleEdit = (activity) => {
+    setEditingActivity(activity);
+    setFormInputs({
+      ...activity,
+      start_time: new Date(activity.start_time).toISOString().slice(0, 16),
+      end_time: new Date(activity.end_time).toISOString().slice(0, 16),
+      location: activity.location?._id || '',
+    });
+    setIsFormVisible(true);
+  };
+
   const handleDelete = async (activityId) => {
-    if (!window.confirm('Are you sure you want to delete this activity?')) {
-      return;
-    }
+    if (!window.confirm('Are you sure you want to delete this activity?')) return;
 
     try {
       await axios.delete(
         `http://localhost:8000/api/advertiser/delete-activity/${activityId}`
       );
       setActivities(activities.filter(activity => activity._id !== activityId));
-      alert('Activity deleted successfully!');
     } catch (error) {
       console.error('Error deleting activity:', error);
       alert(error.response?.data?.message || 'Error deleting activity');
     }
   };
 
+  const filteredActivities = activities.filter(activity =>
+    activity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    activity.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   if (loading) {
-    return <div>Loading activities...</div>;
+    return <div className="loading">Loading activities...</div>;
   }
 
   return (
-    <div className="manage-activities">
-      <div className="activities-grid">
-        {activities.map(activity => (
-          <div key={activity._id} className="activity-card">
-            {editingActivity?._id === activity._id ? (
-              <div className="edit-form">
-                <input
-                  type="text"
-                  value={editingActivity.title}
-                  onChange={e => setEditingActivity({
-                    ...editingActivity,
-                    title: e.target.value
-                  })}
-                  placeholder="Activity Title"
-                />
-                <textarea
-                  value={editingActivity.description}
-                  onChange={e => setEditingActivity({
-                    ...editingActivity,
-                    description: e.target.value
-                  })}
-                  placeholder="Description"
-                />
-                <input
-                  type="datetime-local"
-                  value={editingActivity.start_time}
-                  onChange={e => setEditingActivity({
-                    ...editingActivity,
-                    start_time: e.target.value
-                  })}
-                />
-                <input
-                  type="number"
-                  value={editingActivity.duration}
-                  onChange={e => setEditingActivity({
-                    ...editingActivity,
-                    duration: parseInt(e.target.value)
-                  })}
-                  placeholder="Duration (minutes)"
-                />
-                <input
-                  type="number"
-                  value={editingActivity.price}
-                  onChange={e => setEditingActivity({
-                    ...editingActivity,
-                    price: parseFloat(e.target.value)
-                  })}
-                  placeholder="Price"
-                />
-                <select
-                  value={editingActivity.category}
-                  onChange={e => setEditingActivity({
-                    ...editingActivity,
-                    category: e.target.value
-                  })}
-                >
-                  <option value="">Select Category</option>
-                  {categories.map(category => (
-                    <option key={category._id} value={category._id}>
-                      {category.category}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  multiple
-                  value={editingActivity.tags}
-                  onChange={e => setEditingActivity({
-                    ...editingActivity,
-                    tags: Array.from(e.target.selectedOptions, option => option.value)
-                  })}
-                >
-                  {tags.map(tag => (
-                    <option key={tag._id} value={tag._id}>
-                      {tag.tag_name}
-                    </option>
-                  ))}
-                </select>
-                <div className="edit-actions">
-                  <button onClick={handleUpdate} className="btn-save">
-                    <FaCheck /> Save
-                  </button>
-                  <button onClick={() => setEditingActivity(null)} className="btn-cancel">
-                    <FaTimes /> Cancel
-                  </button>
+    <div className="manage-activities-container">
+      <div className="header">
+        <div className="header-left">
+          <h1>Manage Activities</h1>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="btn-add"
+            onClick={() => {
+              setIsFormVisible(true);
+              resetForm();
+            }}
+          >
+            <FaPlus /> Add Activity
+          </motion.button>
+        </div>
+        <div className="search-bar">
+          <input
+            type="text"
+            placeholder="Search activities..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
+
+      {/* Activity Form Modal */}
+      {isFormVisible && (
+        <motion.div 
+          className="modal-overlay"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <motion.div 
+            className="modal-content"
+            initial={{ y: -50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+          >
+            <div className="modal-header">
+              <h2>{editingActivity ? 'Edit Activity' : 'Add New Activity'}</h2>
+              <button 
+                className="btn-close"
+                onClick={() => {
+                  setIsFormVisible(false);
+                  setEditingActivity(null);
+                  resetForm();
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="activity-form">
+              <div className="form-grid">
+                <div className="form-group">
+                  <label>Title</label>
+                  <input
+                    type="text"
+                    value={formInputs.title}
+                    onChange={(e) => setFormInputs({...formInputs, title: e.target.value})}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Description</label>
+                  <textarea
+                    value={formInputs.description}
+                    onChange={(e) => setFormInputs({...formInputs, description: e.target.value})}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>
+                    <FaCalendarAlt /> Start Time
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={formInputs.start_time}
+                    onChange={(e) => setFormInputs({...formInputs, start_time: e.target.value})}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>
+                    <FaCalendarAlt /> End Time
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={formInputs.end_time}
+                    onChange={(e) => setFormInputs({...formInputs, end_time: e.target.value})}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>
+                    <FaDollarSign /> Price
+                  </label>
+                  <input
+                    type="number"
+                    value={formInputs.price || '0'}
+                    onChange={(e) => setFormInputs({
+                      ...formInputs,
+                      price: e.target.value === '' ? '0' : e.target.value
+                    })}
+                    required
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Location</label>
+                  <select
+                    value={formInputs.location}
+                    onChange={(e) => setFormInputs({...formInputs, location: e.target.value})}
+                    required
+                  >
+                    <option value="">Select Location</option>
+                    {locations.map(location => (
+                      <option key={location._id} value={location._id}>
+                        {`${location.latitude}, ${location.longitude}`}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
-            ) : (
-              <>
-                <h3>{activity.title}</h3>
-                <p>{activity.description}</p>
-                <div className="activity-details">
-                  <p>
-                    <strong>Date:</strong>{' '}
-                    {new Date(activity.start_time).toLocaleDateString()}
-                  </p>
-                  <p>
-                    <strong>Time:</strong>{' '}
-                    {new Date(activity.start_time).toLocaleTimeString()}
-                  </p>
-                  <p>
-                    <strong>Duration:</strong> {activity.duration} minutes
-                  </p>
-                  <p>
-                    <strong>Price:</strong> ${activity.price}
-                  </p>
+
+              <div className="form-actions">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  type="submit"
+                  className="btn-submit"
+                >
+                  {editingActivity ? <><FaCheck /> Update Activity</> : <><FaPlus /> Create Activity</>}
+                </motion.button>
+                
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  type="button"
+                  className="btn-cancel"
+                  onClick={() => {
+                    setIsFormVisible(false);
+                    setEditingActivity(null);
+                    resetForm();
+                  }}
+                >
+                  <FaTimes /> Cancel
+                </motion.button>
+              </div>
+            </form>
+          </motion.div>
+        </motion.div>
+      )}
+
+      <div className="activities-grid">
+        <AnimatePresence>
+          {filteredActivities.map((activity) => (
+            <motion.div
+              key={activity._id}
+              className="activity-card"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              layout
+            >
+              <h3>{activity.title}</h3>
+              <p className="description">{activity.description}</p>
+              
+              <div className="activity-details">
+                <div className="detail">
+                  <FaCalendarAlt />
+                  <span>{new Date(activity.start_time).toLocaleDateString()}</span>
                 </div>
-                <div className="activity-actions">
-                  <button onClick={() => handleEdit(activity)} className="btn-edit">
-                    <FaEdit /> Edit
-                  </button>
-                  <button onClick={() => handleDelete(activity._id)} className="btn-delete">
-                    <FaTrash /> Delete
-                  </button>
+                <div className="detail">
+                  <FaClock />
+                  <span>{activity.duration} minutes</span>
                 </div>
-              </>
-            )}
-          </div>
-        ))}
+                <div className="detail">
+                  <FaDollarSign />
+                  <span>${activity.price}</span>
+                </div>
+              </div>
+
+              <div className="tags">
+                {activity.tags.map(tag => (
+                  <span key={tag._id} className="tag">
+                    {tag.tag_name}
+                  </span>
+                ))}
+              </div>
+
+              <div className="card-actions">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="btn-edit"
+                  onClick={() => handleEdit(activity)}
+                >
+                  <FaEdit /> Edit
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="btn-delete"
+                  onClick={() => handleDelete(activity._id)}
+                >
+                  <FaTrash /> Delete
+                </motion.button>
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
     </div>
   );
-} 
+};
+
+export default ManageActivities; 
+
