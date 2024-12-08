@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import { FaPlus, FaImage, FaTimes } from 'react-icons/fa';
+import React, { useState } from "react";
+import axios from "axios";
+import { FaPlus, FaImage, FaTimes } from "react-icons/fa";
 
 const AddProduct = ({ fetchProducts }) => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [productData, setProductData] = useState({
-    name: '',
-    description: '',
-    price: '',
-    available_quantity: '',
+    name: "",
+    description: "",
+    price: "",
+    available_quantity: "",
   });
   const [images, setImages] = useState([]);
   const [previewUrls, setPreviewUrls] = useState([]);
@@ -17,23 +17,23 @@ const AddProduct = ({ fetchProducts }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setProductData(prev => ({
+    setProductData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-    setImages(prev => [...prev, ...files]);
-    
-    const newPreviewUrls = files.map(file => URL.createObjectURL(file));
-    setPreviewUrls(prev => [...prev, ...newPreviewUrls]);
+    setImages((prev) => [...prev, ...files]);
+
+    const newPreviewUrls = files.map((file) => URL.createObjectURL(file));
+    setPreviewUrls((prev) => [...prev, ...newPreviewUrls]);
   };
 
   const removeImage = (index) => {
-    setImages(prev => prev.filter((_, i) => i !== index));
-    setPreviewUrls(prev => prev.filter((_, i) => i !== index));
+    setImages((prev) => prev.filter((_, i) => i !== index));
+    setPreviewUrls((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e) => {
@@ -42,37 +42,36 @@ const AddProduct = ({ fetchProducts }) => {
     setIsSubmitting(true);
 
     try {
-      const sellerId = localStorage.getItem('roleId');
+      const sellerId = localStorage.getItem("roleId");
       const formData = new FormData();
-      
-      formData.append('seller', sellerId);
-      formData.append('name', productData.name);
-      formData.append('description', productData.description);
-      formData.append('price', productData.price);
-      formData.append('available_quantity', productData.available_quantity);
-      formData.append('archived', false);
-      
-      images.forEach(image => {
-        formData.append('images', image);
+
+      formData.append("seller", sellerId);
+      formData.append("name", productData.name);
+      formData.append("description", productData.description);
+      formData.append("price", productData.price);
+      formData.append("available_quantity", productData.available_quantity);
+      formData.append("archived", false);
+
+      images.forEach((image) => {
+        formData.append("images", image);
       });
 
       const response = await axios.post(
-        'http://localhost:8000/api/seller/create-product',
+        "http://localhost:8000/api/seller/create-product",
         formData,
         {
           headers: {
-            'Content-Type': 'multipart/form-data'
-          }
+            "Content-Type": "multipart/form-data",
+          },
         }
       );
-
       if (response.status === 201) {
-        fetchProducts();
         setIsFormOpen(false);
         resetForm();
       }
     } catch (error) {
-      setError(error.response?.data?.message || 'Error adding product');
+      console.log(error);
+      setError(error.response?.data?.message || "Error adding product");
     } finally {
       setIsSubmitting(false);
     }
@@ -80,10 +79,10 @@ const AddProduct = ({ fetchProducts }) => {
 
   const resetForm = () => {
     setProductData({
-      name: '',
-      description: '',
-      price: '',
-      available_quantity: '',
+      name: "",
+      description: "",
+      price: "",
+      available_quantity: "",
     });
     setImages([]);
     setPreviewUrls([]);
@@ -97,7 +96,7 @@ const AddProduct = ({ fetchProducts }) => {
         className="flex items-center gap-2 px-6 py-3 bg-[var(--primary)] 
           text-white rounded-lg hover:bg-[var(--primaryDark)] transition-colors"
       >
-        <FaPlus /> {isFormOpen ? 'Cancel' : 'Add New Product'}
+        <FaPlus /> {isFormOpen ? "Cancel" : "Add New Product"}
       </button>
 
       {isFormOpen && (
@@ -237,7 +236,7 @@ const AddProduct = ({ fetchProducts }) => {
                 className="px-6 py-2 bg-[var(--primary)] text-white rounded-lg
                   hover:bg-[var(--primaryDark)] transition-colors disabled:opacity-50"
               >
-                {isSubmitting ? 'Adding...' : 'Add Product'}
+                {isSubmitting ? "Adding..." : "Add Product"}
               </button>
             </div>
           </form>
