@@ -32,7 +32,7 @@ import { applyTheme } from '../../utils/themeManager';
 import Bookmarks from '../../pages/Bookmarks';
 import WishlistPage from '../../pages/WishlistPage';
 import { Link } from 'react-router-dom';
-
+import OrdersSummary from '../dashboard/OrdersSummary';
 export default function TouristDashboard() {
   const [activeSection, setActiveSection] = useState("profile");
   const [userId, setUserId] = useState(null);
@@ -112,6 +112,8 @@ export default function TouristDashboard() {
         return <Bookmarks />;
       case "wishlist":
         return <WishlistPage />;
+      case "orders":
+        return <OrdersSummary />;
       default:
         return <Profile userId={userId} touristId={touristId} />;
     }
@@ -134,6 +136,7 @@ export default function TouristDashboard() {
     products: [
       { key: "products", label: "View Products", icon: <FaProductHunt /> },
       { key: "purchasedProducts", label: "View Purchased Products", icon: <FaProductHunt /> },
+      { key: "orders", label: "View Orders", icon: <FaProductHunt /> },
     ],
     rewards: [
       { key: "loyalty", label: "Loyalty Points", icon: <FaStar /> },

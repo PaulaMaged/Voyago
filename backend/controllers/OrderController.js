@@ -2,6 +2,8 @@ import Order from "../models/Order.js";
 import DeliveryAddress from "../models/DeliveryAddress.js";
 import Cart from "../models/Cart.js";
 import Tourist from "../models/Tourist.js";
+import Notification from "../models/Notification.js";
+import Product from "../models/Product.js";
 
 const getOrdersByTourist = async (req, res) => {
   try {
@@ -9,7 +11,21 @@ const getOrdersByTourist = async (req, res) => {
     const orders = await Order.find({ tourist: touristId })
       .populate('product')
       .sort({ createdAt: -1 });
-    res.status(200).json(orders);
+
+    // Update order statuses based on arrival time
+    const updatedOrders = orders.map(order => {
+      const arrivalDate = new Date(order.arrival_date).getTime();
+      const currentTime = new Date().getTime();
+      const hoursUntilArrival = (arrivalDate - currentTime) / (1000 * 60 * 60);
+
+      if (hoursUntilArrival <= 24 && !order.status) {
+        order.status = 'on the way';
+        order.save(); // Save the updated status
+      }
+      return order;
+    });
+
+    res.status(200).json(updatedOrders);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -33,26 +49,69 @@ const getOrderDetails = async (req, res) => {
 const cancelOrder = async (req, res) => {
   try {
     const { orderId } = req.params;
-    const order = await Order.findById(orderId);
+    const order = await Order.findById(orderId).populate('product');
     
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
-    
-    // Only allow cancellation if order is recent (e.g., within 24 hours)
-    const orderTime = new Date(order.createdAt).getTime();
-    const currentTime = new Date().getTime();
-    const hoursSinceOrder = (currentTime - orderTime) / (1000 * 60 * 60);
-    
-    if (hoursSinceOrder > 24) {
-      return res.status(400).json({ message: "Orders can only be cancelled within 24 hours" });
+
+    // Check if order is already cancelled
+    if (order.status === 'cancelled') {
+      return res.status(400).json({ message: "Order is already cancelled" });
     }
+
+    // Calculate time until arrival
+    const arrivalDate = new Date(order.arrival_date).getTime();
+    const currentTime = new Date().getTime();
+    const hoursUntilArrival = (arrivalDate - currentTime) / (1000 * 60 * 60);
     
-    order.status = "cancelled";
-    await order.save();
-    res.status(200).json(order);
+    // Only allow cancellation if more than 24 hours until arrival
+    if (hoursUntilArrival <= 24) {
+      return res.status(400).json({ message: "Orders cannot be cancelled within 24 hours of arrival" });
+    }
+
+    // Calculate refund amount
+    const refundAmount = order.product.price * order.quantity;
+
+    // Find the tourist and update their wallet
+    const tourist = await Tourist.findById(order.tourist);
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    // Update tourist's wallet with refund
+    tourist.wallet += refundAmount;
+    await tourist.save();
+
+    // Restore product quantity
+    const product = await Product.findById(order.product._id);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    product.available_quantity += order.quantity;
+    await product.save();
+
+    // Delete the order
+    await Order.findByIdAndDelete(orderId);
+
+    // Create notification
+    const notification = new Notification({
+      recipient: tourist.user,
+      message: `Your order #${order._id.toString().slice(-6)} has been cancelled. $${refundAmount} has been refunded to your wallet.`,
+      type: "WARNING"
+    });
+    await notification.save();
+
+    // Return success response with updated wallet balance
+    res.status(200).json({
+      message: "Order cancelled successfully",
+      refundAmount,
+      updatedWalletBalance: tourist.wallet
+    });
+
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error cancelling order:', error);
+    res.status(500).json({ message: "Error cancelling order", error: error.message });
   }
 };
 
