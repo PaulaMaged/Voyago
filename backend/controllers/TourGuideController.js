@@ -4,6 +4,8 @@ import TourGuide from "../models/TourGuide.js";
 import ActivityReview from "../models/ActivityReview.js";
 import TourGuideReview from "../models/TourGuideReview.js";
 import Notification from "../models/Notification.js";
+import Tourist from "../models/Tourist.js";
+
 //create Tour Guide
 const createTourGuide = async (req, res) => {
   try {
@@ -619,6 +621,56 @@ const createItineraryFlagNotification = async (tourGuideId, itineraryName) => {
   }
 };
 
+// Get all bookings for a tour guide's itineraries
+const getItineraryBookings = async (req, res) => {
+  try {
+    const tourGuideId = req.params.tourGuideId;
+    
+    // First get all itineraries for this tour guide
+    const itineraries = await Itinerary.find({ tour_guide: tourGuideId });
+    const itineraryIds = itineraries.map(itinerary => itinerary._id);
+    
+    // Then get all bookings for these itineraries
+    const bookings = await ItineraryBooking.find({ 
+      itinerary: { $in: itineraryIds },
+      active: true
+    })
+    .populate({
+      path: 'tourist',
+      populate: {
+        path: 'user',
+        select: 'username email'
+      }
+    })
+    .populate('itinerary');
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Mark attendance for a booking
+const markAttendance = async (req, res) => {
+  try {
+    const { tourGuideId, bookingId } = req.params;
+    // Verify that this booking belongs to one of the tour guide's itineraries
+    const booking = await ItineraryBooking.findById(bookingId)
+      .populate('itinerary');
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+    if (booking.itinerary.tour_guide.toString() !== tourGuideId) {
+      return res.status(403).json({ message: 'Not authorized to mark this attendance' });
+    }
+    // Mark as attended
+    booking.attended = true;
+    await booking.save();
+    res.status(200).json({ message: 'Attendance marked successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 export default {
   createItinerary,
   getItinerary,
@@ -642,4 +694,6 @@ export default {
   getTouristsByMonth,
   getTourGuideNotifications,
   createItineraryFlagNotification,
+  getItineraryBookings,
+  markAttendance,
 };

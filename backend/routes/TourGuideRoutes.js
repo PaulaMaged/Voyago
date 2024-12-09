@@ -109,6 +109,9 @@ router.get(
   TourGuideController.getTourGuideReview
 );
 
+router.get('/itinerary-bookings/:tourGuideId', TourGuideController.getItineraryBookings);
+router.patch('/mark-attendance/:tourGuideId/:bookingId', TourGuideController.markAttendance);
+
 // Sales
 router.get("/sales-report/:tourGuideId", TourGuideController.getAllSales);
 router.get("/sales-report/:tourGuideId/by-date", TourGuideController.getTotalRevenueByDate);
