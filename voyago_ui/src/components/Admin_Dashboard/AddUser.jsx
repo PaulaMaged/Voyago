@@ -41,12 +41,21 @@ export default function AddUser() {
         "http://localhost:8000/api/user/create-user",
         {
           username: data.username,
-          email: data.username,
+          email: data.username + "@hotmail.com",
           password: data.password,
           role: "ADMIN",
         }
       );
       if (response.status === 201) {
+        await axios.put(
+          `http://localhost:8000/api/user/update-user/${response.data._id}`,
+          {
+            is_accepted: true,
+            is_new: false,
+            terms_and_conditions: true,
+          }
+        );
+
         return response.data._id;
       } else {
         throw new Error("Bad Request");
@@ -76,6 +85,15 @@ export default function AddUser() {
           { user: userId }
         );
         if (response2.status === 201 || response2.status === 200) {
+          await axios.put(
+            `http://localhost:8000/api/user/update-user/${userId}`,
+            {
+              is_accepted: true,
+              is_new: false,
+              terms_and_conditions: true,
+            }
+          );
+
           alert("Tourism Governor creation has been successful!");
         }
       } else {

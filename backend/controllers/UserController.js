@@ -251,6 +251,9 @@ const login = async (req, res) => {
     }
 
     const role = user.role;
+    if (role === "ADMIN") {
+      return res.status(200).json({ message: "check", userId: user._id });
+    }
     console.log("User role:", role);
 
     if (user.is_accepted === true && user.terms_and_conditions === false) {

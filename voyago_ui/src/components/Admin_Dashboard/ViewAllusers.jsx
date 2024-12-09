@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import PropTypes from "prop-types";
 
 const roles = [
   "ALL",
@@ -12,7 +13,7 @@ const roles = [
   "ADVERTISER",
 ];
 
-export default function ViewUsers() {
+export default function ViewUsers({ adminidf }) {
   const [users, setUsers] = useState([]);
   const [userStats, setUserStats] = useState({
     totalUsers: 0,
@@ -28,6 +29,7 @@ export default function ViewUsers() {
   }, []);
 
   const fetchUsersAndStats = async () => {
+    console.log("test admin" + adminidf);
     try {
       setLoading(true);
       const [usersResponse, totalUsersResponse, newUsersResponse] =
@@ -38,7 +40,10 @@ export default function ViewUsers() {
         ]);
 
       if (usersResponse.data) {
-        setUsers(usersResponse.data);
+        const result = usersResponse.data.filter(
+          (user) => user._id !== adminidf
+        );
+        setUsers(result);
       } else if (usersResponse.status === 200) {
         alert("No users found");
       } else {
@@ -262,3 +267,7 @@ export default function ViewUsers() {
     </div>
   );
 }
+
+ViewUsers.propTypes = {
+  adminidf: PropTypes.string,
+};

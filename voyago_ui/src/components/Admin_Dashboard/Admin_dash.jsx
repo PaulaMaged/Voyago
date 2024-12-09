@@ -131,6 +131,8 @@
 //kole el above 48lah
 
 import React, { useState } from "react";
+import { useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { ChevronDown, ChevronRight, Bell, Search, User } from "lucide-react";
 import AddUser from "./AddUser";
 import ViewUsers from "./ViewAllUsers";
@@ -156,6 +158,17 @@ import {
 } from "lucide-react";
 
 export default function AdminDashboard() {
+  const [searchParams] = useSearchParams();
+  const adminId = searchParams.get("logtimes");
+
+  useEffect(() => {
+    if (!adminId) {
+      // Handle the case where adminId is not present in the URL
+      console.log("Admin ID is missing from the URL");
+    } else {
+      console.log("Admin ID is present in the URL " + adminId);
+    }
+  }, [adminId]);
   const [activeTab, setActiveTab] = useState("addUser");
   const [expandedSections, setExpandedSections] = useState(["User Management"]);
 
@@ -164,7 +177,7 @@ export default function AdminDashboard() {
       case "addUser":
         return <AddUser />;
       case "viewUsers":
-        return <ViewUsers />;
+        return <ViewUsers adminidf={adminId} />;
       case "viewDocuments":
         return <ViewDocuments />;
       case "manageComplaints":

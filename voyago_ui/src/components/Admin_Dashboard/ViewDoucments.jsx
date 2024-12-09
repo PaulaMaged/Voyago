@@ -36,6 +36,7 @@ export default function ViewDocuments() {
         is_accepted: true,
         is_new: false,
       });
+      setDocuments(documents.filter((doc) => doc._id !== id));
     } else {
       await axios.delete(`http://localhost:8000/api/user/delete-user/${id}`);
 
