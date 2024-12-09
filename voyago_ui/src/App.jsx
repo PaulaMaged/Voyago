@@ -54,6 +54,7 @@ import SellerDashboard from './components/Seller_Dashboard/Seller_dash';
 import TourGuideDashboard from "./components/TourGuide_Dashboard/TourGuide_dash";
 import TouristDashboardDemo from "./components/demo/TouristDashboardDemo";
 import AdvertiserDashboard from "./components/Advertiser_Dashboard/AdvertiserDashboard";
+import TourismGovernorDashboard from "./components/TourismGovernor_Dashboard/TourismGovernor_dash";
 function App() {
   return (
     <ThemeProvider>
@@ -151,6 +152,7 @@ function App() {
         />
         <Route path="/demo/tourist-dashboard" element={<TouristDashboardDemo />} />
         <Route path="/advertiser-dashboard" element={<AdvertiserDashboard />} />
+        <Route path="/tourism-governor-dashboard" element={<TourismGovernorDashboard />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>
