@@ -32,6 +32,17 @@ import HotelSearch from "./components/ThirdParty/HotelSearching";
 import FlightSearch from "./components/ThirdParty/FlightSearch";
 import FlightBooking from "./components/ThirdParty/FlightBooking";
 
+import Cart from "./components/Cart"; // Import Cart
+import WishlistPage from "./pages/WishlistPage";
+import Checkout from './components/Checkout';
+import AddAddress from "./components/AddAddress";
+import OrderConfirmation from "./components/OrderConfirmation";
+import { ThemeProvider } from './context/ThemeContext';
+import SellerDashboard from './components/Seller_Dashboard/Seller_dash';
+import TourGuideDashboard from "./components/TourGuide_Dashboard/TourGuide_dash";
+import TouristDashboardDemo from "./components/demo/TouristDashboardDemo";
+import AdvertiserDashboard from "./components/Advertiser_Dashboard/AdvertiserDashboard";
+import TourismGovernorDashboard from "./components/TourismGovernor_Dashboard/TourismGovernor_dash";
 function App() {
   return (
     <>
@@ -112,6 +123,23 @@ function App() {
           <Route path="/editProduct" element={<EditProduct />}></Route>
           <Route path="/crudCategory" element={<CrudCategory />}></Route>
           <Route path="createReview" element={<CreateReview />} />
+          <Route path="/bookmarks" element={<Bookmarks />} />
+          <Route path="/notifications" element={<Notifications />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/wishlist" element={<WishlistPage />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/add-address" element={<AddAddress />} />
+          <Route path="/seller-dashboard" element={<SellerDashboard />} />
+          <Route 
+          path="/tour-guide/dashboard" 
+          element={
+              <TourGuideDashboard />
+          } 
+        />
+        <Route path="/demo/tourist-dashboard" element={<TouristDashboardDemo />} />
+        <Route path="/advertiser-dashboard" element={<AdvertiserDashboard />} />
+        <Route path="/tourism-governor-dashboard" element={<TourismGovernorDashboard />} />
         </Routes>
       </BrowserRouter>
     </>

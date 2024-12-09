@@ -109,4 +109,7 @@ router.get(
   TourGuideController.getTourGuideReview
 );
 
+router.get('/itinerary-bookings/:tourGuideId', TourGuideController.getItineraryBookings);
+router.patch('/mark-attendance/:tourGuideId/:bookingId', TourGuideController.markAttendance);
+
 export default router;
