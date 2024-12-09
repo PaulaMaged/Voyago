@@ -25,7 +25,7 @@ import ViewProductAdmin from "./components/viewProductAdmin";
 import ViewProductSeller from "./components/viewProductSeller";
 import ViewProductTourist from "./components/viewProductTourist";
 import EditProduct from "./components/editProduct";
-import CrudCategory from "./components/Admin_Dashboard/manageActCategories";
+import CrudCategory from "./components/Admin_Dashboard/ManageActCategories";
 import NavigationPage from "./components/TouristNavigationPage";
 import CreateReview from "./components/CreateReview";
 import HotelSearch from "./components/ThirdParty/HotelSearching";
