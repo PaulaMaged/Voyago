@@ -183,14 +183,6 @@ git clone https://github.com/your-username/Voyago.git
 cd Voyago
 ```
 
-### Point of Latest Development
-
-\*Unfortunately, main branch is not considered the destination for latest state of project. All development is now at **Omar_MoS_Part_2\***. To go there:
-
-```bash
-git checkout Omar_MoS_Part_2
-```
-
 ### Install Dependencies
 
 There are two main directories that have dependencies. Those are namely
